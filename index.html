@@ -19,7 +19,7 @@
 
   .hero { position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 clamp(24px,6vw,80px) clamp(48px,8vh,96px);overflow:hidden; }
   .hero::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 120% 60% at 50% 110%,rgba(26,58,92,0.9) 0%,transparent 70%),radial-gradient(ellipse 80% 40% at 80% 20%,rgba(255,92,26,0.07) 0%,transparent 60%),linear-gradient(175deg,var(--navy) 0%,var(--deep) 40%,var(--ocean) 100%);z-index:1; }
-  .waves { position:absolute;bottom:0;left:0;right:0;height:40%;z-index:2;overflow:hidden; }
+  .waves { position:absolute;bottom:0;left:0;right:0;height:18%;z-index:2;overflow:hidden; }
   .waves svg { width:200%;animation:waveMove 12s linear infinite; }
   @keyframes waveMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
   .hero-content { position:relative;z-index:10; }
