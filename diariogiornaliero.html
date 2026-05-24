@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Diario Giornaliero — Omnia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<style>
+:root {
+  --navy:        #0B2545;
+  --navy-mid:    #1B3A6B;
+  --orange:      #E8731A;
+  --orange-pale: #FFF3E8;
+  --sand:        #F4F1EB;
+  --white:       #FFFFFF;
+  --gray-text:   #6B7280;
+  --gray-bg:     #F0EEE9;
+  --border:      rgba(11,37,69,0.13);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--sand);
+  color: var(--navy);
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  padding: 1.125rem 1.25rem 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.hd-row { display: flex; align-items: center; gap: 10px; }
+.hd-badge {
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  flex-shrink: 0;
+}
+header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: #fff; letter-spacing: 0.03em;
+}
+.hd-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 3px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── MAIN ── */
+main { padding: 1rem; max-width: 640px; margin: 0 auto; }
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.125rem 1.125rem 1.25rem;
+  margin-bottom: 0.875rem;
+  border: 1px solid var(--border);
+}
+
+.sec-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.875rem;
+  display: flex; align-items: center; gap: 7px;
+}
+.sec-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--orange);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ── FORM BASE ── */
+.field { margin-bottom: 0.875rem; }
+.field:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 12px; font-weight: 600;
+  color: var(--gray-text);
+  margin-bottom: 5px;
+  letter-spacing: 0.03em;
+}
+
+select,
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: var(--navy);
+  background: var(--gray-bg);
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  appearance: none; -webkit-appearance: none;
+}
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: var(--navy-mid);
+  background: var(--white);
+}
+textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 2.2rem;
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+/* ── CHIP SELECTOR ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  background: var(--gray-bg);
+  color: var(--navy);
+  user-select: none;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+  white-space: nowrap;
+}
+.chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.chip.on.warn { background: #C0392B; border-color: #C0392B; }
+.chip.on.ok   { background: #1A8A4A; border-color: #1A8A4A; }
+
+/* ── GARBINO ALERT ── */
+.garbino {
+  display: none;
+  background: #FFF3E8;
+  border: 1.5px solid var(--orange);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 13px; font-weight: 600;
+  color: #7C2D12;
+  margin-top: 0.75rem;
+  line-height: 1.45;
+}
+.garbino.show { display: block; }
+
+/* ── INTERVENTI ── */
+.int-box {
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+}
+.int-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.75rem;
+}
+.int-label {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--orange);
+}
+.btn-del {
+  background: none; border: none;
+  font-size: 20px; color: var(--gray-text);
+  cursor: pointer; line-height: 1;
+  padding: 0 4px;
+}
+
+.btn-add-int {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: none;
+  border: 1.5px dashed rgba(11,37,69,0.2);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--navy-mid);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.14s;
+}
+.btn-add-int:active { background: var(--gray-bg); }
+
+/* ── FOTO ── */
+.upload-zone {
+  border: 2px dashed rgba(11,37,69,0.2);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--gray-bg);
+  transition: border-color 0.14s;
+}
+.upload-zone:active { border-color: var(--navy); }
+.upload-icon { font-size: 30px; margin-bottom: 5px; }
+.upload-hint { font-size: 13px; color: var(--gray-text); }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-rm {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(0,0,0,0.55);
+  color: #fff; border: none; border-radius: 50%;
+  width: 22px; height: 22px;
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.upload-prog {
+  display: none;
+  font-size: 13px; color: var(--gray-text);
+  text-align: center; margin-top: 6px;
+}
+
+/* ── SUBMIT ── */
+.btn-submit {
+  width: 100%;
+  padding: 1rem;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 19px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.1s;
+  margin-top: 0.25rem;
+}
+.btn-submit:active { transform: scale(0.98); background: var(--navy-mid); }
+.btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── STATUS ── */
+.banner {
+  display: none;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 0.875rem; text-align: center;
+}
+.banner.ok { display:block; background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7; }
+.banner.err { display:block; background:#FEF2F2; color:#991B1B; border:1px solid #FCA5A5; }
+
+/* ── CHECKLIST ── */
+.chk-group { margin-bottom: 1rem; }
+.chk-group:last-child { margin-bottom: 0; }
+.chk-group-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--navy-mid);
+  margin-bottom: 0.5rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.chk-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(11,37,69,0.06);
+  cursor: pointer;
+  user-select: none;
+}
+.chk-item:last-child { border-bottom: none; }
+.chk-box {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(11,37,69,0.25);
+  background: var(--gray-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: background 0.14s, border-color 0.14s;
+  margin-top: 1px;
+}
+.chk-item.checked .chk-box {
+  background: #1A8A4A; border-color: #1A8A4A; color: #fff;
+}
+.chk-item.checked .chk-text { text-decoration: line-through; color: var(--gray-text); }
+.chk-text { font-size: 14px; line-height: 1.4; }
+.chk-sub { font-size: 11.5px; color: var(--gray-text); display: block; margin-top: 1px; }
+.chk-warn .chk-box { border-color: #C0392B; }
+.chk-counter {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  margin-top: 6px;
+}
+.chk-counter-label { font-size: 12px; color: var(--gray-text); flex: 1; }
+.chk-counter-val { font-size: 15px; font-weight: 600; color: var(--navy); min-width: 24px; text-align: center; }
+.chk-alert {
+  display: none;
+  background: #FEF2F2; border: 1px solid #FCA5A5;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12.5px; font-weight: 600; color: #991B1B;
+  margin-top: 8px;
+}
+.chk-alert.show { display: block; }
+
+/* ── SEZIONE STORICO ── */
+.storico-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: none; border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem; width: 100%;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--navy);
+  cursor: pointer; margin-bottom: 0.875rem;
+}
+.log-entry {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.log-entry:last-child { border-bottom: none; }
+.log-meta { font-size: 12px; color: var(--gray-text); }
+.log-title { font-size: 15px; font-weight: 600; margin: 2px 0; }
+.log-badge {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: var(--orange-pale); color: var(--orange);
+  margin-left: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="hd-row">
+    <span class="hd-badge">Omnia</span>
+    <h1>Diario Giornaliero</h1>
+  </div>
+  <div class="hd-sub">Adriatic Lifeguard Service — Area Riservata</div>
+</header>
+
+<main>
+
+  <!-- STATUS BANNER -->
+  <div id="banner" class="banner"></div>
+
+  <!-- ① POSTAZIONE + DATA -->
+  <div class="card">
+    <div class="sec-title">Identificazione</div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Postazione</label>
+        <select id="postazione">
+          <option value="">— Seleziona —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Data e ora</label>
+        <input type="datetime-local" id="dataOra">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Bagnino responsabile</label>
+      <input type="text" id="bagnino" placeholder="Nome e cognome">
+    </div>
+  </div>
+
+  <!-- ② CHECKLIST POSTAZIONE -->
+  <div class="card">
+    <div class="sec-title">Checklist Postazione</div>
+
+    <div id="chkCounter" class="chk-counter">
+      <span class="chk-counter-label">Elementi verificati</span>
+      <span class="chk-counter-val" id="chkDone">0</span>
+      <span style="font-size:12px;color:var(--gray-text)">/</span>
+      <span class="chk-counter-val" id="chkTotal">0</span>
+    </div>
+    <div id="chkAlert" class="chk-alert">
+      ⚠️ Attenzione: non tutti gli elementi sono stati verificati.
+    </div>
+
+    <!-- NEL CASSONE -->
+    <div class="chk-group" style="margin-top:.875rem">
+      <div class="chk-group-title">Nel cassone</div>
+      <div class="chk-item chk-warn" data-id="kit_medico">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Kit medico presente e sigillato
+          <span class="chk-sub">Aprire SOLO in emergenza — Pocket Mask, Pallone Ambu, Canule, Guanti, Mascherina, Occhiali protettivi</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="giubbino">
+        <div class="chk-box"></div>
+        <div class="chk-text">Giubbino di salvataggio</div>
+      </div>
+      <div class="chk-item" data-id="rullo">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Rullo presente
+          <span class="chk-sub">Controlla che non sia intrecciato</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="caschetto">
+        <div class="chk-box"></div>
+        <div class="chk-text">Caschetto</div>
+      </div>
+    </div>
+
+    <!-- NEL PATTINO -->
+    <div class="chk-group">
+      <div class="chk-group-title">Nel pattino</div>
+      <div class="chk-item" data-id="scalmi_remi">
+        <div class="chk-box"></div>
+        <div class="chk-text">Scalmi e remi</div>
+      </div>
+      <div class="chk-item" data-id="mezzo_marinaio">
+        <div class="chk-box"></div>
+        <div class="chk-text">Mezzo marinaio</div>
+      </div>
+      <div class="chk-item" data-id="ancora">
+        <div class="chk-box"></div>
+        <div class="chk-text">Ancora</div>
+      </div>
+      <div class="chk-item" data-id="salvagente_pattino">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Salvagente
+          <span class="chk-sub">Scegli quello migliore</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TU DEVI AVERE -->
+    <div class="chk-group">
+      <div class="chk-group-title">Tu devi avere</div>
+      <div class="chk-item" data-id="canotta_rossa">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Canotta rossa indossata
+          <span class="chk-sub">Da indossare sempre, anche sul pattino</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="fischietto">
+        <div class="chk-box"></div>
+        <div class="chk-text">Fischietto tipo Fox o superiore</div>
+      </div>
+      <div class="chk-item" data-id="pinne_maschera">
+        <div class="chk-box"></div>
+        <div class="chk-text">Pinne, maschera e boccaglio</div>
+      </div>
+      <div class="chk-item" data-id="binocolo">
+        <div class="chk-box"></div>
+        <div class="chk-text">Binocolo</div>
+      </div>
+      <div class="chk-item chk-warn" data-id="documenti">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Brevetto, BLSD e visita medica
+          <span class="chk-sub">Documenti al seguito o verificati</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLLI GENERALI -->
+    <div class="chk-group">
+      <div class="chk-group-title">Controlli generali (ogni lido)</div>
+      <div class="chk-item" data-id="salvagente_concessione">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          N.2 salvagente agli estremi di ogni concessione pattugliata
+          <span class="chk-sub">Sagola in ordine</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="bandiere_ok">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Bandiere verde, gialla e rossa presenti
+          <span class="chk-sub">Se il palo ha una sola corda, la bandiera gialla deve essere nel cassone</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="limite_acque">
+        <div class="chk-box"></div>
+        <div class="chk-text">Limiti acque sicure posizionati in mare</div>
+      </div>
+      <div class="chk-item" data-id="boa_300m">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Boa dei 300m dietro gli scogli
+          <span class="chk-sub">Verificare per ogni lido coperto</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ③ METEO / MARE (was ②) -->
+  <div class="card">
+    <div class="sec-title">Meteo e Condizioni del Mare</div>
+
+    <div class="field">
+      <label>Stato del mare</label>
+      <div class="chips" id="mare">
+        <span class="chip" data-v="calmo">Calmo</span>
+        <span class="chip" data-v="poco_mosso">Poco mosso</span>
+        <span class="chip" data-v="mosso">Mosso</span>
+        <span class="chip on warn" data-v="agitato">Agitato</span>
+        <span class="chip on warn" data-v="molto_agitato">Molto agitato</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:.75rem">
+      <label>Cielo</label>
+      <div class="chips" id="cielo">
+        <span class="chip on" data-v="sereno">☀️ Sereno</span>
+        <span class="chip" data-v="nuvoloso">⛅ Nuvoloso</span>
+        <span class="chip" data-v="coperto">☁️ Coperto</span>
+        <span class="chip" data-v="pioggia">🌧 Pioggia</span>
+        <span class="chip" data-v="temporale">⛈ Temporale</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:.75rem">
+      <label>Bandiera esposta</label>
+      <div class="chips" id="bandiera">
+        <span class="chip on ok" data-v="verde">🟢 Verde</span>
+        <span class="chip" data-v="gialla">🟡 Gialla</span>
+        <span class="chip" data-v="rossa">🔴 Rossa</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ PRESENZE -->
+  <div class="card">
+    <div class="sec-title">Presenze</div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Affluenza spiaggia</label>
+        <div class="chips" id="affluenza">
+          <span class="chip" data-v="bassa">Bassa</span>
+          <span class="chip on" data-v="media">Media</span>
+          <span class="chip" data-v="alta">Alta</span>
+          <span class="chip" data-v="molto_alta">Molto alta</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Persone in acqua (stima)</label>
+        <input type="number" id="inAcqua" min="0" placeholder="es. 45">
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ INTERVENTI -->
+  <div class="card">
+    <div class="sec-title">Interventi e Soccorsi</div>
+
+    <div id="interventiList"></div>
+
+    <button class="btn-add-int" onclick="addIntervento()">
+      ＋ Aggiungi intervento
+    </button>
+  </div>
+
+  <!-- ⑤ NOTE -->
+  <div class="card">
+    <div class="sec-title">Note Libere</div>
+    <div class="field">
+      <textarea id="note" placeholder="Annotazioni, situazioni particolari, comunicazioni per la sede..."></textarea>
+    </div>
+  </div>
+
+  <!-- ⑥ FOTO -->
+  <div class="card">
+    <div class="sec-title">Foto</div>
+    <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+      <div class="upload-icon">📷</div>
+      <div class="upload-hint">Tocca per aggiungere foto (max 6)</div>
+    </div>
+    <div id="photoGrid" class="photo-grid"></div>
+    <div id="uploadProg" class="upload-prog"></div>
+  </div>
+
+  <!-- SUBMIT -->
+  <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+    Invia Diario
+  </button>
+
+  <!-- STORICO -->
+  <button class="storico-toggle" onclick="loadStorico()" style="margin-top:1.25rem">
+    📋 Visualizza diari recenti
+  </button>
+  <div id="storBlock" class="card" style="display:none">
+    <div class="sec-title">Ultimi 10 diari</div>
+    <div id="storList"></div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  FIREBASE CONFIG
+//  Sostituisci i valori con quelli del tuo progetto:
+//  Firebase Console → Impostazioni progetto → App web
+// ══════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
+  authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
+  projectId:         "app-segnalazioni-omnia-roseto",
+  storageBucket:     "app-segnalazioni-omnia-roseto.appspot.com",
+  messagingSenderId: "699028105579",
+  appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+
+// ── INIT ──
+(function init() {
+  // Popola postazioni come da app
+  const STATIONS = [
+    {num:10, name:"Tartaruga"},
+    {num:11, name:"Cabana Park"},
+    {num:12, name:"Spiaggia Libera tra Orsa Minore e Scirocco"},
+    {num:13, name:"Spiaggia Libera tra Ahamar e Papenoo"},
+    {num:14, name:"Lido La Vela"},
+    {num:15, name:"Bagni Marini"},
+    {num:16, name:"Bolla Mare"},
+    {num:17, name:"La Paranzella"},
+    {num:18, name:"Celommi"},
+    {num:19, name:"Marisella"},
+    {num:20, name:"Sirenetta"},
+    {num:21, name:"Lauretta"},
+    {num:22, name:"Lido Azzurra"},
+    {num:23, name:"Aurora"},
+    {num:24, name:"Bellavista"},
+    {num:25, name:"Lido Aragosta"},
+    {num:26, name:"Riva del Sol"},
+    {num:27, name:"Tropical"},
+    {num:28, name:"Lido38"},
+    {num:29, name:"Spiaggia Libera tra VVF e Lido Sahara"},
+    {num:30, name:"Casa del Mar"},
+    {num:31, name:"Maldimare"},
+    {num:32, name:"Bora Bora"},
+    {num:33, name:"Camping Surabaia"},
+    {num:34, name:"Spiaggia Libera tra Lo Squalo e Bagni Bruno"},
+    {num:35, name:"Camping Nino"}
+  ];
+  const sel = document.getElementById('postazione');
+  STATIONS.forEach(s => {
+    const o = document.createElement('option');
+    o.value = `P.${s.num}`;
+    o.textContent = `P.${s.num} — ${s.name}`;
+    sel.appendChild(o);
+  });
+
+  // Data/ora corrente
+  setNow();
+
+  // Chip groups single-select
+  ['mare', 'cielo', 'bandiera', 'affluenza'].forEach(id => {
+    chipGroup(id, false);
+  });
+})();
+
+// ── CHECKLIST ──
+(function initChecklist() {
+  const items = document.querySelectorAll('.chk-item');
+  document.getElementById('chkTotal').textContent = items.length;
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('checked');
+      const box = item.querySelector('.chk-box');
+      box.textContent = item.classList.contains('checked') ? '✓' : '';
+      updateChkCounter();
+    });
+  });
+})();
+
+function updateChkCounter() {
+  const total  = document.querySelectorAll('.chk-item').length;
+  const done   = document.querySelectorAll('.chk-item.checked').length;
+  document.getElementById('chkDone').textContent  = done;
+  document.getElementById('chkTotal').textContent = total;
+  document.getElementById('chkAlert').classList.toggle('show', done < total);
+}
+
+function collectChecklist() {
+  const result = {};
+  document.querySelectorAll('.chk-item').forEach(item => {
+    result[item.dataset.id] = item.classList.contains('checked');
+  });
+  return result;
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.chk-item').forEach(item => {
+    item.classList.remove('checked');
+    item.querySelector('.chk-box').textContent = '';
+  });
+  document.getElementById('chkAlert').classList.remove('show');
+  document.getElementById('chkDone').textContent = '0';
+}
+
+function setNow() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('dataOra').value = now.toISOString().slice(0,16);
+}
+
+// ── CHIP GROUP ──
+function chipGroup(id, multi) {
+  document.getElementById(id).querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (!multi) {
+        // Deactivate all, re-apply non-semantic classes
+        document.getElementById(id).querySelectorAll('.chip').forEach(c => {
+          c.classList.remove('on');
+        });
+      }
+      chip.classList.toggle('on');
+    });
+  });
+}
+
+function getChips(id) {
+  return Array.from(document.getElementById(id).querySelectorAll('.chip.on')).map(c => c.dataset.v);
+}
+
+// ── INTERVENTI ──
+let intCount = 0;
+const tipiIntervento = [
+  'Soccorso in acqua','Primo soccorso a terra','Disperso / scomparso',
+  'Puntura medusa','Trauma / caduta','Oggetto pericoloso','Altro'
+];
+
+function addIntervento() {
+  intCount++;
+  const id = 'int_' + intCount;
+  const n  = intCount;
+
+  const div = document.createElement('div');
+  div.className = 'int-box';
+  div.id = id;
+  div.innerHTML = `
+    <div class="int-header">
+      <span class="int-label">Intervento #${n}</span>
+      <button class="btn-del" onclick="document.getElementById('${id}').remove()" aria-label="Elimina">×</button>
+    </div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="i-tipo">
+        ${tipiIntervento.map(t=>`<option>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label>Ora</label>
+      <input type="datetime-local" class="i-ora">
+    </div>
+    <div class="field">
+      <label>Descrizione ed esito</label>
+      <textarea class="i-desc" placeholder="Descrivi l'intervento, le azioni intraprese e l'esito..."></textarea>
+    </div>
+    <div class="field">
+      <label>Allertato</label>
+      <div class="chips i-allerta">
+        <span class="chip" data-v="118">🚑 118</span>
+        <span class="chip" data-v="gdf">⚓ Guardia di Finanza</span>
+        <span class="chip" data-v="vvff">🚒 Vigili del Fuoco</span>
+        <span class="chip" data-v="guardia_medica">🏥 Guardia Medica</span>
+        <span class="chip" data-v="nessuno">Nessuno</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('interventiList').appendChild(div);
+
+  // Ora dell'intervento = adesso
+  const ora = div.querySelector('.i-ora');
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  ora.value = now.toISOString().slice(0,16);
+
+  // Chip multi-select per allerta
+  div.querySelectorAll('.i-allerta .chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('on'));
+  });
+}
+
+function collectInterventi() {
+  return Array.from(document.querySelectorAll('.int-box')).map(box => ({
+    tipo: box.querySelector('.i-tipo').value,
+    ora:  box.querySelector('.i-ora').value,
+    descrizione: box.querySelector('.i-desc').value.trim(),
+    allertato: Array.from(box.querySelectorAll('.i-allerta .chip.on')).map(c=>c.dataset.v)
+  }));
+}
+
+// ── FOTO ──
+let files = [];
+
+function handlePhotos(e) {
+  Array.from(e.target.files).forEach(f => {
+    if (files.filter(Boolean).length >= 6) return;
+    const idx = files.length;
+    files.push(f);
+    const reader = new FileReader();
+    reader.onload = ev => addThumb(ev.target.result, idx);
+    reader.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function addThumb(src, idx) {
+  const grid = document.getElementById('photoGrid');
+  const div = document.createElement('div');
+  div.className = 'photo-thumb';
+  div.id = 'th_' + idx;
+  div.innerHTML = `<img src="${src}" alt="foto"><button class="photo-rm" onclick="removeThumb(${idx})">×</button>`;
+  grid.appendChild(div);
+}
+
+function removeThumb(idx) {
+  files[idx] = null;
+  const el = document.getElementById('th_' + idx);
+  if (el) el.remove();
+}
+
+// ── SUBMIT ──
+async function submitForm() {
+  const btn    = document.getElementById('submitBtn');
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+
+  const postazione = document.getElementById('postazione').value;
+  const dataOra    = document.getElementById('dataOra').value;
+  const bagnino    = document.getElementById('bagnino').value.trim();
+
+  if (!postazione || !dataOra || !bagnino) {
+    showBanner('err', '⚠️ Compila i campi obbligatori: postazione, data/ora e bagnino responsabile.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Invio in corso…';
+
+  try {
+    // Upload foto
+    const fotoUrls = [];
+    const validFiles = files.filter(Boolean);
+    const prog = document.getElementById('uploadProg');
+
+    if (validFiles.length > 0) {
+      prog.style.display = 'block';
+      for (let i = 0; i < validFiles.length; i++) {
+        prog.textContent = `📤 Caricamento foto ${i+1} di ${validFiles.length}…`;
+        const ts  = Date.now();
+        const ref = storage.ref(`diario/${postazione}/${ts}_${i}`);
+        await ref.put(validFiles[i]);
+        fotoUrls.push(await ref.getDownloadURL());
+      }
+      prog.style.display = 'none';
+    }
+
+    // Salva su Firestore
+    await db.collection('diariogiornaliero').add({
+      postazione,
+      dataOra:   new Date(dataOra),
+      bagnino,
+      meteo: {
+        stateMare:  getChips('mare')[0] || null,
+        cielo:      getChips('cielo')[0] || null,
+        bandiera:   getChips('bandiera')[0] || null,
+      },
+      presenze: {
+        affluenza: getChips('affluenza')[0] || null,
+        inAcqua:   parseInt(document.getElementById('inAcqua').value) || null,
+      },
+      checklist: collectChecklist(),
+      interventi: collectInterventi(),
+      note:  document.getElementById('note').value.trim(),
+      foto:  fotoUrls,
+      ts:    firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    showBanner('ok', '✅ Diario inviato correttamente!');
+    resetForm();
+
+  } catch (err) {
+    console.error(err);
+    showBanner('err', `❌ Errore: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Invia Diario';
+  }
+}
+
+function showBanner(type, msg) {
+  const b = document.getElementById('banner');
+  b.className = 'banner ' + type;
+  b.textContent = msg;
+  b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => b.className = 'banner', 6000);
+}
+
+function resetForm() {
+  ['postazione','bagnino','note','inAcqua'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('interventiList').innerHTML = '';
+  document.getElementById('photoGrid').innerHTML = '';
+  files = []; intCount = 0;
+
+  // Reset chip visual states (mantieni solo i default)
+  ['mare','cielo','bandiera','affluenza'].forEach(id => {
+    document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  });
+
+  resetChecklist();
+  setNow();
+}
+
+// ── STORICO ──
+async function loadStorico() {
+  const block = document.getElementById('storBlock');
+  const list  = document.getElementById('storList');
+  block.style.display = block.style.display === 'none' ? 'block' : 'none';
+  if (block.style.display === 'none') return;
+
+  list.innerHTML = '<p style="font-size:13px;color:var(--gray-text)">Caricamento…</p>';
+
+  try {
+    const snap = await db.collection('diariogiornaliero')
+      .orderBy('ts', 'desc').limit(10).get();
+
+    if (snap.empty) {
+      list.innerHTML = '<p style="font-size:13px;color:var(--gray-text)">Nessun diario ancora inviato.</p>';
+      return;
+    }
+
+    list.innerHTML = '';
+    snap.forEach(doc => {
+      const d = doc.data();
+      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+      const dateStr = dt.toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const nInt = (d.interventi||[]).length;
+
+      const el = document.createElement('div');
+      el.className = 'log-entry';
+      el.innerHTML = `
+        <div class="log-meta">${dateStr}</div>
+        <div class="log-title">
+          ${d.postazione || '—'}
+          — ${d.bagnino || '—'}
+          ${nInt > 0 ? `<span class="log-badge">${nInt} intervento${nInt>1?'i':''}</span>` : ''}
+        </div>
+        <div style="font-size:13px;color:var(--gray-text);margin-top:3px">
+          Mare: ${d.meteo?.stateMare || '—'} &middot; Bandiera: ${d.meteo?.bandiera || '—'}
+          ${d.meteo?.garbino ? ' &middot; ⚠️ Garbino' : ''}
+        </div>
+      `;
+      list.appendChild(el);
+    });
+
+  } catch(err) {
+    list.innerHTML = `<p style="font-size:13px;color:#991B1B">Errore: ${err.message}</p>`;
+  }
+}
+</script>
+
+</body>
+</html>
