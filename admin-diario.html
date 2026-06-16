@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Diario — Omnia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --navy:      #0B2545;
+  --navy-mid:  #1B3A6B;
+  --orange:    #E8731A;
+  --sand:      #F4F1EB;
+  --white:     #FFFFFF;
+  --gray:      #6B7280;
+  --gray-bg:   #F0EEE9;
+  --border:    rgba(11,37,69,0.13);
+  --radius:    12px;
+  --radius-sm: 8px;
+  --success:   #1A8A4A;
+  --danger:    #C0392B;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--sand);
+  color: var(--navy);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  padding: 0.875rem 1.5rem;
+  display: flex; align-items: center; gap: 14px;
+  position: sticky; top: 0; z-index: 200;
+  border-bottom: 2px solid var(--orange);
+}
+.hd-badge {
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px; flex-shrink: 0;
+}
+header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: #fff; letter-spacing: 0.03em;
+}
+.hd-count {
+  margin-left: auto;
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  font-weight: 500; white-space: nowrap;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - 56px);
+}
+
+/* ── SIDEBAR FILTERS ── */
+.sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+
+.filter-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.75rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+}
+.filter-title::before {
+  content: '';
+  width: 3px; height: 13px;
+  background: var(--orange); border-radius: 2px;
+}
+
+.filter-group { margin-bottom: 1.125rem; }
+
+label.fl {
+  display: block;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--gray); margin-bottom: 4px;
+}
+
+select.fi, input.fi {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; color: var(--navy);
+  background: var(--gray-bg);
+  outline: none;
+  appearance: none; -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+select.fi:focus, input.fi:focus { border-color: var(--navy-mid); background: #fff; }
+select.fi {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 2rem;
+}
+
+.btn-filter {
+  width: 100%;
+  padding: 0.625rem;
+  background: var(--navy);
+  color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.25rem;
+}
+.btn-filter:hover { background: var(--navy-mid); }
+
+.btn-reset {
+  width: 100%;
+  padding: 0.5rem;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--gray);
+  cursor: pointer; margin-top: 0.5rem;
+  transition: border-color 0.15s;
+}
+.btn-reset:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── MAIN CONTENT ── */
+.content { padding: 1.25rem; overflow-x: auto; }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+}
+.stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--navy); line-height: 1;
+}
+.stat-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-top: 3px;
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+thead tr {
+  background: var(--navy);
+  color: #fff;
+}
+th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  white-space: nowrap;
+}
+th:first-child { width: 40px; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #F8F6F2; }
+tbody tr.active { background: #EEF3FB; }
+
+td {
+  padding: 0.7rem 1rem;
+  color: var(--navy);
+  white-space: nowrap;
+}
+td.wrap { white-space: normal; }
+
+.td-arrow {
+  color: var(--gray);
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
+
+/* BADGES */
+.badge {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.badge-verde  { background: #ECFDF5; color: #065F46; }
+.badge-gialla { background: #FFFBEB; color: #92400E; }
+.badge-rossa  { background: #FEF2F2; color: #991B1B; }
+.badge-int    { background: #EEF3FB; color: var(--navy-mid); }
+.badge-ok     { background: #ECFDF5; color: #065F46; }
+.badge-warn   { background: #FEF2F2; color: #991B1B; }
+
+/* ── DETAIL PANEL ── */
+.detail-row td {
+  padding: 0;
+  background: #F8F6F2;
+  cursor: default;
+}
+.detail-inner {
+  padding: 1.25rem 1.5rem;
+  border-top: 2px solid var(--orange);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.detail-section {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+}
+.detail-section.span2 { grid-column: span 2; }
+.detail-section.span3 { grid-column: span 3; }
+
+.ds-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 0.625rem;
+  border-bottom: 1px solid var(--border); padding-bottom: 4px;
+}
+
+.ds-row {
+  display: flex; gap: 6px;
+  font-size: 13px; margin-bottom: 4px;
+}
+.ds-key { color: var(--gray); font-weight: 600; flex-shrink: 0; min-width: 90px; }
+.ds-val { color: var(--navy); font-weight: 500; }
+
+/* CHECKLIST IN DETAIL */
+.chk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 1rem;
+}
+.chk-line {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12.5px;
+}
+.chk-ico { font-size: 13px; }
+
+/* INTERVENTIONS */
+.int-item {
+  background: var(--gray-bg);
+  border-radius: 6px; padding: 0.625rem 0.75rem;
+  margin-bottom: 0.5rem; font-size: 13px;
+  border-left: 3px solid var(--orange);
+}
+.int-item:last-child { margin-bottom: 0; }
+.int-tipo { font-weight: 700; color: var(--navy); }
+.int-meta { color: var(--gray); font-size: 11.5px; margin: 2px 0; }
+.int-desc { color: var(--navy); }
+
+/* PHOTOS */
+.photo-gallery {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 6px;
+}
+.photo-gallery a {
+  display: block;
+  width: 80px; height: 80px;
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.photo-gallery img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+/* ── LOADING / EMPTY ── */
+.state-msg {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--gray);
+  font-size: 15px;
+}
+.state-msg .icon { font-size: 36px; margin-bottom: 8px; }
+
+/* ── LOAD MORE ── */
+.btn-more {
+  display: block; width: 100%;
+  padding: 0.75rem;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--navy-mid);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-more:hover { background: var(--white); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-section.span2, .detail-section.span3 { grid-column: span 1; }
+  .chk-grid { grid-template-columns: 1fr; }
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.25rem;
+  background: var(--white);
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.tab-btn {
+  padding: 0.75rem 1.5rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border: none; background: none;
+  color: var(--gray); cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -2px;
+}
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-btn:hover:not(.active) { color: var(--navy); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── STATS PAGE ── */
+.stats-page { padding-bottom: 2rem; }
+
+.stats-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 0.875rem;
+  display: flex; align-items: center; gap: 7px;
+}
+.stats-section-title::before {
+  content:''; width:3px; height:14px;
+  background:var(--orange); border-radius:2px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.chart-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem 1.25rem;
+}
+.chart-card.full { grid-column: span 2; }
+.chart-title {
+  font-size: 12px; font-weight: 700;
+  color: var(--gray); text-transform: uppercase;
+  letter-spacing: 0.1em; margin-bottom: 0.875rem;
+}
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 320px; }
+
+/* STATION TABLE */
+.stn-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stn-table th {
+  padding: 0.5rem 0.75rem;
+  background: var(--navy); color: #fff;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; font-weight:700;
+  letter-spacing:0.1em; text-transform:uppercase;
+  text-align:left;
+}
+.stn-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--navy);
+}
+.stn-table tr:last-child td { border-bottom: none; }
+.stn-table tr:nth-child(even) td { background: #fafaf8; }
+
+.bar-inline {
+  height: 6px; border-radius: 3px;
+  background: var(--orange); display: inline-block;
+  vertical-align: middle; margin-left: 6px;
+  min-width: 2px;
+}
+
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card.full { grid-column: span 1; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <span class="hd-badge">Admin</span>
+  <h1>Diario Giornaliero — Pannello</h1>
+  <span class="hd-count" id="hd-count"></span>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="filter-title">Filtri</div>
+
+    <div class="filter-group">
+      <label class="fl">Data da</label>
+      <input type="date" id="f-da" class="fi">
+    </div>
+    <div class="filter-group">
+      <label class="fl">Data a</label>
+      <input type="date" id="f-a" class="fi">
+    </div>
+    <div class="filter-group">
+      <label class="fl">Postazione</label>
+      <select id="f-post" class="fi">
+        <option value="">Tutte le postazioni</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="fl">Bandiera</label>
+      <select id="f-band" class="fi">
+        <option value="">Tutte</option>
+        <option value="verde">🟢 Verde</option>
+        <option value="gialla">🟡 Gialla</option>
+        <option value="rossa">🔴 Rossa</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="fl">Interventi</label>
+      <select id="f-int" class="fi">
+        <option value="">Tutti</option>
+        <option value="si">Con interventi</option>
+        <option value="no">Nessun intervento</option>
+      </select>
+    </div>
+
+    <button class="btn-filter" onclick="applyFilters()">🔍 Cerca</button>
+    <button class="btn-reset" onclick="resetFilters()">✕ Azzera filtri</button>
+
+    <div style="margin-top:1.5rem">
+      <div class="filter-title">Esporta</div>
+      <button class="btn-reset" style="margin-top:.5rem" onclick="exportCSV()">⬇ Scarica CSV</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="content">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('diari')">📋 Diari</button>
+      <button class="tab-btn" onclick="switchTab('stats')">📊 Statistiche</button>
+    </div>
+
+    <!-- TAB: DIARI -->
+    <div class="tab-panel active" id="tab-diari">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="s-tot">—</div>
+        <div class="stat-label">Diari totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="s-int">—</div>
+        <div class="stat-label">Interventi totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="s-foto">—</div>
+        <div class="stat-label">Foto caricate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="s-chk">—</div>
+        <div class="stat-label">Checklist complete</div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Data / Ora</th>
+            <th>Postazione</th>
+            <th>Bagnino</th>
+            <th>Mare</th>
+            <th>Bandiera</th>
+            <th>Interventi</th>
+            <th>Checklist</th>
+            <th>Foto</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="btn-more" id="btnMore" style="display:none" onclick="loadMore()">Carica altri diari</button>
+
+    </div><!-- /tab-diari -->
+
+    <!-- TAB: STATISTICHE -->
+    <div class="tab-panel stats-page" id="tab-stats">
+
+      <!-- GENERALI -->
+      <div class="stats-section-title">Riepilogo generale</div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Diari per giorno</div>
+          <div class="chart-wrap"><canvas id="chartTimeline"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Distribuzione bandiere</div>
+          <div class="chart-wrap"><canvas id="chartBandiere"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Stato del mare</div>
+          <div class="chart-wrap"><canvas id="chartMare"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Tipi di intervento</div>
+          <div class="chart-wrap"><canvas id="chartInterventi"></canvas></div>
+        </div>
+      </div>
+
+      <!-- PER POSTAZIONE -->
+      <div class="stats-section-title">Per postazione</div>
+      <div class="charts-grid">
+        <div class="chart-card full">
+          <div class="chart-title">Diari per postazione</div>
+          <div class="chart-wrap tall"><canvas id="chartPostazioni"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-title">Dettaglio per postazione</div>
+        <div style="overflow-x:auto">
+          <table class="stn-table" id="stnTable">
+            <thead>
+              <tr>
+                <th>Postazione</th>
+                <th>Diari</th>
+                <th>Interventi</th>
+                <th>Foto</th>
+                <th>Checklist media</th>
+                <th>Attività</th>
+              </tr>
+            </thead>
+            <tbody id="stnBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /tab-stats -->
+
+  </main>
+</div>
+
+<script>
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
+  authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
+  projectId:         "app-segnalazioni-omnia-roseto",
+  storageBucket:     "app-segnalazioni-omnia-roseto.appspot.com",
+  messagingSenderId: "699028105579",
+  appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── STATIONS ──
+const STATIONS = [
+  {num:10,name:"Tartaruga"},{num:11,name:"Cabana Park"},
+  {num:12,name:"Sl. Orsa Minore-Scirocco"},{num:13,name:"Sl. Ahamar-Papenoo"},
+  {num:14,name:"Lido La Vela"},{num:15,name:"Bagni Marini"},
+  {num:16,name:"Bolla Mare"},{num:17,name:"La Paranzella"},
+  {num:18,name:"Celommi"},{num:19,name:"Marisella"},
+  {num:20,name:"Sirenetta"},{num:21,name:"Lauretta"},
+  {num:22,name:"Lido Azzurra"},{num:23,name:"Aurora"},
+  {num:24,name:"Bellavista"},{num:25,name:"Lido Aragosta"},
+  {num:26,name:"Riva del Sol"},{num:27,name:"Tropical"},
+  {num:28,name:"Lido38"},{num:29,name:"Sl. VVF-Lido Sahara"},
+  {num:30,name:"Casa del Mar"},{num:31,name:"Maldimare"},
+  {num:32,name:"Bora Bora"},{num:33,name:"Camping Surabaia"},
+  {num:34,name:"Sl. Lo Squalo-Bagni Bruno"},{num:35,name:"Camping Nino"}
+];
+
+(function initSelects() {
+  const sel = document.getElementById('f-post');
+  STATIONS.forEach(s => {
+    const o = document.createElement('option');
+    o.value = `P.${s.num}`;
+    o.textContent = `P.${s.num} — ${s.name}`;
+    sel.appendChild(o);
+  });
+})();
+
+// ── STATE ──
+let allDocs = [];
+let lastDoc  = null;
+let activeId = null;
+const PAGE = 30;
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  // Default: last 30 days
+  const today = new Date();
+  const ago30 = new Date(today); ago30.setDate(today.getDate() - 30);
+  document.getElementById('f-a').value  = fmtDate(today);
+  document.getElementById('f-da').value = fmtDate(ago30);
+  loadData();
+});
+
+// ── LOAD ──
+async function loadData(append = false) {
+  if (!append) { allDocs = []; lastDoc = null; }
+
+  const da   = document.getElementById('f-da').value;
+  const a    = document.getElementById('f-a').value;
+  const post = document.getElementById('f-post').value;
+  const band = document.getElementById('f-band').value;
+  const intF = document.getElementById('f-int').value;
+
+  let q = db.collection('diariogiornaliero').orderBy('ts', 'desc');
+
+  if (da)   q = q.where('dataOra', '>=', new Date(da));
+  if (a)    q = q.where('dataOra', '<=', new Date(a + 'T23:59:59'));
+  if (post) q = q.where('postazione', '==', post);
+
+  if (lastDoc) q = q.startAfter(lastDoc);
+  q = q.limit(PAGE);
+
+  const snap = await q.get();
+  if (!snap.empty) lastDoc = snap.docs[snap.docs.length - 1];
+
+  let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  // Client-side filters (Firestore index limits)
+  if (band) docs = docs.filter(d => d.meteo?.bandiera === band);
+  if (intF === 'si') docs = docs.filter(d => (d.interventi||[]).length > 0);
+  if (intF === 'no') docs = docs.filter(d => (d.interventi||[]).length === 0);
+
+  if (append) allDocs = [...allDocs, ...docs];
+  else allDocs = docs;
+
+  render();
+  document.getElementById('btnMore').style.display = snap.docs.length === PAGE ? 'block' : 'none';
+}
+
+function applyFilters() { loadData(false); }
+function loadMore()     { loadData(true);  }
+function resetFilters() {
+  document.getElementById('f-da').value   = '';
+  document.getElementById('f-a').value    = '';
+  document.getElementById('f-post').value = '';
+  document.getElementById('f-band').value = '';
+  document.getElementById('f-int').value  = '';
+  loadData(false);
+}
+
+// ── RENDER ──
+function render() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  if (allDocs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
+    updateStats([]);
+    return;
+  }
+
+  updateStats(allDocs);
+
+  allDocs.forEach(doc => {
+    const dt = doc.dataOra?.toDate ? doc.dataOra.toDate() : new Date(doc.dataOra);
+    const dateStr = dt.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const timeStr = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+    const nInt  = (doc.interventi||[]).length;
+    const nFoto = (doc.foto||[]).length;
+    const chkPct = chkPercent(doc.checklist);
+    const band  = doc.meteo?.bandiera || '—';
+    const mare  = doc.meteo?.stateMare || '—';
+
+    // Summary row
+    const tr = document.createElement('tr');
+    tr.dataset.id = doc.id;
+    tr.innerHTML = `
+      <td class="td-arrow">›</td>
+      <td><strong>${dateStr}</strong><br><span style="color:var(--gray);font-size:11.5px">${timeStr}</span></td>
+      <td><strong>${doc.postazione||'—'}</strong></td>
+      <td>${doc.bagnino||'—'}</td>
+      <td style="text-transform:capitalize">${mare}</td>
+      <td>${bandBadge(band)}</td>
+      <td>${nInt > 0 ? `<span class="badge badge-int">${nInt} intervento${nInt>1?'i':''}</span>` : '<span style="color:var(--gray);font-size:12px">—</span>'}</td>
+      <td>${chkBadge(chkPct)}</td>
+      <td>${nFoto > 0 ? `📷 ${nFoto}` : '—'}</td>
+    `;
+    tr.addEventListener('click', () => toggleDetail(doc, tr));
+    tbody.appendChild(tr);
+
+    // Detail row (hidden)
+    const trD = document.createElement('tr');
+    trD.className = 'detail-row';
+    trD.id = 'detail-' + doc.id;
+    trD.style.display = 'none';
+    const tdD = document.createElement('td');
+    tdD.colSpan = 9;
+    tdD.innerHTML = buildDetail(doc);
+    trD.appendChild(tdD);
+    tbody.appendChild(trD);
+  });
+
+  document.getElementById('hd-count').textContent = `${allDocs.length} diari`;
+}
+
+// ── DETAIL TOGGLE ──
+function toggleDetail(doc, tr) {
+  const detailRow = document.getElementById('detail-' + doc.id);
+  const isOpen = detailRow.style.display !== 'none';
+
+  // Close all
+  document.querySelectorAll('.detail-row').forEach(r => r.style.display = 'none');
+  document.querySelectorAll('tbody tr:not(.detail-row)').forEach(r => r.classList.remove('active'));
+
+  if (!isOpen) {
+    detailRow.style.display = '';
+    tr.classList.add('active');
+    tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ── BUILD DETAIL ──
+function buildDetail(doc) {
+  const dt = doc.dataOra?.toDate ? doc.dataOra.toDate() : new Date(doc.dataOra);
+  const dtStr = dt.toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Checklist
+  const chkLabels = {
+    kit_medico:'Kit medico', giubbino:'Giubbino salvataggio', rullo:'Rullo',
+    caschetto:'Caschetto', scalmi_remi:'Scalmi e remi', mezzo_marinaio:'Mezzo marinaio',
+    ancora:'Ancora', salvagente_pattino:'Salvagente pattino', canotta_rossa:'Canotta rossa',
+    fischietto:'Fischietto', pinne_maschera:'Pinne/maschera/boccaglio', binocolo:'Binocolo',
+    documenti:'Brevetto/BLSD/Visita', salvagente_concessione:'Salvagente concessione',
+    bandiere_ok:'Bandiere ok', limite_acque:'Limiti acque sicure', boa_300m:'Boa 300m'
+  };
+  const chk = doc.checklist || {};
+  const chkItems = Object.entries(chkLabels).map(([k,v]) =>
+    `<div class="chk-line">
+      <span class="chk-ico">${chk[k] ? '✅' : '❌'}</span>
+      <span style="font-size:12.5px;color:${chk[k]?'var(--navy)':'var(--gray)'}">${v}</span>
+    </div>`
+  ).join('');
+
+  // Interventi
+  const interventi = (doc.interventi||[]);
+  const intHtml = interventi.length === 0
+    ? '<p style="font-size:13px;color:var(--gray)">Nessun intervento registrato.</p>'
+    : interventi.map(i => {
+        const allertato = (i.allertato||[]).join(', ') || 'nessuno';
+        const ora = i.ora ? new Date(i.ora).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<div class="int-item">
+          <div class="int-tipo">${i.tipo||'—'}</div>
+          <div class="int-meta">Ore ${ora} · Allertato: ${allertato}</div>
+          <div class="int-desc">${i.descrizione||'—'}</div>
+        </div>`;
+      }).join('');
+
+  // Foto
+  const foto = (doc.foto||[]);
+  const fotoHtml = foto.length === 0
+    ? '<p style="font-size:13px;color:var(--gray)">Nessuna foto.</p>'
+    : `<div class="photo-gallery">${foto.map(u=>`<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`).join('')}</div>`;
+
+  // Meteo
+  const m = doc.meteo || {};
+  const p = doc.presenze || {};
+
+  return `<div class="detail-inner">
+    <div class="detail-grid">
+
+      <div class="detail-section">
+        <div class="ds-title">Identificazione</div>
+        <div class="ds-row"><span class="ds-key">Data/ora</span><span class="ds-val">${dtStr}</span></div>
+        <div class="ds-row"><span class="ds-key">Postazione</span><span class="ds-val">${doc.postazione||'—'}</span></div>
+        <div class="ds-row"><span class="ds-key">Bagnino</span><span class="ds-val">${doc.bagnino||'—'}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Meteo e Mare</div>
+        <div class="ds-row"><span class="ds-key">Stato mare</span><span class="ds-val">${m.stateMare||'—'}</span></div>
+        <div class="ds-row"><span class="ds-key">Cielo</span><span class="ds-val">${m.cielo||'—'}</span></div>
+        <div class="ds-row"><span class="ds-key">Bandiera</span><span class="ds-val">${bandBadge(m.bandiera||'—')}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Presenze</div>
+        <div class="ds-row"><span class="ds-key">Affluenza</span><span class="ds-val">${p.affluenza||'—'}</span></div>
+        <div class="ds-row"><span class="ds-key">In acqua</span><span class="ds-val">${p.inAcqua != null ? p.inAcqua + ' pers.' : '—'}</span></div>
+        <div class="ds-row"><span class="ds-key">Note</span><span class="ds-val">${doc.note||'—'}</span></div>
+      </div>
+
+      <div class="detail-section span3">
+        <div class="ds-title">Checklist postazione</div>
+        <div class="chk-grid">${chkItems}</div>
+      </div>
+
+      <div class="detail-section span2">
+        <div class="ds-title">Interventi e Soccorsi</div>
+        ${intHtml}
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Foto (${foto.length})</div>
+        ${fotoHtml}
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ── STATS ──
+function updateStats(docs) {
+  const totInt  = docs.reduce((s,d) => s + (d.interventi||[]).length, 0);
+  const totFoto = docs.reduce((s,d) => s + (d.foto||[]).length, 0);
+  const totChk  = docs.filter(d => chkPercent(d.checklist) === 100).length;
+  document.getElementById('s-tot').textContent  = docs.length;
+  document.getElementById('s-int').textContent  = totInt;
+  document.getElementById('s-foto').textContent = totFoto;
+  document.getElementById('s-chk').textContent  = totChk;
+}
+
+// ── HELPERS ──
+function chkPercent(chk) {
+  if (!chk) return 0;
+  const vals = Object.values(chk);
+  if (!vals.length) return 0;
+  return Math.round(vals.filter(Boolean).length / vals.length * 100);
+}
+
+function chkBadge(pct) {
+  if (pct === 100) return `<span class="badge badge-ok">✓ ${pct}%</span>`;
+  if (pct >= 80)   return `<span class="badge badge-int">${pct}%</span>`;
+  return `<span class="badge badge-warn">⚠ ${pct}%</span>`;
+}
+
+function bandBadge(b) {
+  if (b === 'verde')  return `<span class="badge badge-verde">🟢 Verde</span>`;
+  if (b === 'gialla') return `<span class="badge badge-gialla">🟡 Gialla</span>`;
+  if (b === 'rossa')  return `<span class="badge badge-rossa">🔴 Rossa</span>`;
+  return `<span style="color:var(--gray)">—</span>`;
+}
+
+function fmtDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  const rows = [['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Note']];
+  allDocs.forEach(d => {
+    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+    rows.push([
+      dt.toLocaleDateString('it-IT'),
+      dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+      d.postazione||'',
+      d.bagnino||'',
+      d.meteo?.stateMare||'',
+      d.meteo?.bandiera||'',
+      (d.interventi||[]).length,
+      chkPercent(d.checklist),
+      (d.foto||[]).length,
+      (d.note||'').replace(/,/g,' ')
+    ]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `diario_omnia_${fmtDate(new Date())}.csv`;
+  a.click();
+}
+
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'stats') renderStats();
+}
+
+// ── CHARTS STATE ──
+let charts = {};
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ── RENDER STATS ──
+function renderStats() {
+  if (!allDocs.length) return;
+
+  // 1. TIMELINE — diari per giorno
+  const byDay = {};
+  allDocs.forEach(d => {
+    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+    const key = dt.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit'});
+    byDay[key] = (byDay[key]||0) + 1;
+  });
+  const dayKeys = Object.keys(byDay).slice(-30);
+  destroyChart('timeline');
+  charts.timeline = new Chart(document.getElementById('chartTimeline'), {
+    type: 'bar',
+    data: {
+      labels: dayKeys,
+      datasets: [{ label: 'Diari', data: dayKeys.map(k=>byDay[k]),
+        backgroundColor: '#E8731A', borderRadius: 4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true, ticks:{stepSize:1}}, x:{ticks:{font:{size:10}}}} }
+  });
+
+  // 2. BANDIERE
+  const bCount = {verde:0, gialla:0, rossa:0};
+  allDocs.forEach(d => { const b = d.meteo?.bandiera; if(b) bCount[b]=(bCount[b]||0)+1; });
+  destroyChart('bandiere');
+  charts.bandiere = new Chart(document.getElementById('chartBandiere'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Verde','Gialla','Rossa'],
+      datasets: [{ data: [bCount.verde, bCount.gialla, bCount.rossa],
+        backgroundColor: ['#1A8A4A','#F59E0B','#C0392B'],
+        borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{font:{size:12}}}} }
+  });
+
+  // 3. STATO MARE
+  const mCount = {};
+  allDocs.forEach(d => { const m = d.meteo?.stateMare; if(m) mCount[m]=(mCount[m]||0)+1; });
+  const mKeys = Object.keys(mCount).sort();
+  destroyChart('mare');
+  charts.mare = new Chart(document.getElementById('chartMare'), {
+    type: 'bar',
+    data: {
+      labels: mKeys,
+      datasets: [{ label:'Giorni', data: mKeys.map(k=>mCount[k]),
+        backgroundColor: '#1B3A6B', borderRadius:4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true, ticks:{stepSize:1}}, y:{ticks:{font:{size:11}}}} }
+  });
+
+  // 4. TIPI INTERVENTO
+  const iCount = {};
+  allDocs.forEach(d => (d.interventi||[]).forEach(i => {
+    const t = i.tipo||'Altro'; iCount[t]=(iCount[t]||0)+1;
+  }));
+  const iKeys = Object.keys(iCount).sort((a,b)=>iCount[b]-iCount[a]);
+  destroyChart('interventi');
+  charts.interventi = new Chart(document.getElementById('chartInterventi'), {
+    type: 'bar',
+    data: {
+      labels: iKeys.length ? iKeys : ['Nessun intervento'],
+      datasets: [{ label:'Interventi', data: iKeys.length ? iKeys.map(k=>iCount[k]) : [0],
+        backgroundColor: '#E8731A', borderRadius:4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true, ticks:{stepSize:1}}, y:{ticks:{font:{size:10}}}} }
+  });
+
+  // 5. POSTAZIONI BAR
+  const pCount = {}; const pInt = {}; const pFoto = {}; const pChk = {};
+  allDocs.forEach(d => {
+    const p = d.postazione||'?';
+    pCount[p] = (pCount[p]||0)+1;
+    pInt[p]   = (pInt[p]||0) + (d.interventi||[]).length;
+    pFoto[p]  = (pFoto[p]||0) + (d.foto||[]).length;
+    if (!pChk[p]) pChk[p] = [];
+    pChk[p].push(chkPercent(d.checklist));
+  });
+  const pKeys = Object.keys(pCount).sort((a,b)=>{
+    const na=parseInt(a.replace('P.','')), nb=parseInt(b.replace('P.',''));
+    return na-nb;
+  });
+
+  destroyChart('postazioni');
+  charts.postazioni = new Chart(document.getElementById('chartPostazioni'), {
+    type: 'bar',
+    data: {
+      labels: pKeys,
+      datasets: [
+        { label:'Diari', data: pKeys.map(k=>pCount[k]), backgroundColor:'#0B2545', borderRadius:3 },
+        { label:'Interventi', data: pKeys.map(k=>pInt[k]), backgroundColor:'#E8731A', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top', labels:{font:{size:12}}}},
+      scales:{x:{ticks:{font:{size:10}}}, y:{beginAtZero:true, ticks:{stepSize:1}}} }
+  });
+
+  // 6. STATION TABLE
+  const maxDiari = Math.max(...pKeys.map(k=>pCount[k]));
+  const stnBody = document.getElementById('stnBody');
+  stnBody.innerHTML = '';
+  pKeys.forEach(p => {
+    const avgChk = pChk[p].length
+      ? Math.round(pChk[p].reduce((s,v)=>s+v,0)/pChk[p].length) : 0;
+    const barW = Math.round(pCount[p]/maxDiari * 80);
+    const stnName = STATIONS.find(s=>`P.${s.num}`===p)?.name || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${stnName}</span></td>
+      <td>${pCount[p]}</td>
+      <td>${pInt[p]||0}</td>
+      <td>${pFoto[p]||0}</td>
+      <td>${chkBadge(avgChk)}</td>
+      <td><span class="bar-inline" style="width:${barW}px"></span></td>
+    `;
+    stnBody.appendChild(tr);
+  });
+}
+
+</script>
+
+</body>
+</html>
