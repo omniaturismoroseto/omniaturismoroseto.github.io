@@ -1465,11 +1465,7 @@ function renderStats() {
 
   // 5c. AFFLUENZA in acqua
   const afOrder  = ['bassa','media','alta','molto_alta'];
-  const afLabels = ['🟢 Bassa
-≤30 pers','🟡 Media
-30–100','🟠 Alta
-100–500','🔴 Molto alta
->500'];
+  const afLabels = ['Bassa (≤30)','Media (30–100)','Alta (100–500)','Molto alta (>500)'];
   const afColors = ['#6EE7B7','#FDE68A','#FB923C','#F87171'];
   const afCount  = {};
   allDocs.forEach(d => { const a = d.presenze?.affluenza; if(a) afCount[a]=(afCount[a]||0)+1; });
