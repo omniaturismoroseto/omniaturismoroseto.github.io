@@ -676,11 +676,7 @@ const PAGE = 30;
 
 // ── INIT ──
 window.addEventListener('DOMContentLoaded', () => {
-  // Default: last 30 days
-  const today = new Date();
-  const ago30 = new Date(today); ago30.setDate(today.getDate() - 30);
-  document.getElementById('f-a').value  = fmtDate(today);
-  document.getElementById('f-da').value = fmtDate(ago30);
+  // Di default carica tutto (nessun filtro data)
   loadData();
 });
 
@@ -688,36 +684,55 @@ window.addEventListener('DOMContentLoaded', () => {
 async function loadData(append = false) {
   if (!append) { allDocs = []; lastDoc = null; }
 
-  const da   = document.getElementById('f-da').value;
-  const a    = document.getElementById('f-a').value;
-  const post = document.getElementById('f-post').value;
-  const band = document.getElementById('f-band').value;
-  const intF = document.getElementById('f-int').value;
+  const tbody = document.getElementById('tableBody');
+  if (!append) tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
 
-  let q = db.collection('diariogiornaliero').orderBy('ts', 'desc');
+  try {
+    // Query semplice senza indici compositi — filtri tutti lato client
+    let q = db.collection('diariogiornaliero').orderBy('ts', 'desc').limit(500);
+    if (lastDoc) q = q.startAfter(lastDoc);
 
-  if (da)   q = q.where('dataOra', '>=', new Date(da));
-  if (a)    q = q.where('dataOra', '<=', new Date(a + 'T23:59:59'));
-  if (post) q = q.where('postazione', '==', post);
+    const snap = await q.get();
+    if (!snap.empty) lastDoc = snap.docs[snap.docs.length - 1];
 
-  if (lastDoc) q = q.startAfter(lastDoc);
-  q = q.limit(PAGE);
+    let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  const snap = await q.get();
-  if (!snap.empty) lastDoc = snap.docs[snap.docs.length - 1];
+    // Filtri client-side
+    const da   = document.getElementById('f-da').value;
+    const a    = document.getElementById('f-a').value;
+    const post = document.getElementById('f-post').value;
+    const band = document.getElementById('f-band').value;
+    const intF = document.getElementById('f-int').value;
 
-  let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (da) {
+      const daDate = new Date(da);
+      docs = docs.filter(d => {
+        const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+        return dt >= daDate;
+      });
+    }
+    if (a) {
+      const aDate = new Date(a + 'T23:59:59');
+      docs = docs.filter(d => {
+        const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+        return dt <= aDate;
+      });
+    }
+    if (post) docs = docs.filter(d => d.postazione === post);
+    if (band) docs = docs.filter(d => d.meteo?.bandiera === band);
+    if (intF === 'si') docs = docs.filter(d => (d.interventi||[]).length > 0);
+    if (intF === 'no') docs = docs.filter(d => (d.interventi||[]).length === 0);
 
-  // Client-side filters (Firestore index limits)
-  if (band) docs = docs.filter(d => d.meteo?.bandiera === band);
-  if (intF === 'si') docs = docs.filter(d => (d.interventi||[]).length > 0);
-  if (intF === 'no') docs = docs.filter(d => (d.interventi||[]).length === 0);
+    if (append) allDocs = [...allDocs, ...docs];
+    else allDocs = docs;
 
-  if (append) allDocs = [...allDocs, ...docs];
-  else allDocs = docs;
+    render();
+    document.getElementById('btnMore').style.display = snap.docs.length === 500 ? 'block' : 'none';
 
-  render();
-  document.getElementById('btnMore').style.display = snap.docs.length === PAGE ? 'block' : 'none';
+  } catch(err) {
+    console.error('Firestore error:', err);
+    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">❌</div>Errore caricamento: ${err.message}<br><small style="margin-top:6px;display:block">Apri la console del browser (F12) per i dettagli.</small></div></td></tr>`;
+  }
 }
 
 function applyFilters() { loadData(false); }
