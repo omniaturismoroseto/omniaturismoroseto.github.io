@@ -633,6 +633,7 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
     <div style="margin-top:1.5rem">
       <div class="filter-title">Esporta</div>
       <button class="btn-reset" style="margin-top:.5rem" onclick="exportCSV()">⬇ Scarica CSV</button>
+      <button class="btn-reset" style="margin-top:.5rem" onclick="exportPDF()">📄 Stampa / PDF</button>
     </div>
   </aside>
 
@@ -684,6 +685,7 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
             <th>Postazione</th>
             <th>Bagnino</th>
             <th>Mare</th>
+            <th>Vento</th>
             <th>Bandiera</th>
             <th>Interventi</th>
             <th>Checklist</th>
@@ -691,7 +693,7 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
+          <tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -721,6 +723,27 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
         <div class="chart-card">
           <div class="chart-title">Tipi di intervento</div>
           <div class="chart-wrap"><canvas id="chartInterventi"></canvas></div>
+        </div>
+      </div>
+
+      <!-- VENTO + AFFLUENZA + CIELO -->
+      <div class="stats-section-title">Vento · Presenze · Condizioni</div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Intensità vento</div>
+          <div class="chart-wrap"><canvas id="chartVento"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Presenze in acqua</div>
+          <div class="chart-wrap"><canvas id="chartAfluenza"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Condizioni cielo</div>
+          <div class="chart-wrap"><canvas id="chartCielo"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Mare vs Bandiera (heatmap)</div>
+          <div class="chart-wrap"><canvas id="chartMareBand"></canvas></div>
         </div>
       </div>
 
@@ -861,7 +884,7 @@ async function loadData(append = false) {
   if (!append) { allDocs = []; lastDoc = null; }
 
   const tbody = document.getElementById('tableBody');
-  if (!append) tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
+  if (!append) tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
 
   try {
     // Query semplice senza indici compositi — filtri tutti lato client
@@ -907,7 +930,7 @@ async function loadData(append = false) {
 
   } catch(err) {
     console.error('Firestore error:', err);
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">❌</div>Errore caricamento: ${err.message}<br><small style="margin-top:6px;display:block">Apri la console del browser (F12) per i dettagli.</small></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">❌</div>Errore caricamento: ${err.message}<br><small style="margin-top:6px;display:block">Apri la console del browser (F12) per i dettagli.</small></div></td></tr>`;
   }
 }
 
@@ -928,7 +951,7 @@ function render() {
   tbody.innerHTML = '';
 
   if (allDocs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
     updateStats([]);
     return;
   }
@@ -954,6 +977,7 @@ function render() {
       <td><strong>${doc.postazione||'—'}</strong></td>
       <td>${doc.bagnino||'—'}</td>
       <td style="text-transform:capitalize">${mare}</td>
+      <td>${ventoIntBadge(doc.meteo?.ventoInt)}</td>
       <td>${bandBadge(band)}</td>
       <td>${nInt > 0 ? `<span class="badge badge-int">${nInt} intervento${nInt>1?'i':''}</span>` : '<span style="color:var(--gray);font-size:12px">—</span>'}</td>
       <td>${chkBadge(chkPct)}</td>
@@ -1052,15 +1076,15 @@ function buildDetail(doc) {
 
       <div class="detail-section">
         <div class="ds-title">Meteo e Mare</div>
-        <div class="ds-row"><span class="ds-key">Stato mare</span><span class="ds-val">${m.stateMare||'—'}</span></div>
+        <div class="ds-row"><span class="ds-key">Stato mare</span><span class="ds-val" style="text-transform:capitalize">${(m.stateMare||'—').replace(/_/g,' ')}</span></div>
         <div class="ds-row"><span class="ds-key">Cielo</span><span class="ds-val">${m.cielo||'—'}</span></div>
         <div class="ds-row"><span class="ds-key">Bandiera</span><span class="ds-val">${bandBadge(m.bandiera||'—')}</span></div>
+        <div class="ds-row"><span class="ds-key">Vento</span><span class="ds-val">${ventoIntLabel(m.ventoInt)}</span></div>
       </div>
 
       <div class="detail-section">
-        <div class="ds-title">Presenze</div>
-        <div class="ds-row"><span class="ds-key">Affluenza</span><span class="ds-val">${p.affluenza||'—'}</span></div>
-        <div class="ds-row"><span class="ds-key">In acqua</span><span class="ds-val">${p.inAcqua != null ? p.inAcqua + ' pers.' : '—'}</span></div>
+        <div class="ds-title">Presenze in acqua</div>
+        <div class="ds-row"><span class="ds-key">Affluenza</span><span class="ds-val">${affluenzaBadge(p.affluenza)}</span></div>
         <div class="ds-row"><span class="ds-key">Note</span><span class="ds-val">${doc.note||'—'}</span></div>
       </div>
 
@@ -1119,9 +1143,40 @@ function fmtDate(d) {
   return d.toISOString().slice(0, 10);
 }
 
+// ── HELPERS VENTO/AFFLUENZA ──
+function ventoIntLabel(v) {
+  const map = { assente:'Assente', debole:'Debole', moderato:'Moderato', forte:'Forte', molto_forte:'Molto forte' };
+  return map[v] || (v ? v : '—');
+}
+
+function ventoIntBadge(v) {
+  const cfg = {
+    assente:    { bg:'#F0F9FF', color:'#0369A1', label:'Assente' },
+    debole:     { bg:'#ECFDF5', color:'#065F46', label:'Debole' },
+    moderato:   { bg:'#FFFBEB', color:'#92400E', label:'Moderato' },
+    forte:      { bg:'#FEF3C7', color:'#B45309', label:'Forte' },
+    molto_forte:{ bg:'#FEE2E2', color:'#991B1B', label:'Molto forte' }
+  };
+  const c = cfg[v];
+  if (!c) return '<span style="color:var(--gray)">—</span>';
+  return `<span class="badge" style="background:${c.bg};color:${c.color}">${c.label}</span>`;
+}
+
+function affluenzaBadge(v) {
+  const cfg = {
+    bassa:     { bg:'#ECFDF5', color:'#065F46', label:'🟢 Bassa (≤30)' },
+    media:     { bg:'#FFFBEB', color:'#92400E', label:'🟡 Media (30–100)' },
+    alta:      { bg:'#FEF3C7', color:'#B45309', label:'🟠 Alta (100–500)' },
+    molto_alta:{ bg:'#FEE2E2', color:'#991B1B', label:'🔴 Molto alta (>500)' }
+  };
+  const c = cfg[v];
+  if (!c) return '<span style="color:var(--gray)">—</span>';
+  return `<span class="badge" style="background:${c.bg};color:${c.color}">${c.label}</span>`;
+}
+
 // ── EXPORT CSV ──
 function exportCSV() {
-  const rows = [['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Note']];
+  const rows = [['Data','Ora','Postazione','Bagnino','Mare','Vento','Bandiera','Affluenza acqua','Interventi','Checklist%','Foto','Note']];
   allDocs.forEach(d => {
     const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
     rows.push([
@@ -1130,7 +1185,9 @@ function exportCSV() {
       d.postazione||'',
       d.bagnino||'',
       d.meteo?.stateMare||'',
+      d.meteo?.ventoInt||'',
       d.meteo?.bandiera||'',
+      d.presenze?.affluenza||'',
       (d.interventi||[]).length,
       chkPercent(d.checklist),
       (d.foto||[]).length,
@@ -1143,6 +1200,124 @@ function exportCSV() {
   a.href = URL.createObjectURL(blob);
   a.download = `diario_omnia_${fmtDate(new Date())}.csv`;
   a.click();
+}
+
+// ── EXPORT PDF ──
+function exportPDF() {
+  const da   = document.getElementById('f-da').value;
+  const a    = document.getElementById('f-a').value;
+  const post = document.getElementById('f-post').value;
+
+  const bandCount = {verde:0,gialla:0,rossa:0};
+  const mareCount = {};
+  const ventoCount = {};
+  const afCount   = {};
+  let totInt = 0, totFoto = 0, totChk100 = 0;
+
+  allDocs.forEach(d => {
+    const b = d.meteo?.bandiera; if(b) bandCount[b]=(bandCount[b]||0)+1;
+    const m = d.meteo?.stateMare; if(m) mareCount[m]=(mareCount[m]||0)+1;
+    const v = d.meteo?.ventoInt; if(v) ventoCount[v]=(ventoCount[v]||0)+1;
+    const af = d.presenze?.affluenza; if(af) afCount[af]=(afCount[af]||0)+1;
+    totInt  += (d.interventi||[]).length;
+    totFoto += (d.foto||[]).length;
+    if(chkPercent(d.checklist)===100) totChk100++;
+  });
+
+  const periodLabel = da && a ? `${da} → ${a}` : 'Tutti i diari';
+  const postazioneLabel = post || 'Tutte le postazioni';
+
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="it"><head>
+  <meta charset="UTF-8">
+  <title>Report Diario Omnia — ${periodLabel}</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#0B2545;margin:0;padding:20px}
+    h1{font-size:20px;margin-bottom:4px;color:#0B2545}
+    .sub{font-size:11px;color:#6B7280;margin-bottom:18px}
+    h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#E8731A;margin:18px 0 8px;border-bottom:1px solid #e5e5e5;padding-bottom:4px}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+    .kpi{background:#F4F1EB;border-radius:6px;padding:10px 12px;text-align:center}
+    .kpi-val{font-size:24px;font-weight:700;color:#0B2545}
+    .kpi-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#6B7280;margin-top:2px}
+    table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+    th{background:#0B2545;color:#fff;padding:6px 8px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+    td{padding:5px 8px;border-bottom:1px solid #e5e5e5;vertical-align:top}
+    tr:nth-child(even) td{background:#fafaf8}
+    .bar-bg{background:#e5e5e5;border-radius:3px;height:8px;margin-top:3px}
+    .bar-fill{height:8px;border-radius:3px}
+    .badge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700}
+    .verde{background:#ECFDF5;color:#065F46}
+    .gialla{background:#FFFBEB;color:#92400E}
+    .rossa{background:#FEE2E2;color:#991B1B}
+    @media print{body{padding:10px}.no-print{display:none}}
+  </style>
+  </head><body>
+  <button class="no-print" onclick="window.print()" style="margin-bottom:12px;padding:8px 16px;background:#0B2545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🖨 Stampa / Salva PDF</button>
+  <h1>📋 Report Diario Giornaliero — Omnia</h1>
+  <div class="sub">Periodo: ${periodLabel} &nbsp;·&nbsp; Postazione: ${postazioneLabel} &nbsp;·&nbsp; Generato il ${new Date().toLocaleDateString('it-IT')}</div>
+
+  <h2>KPI generali</h2>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-val">${allDocs.length}</div><div class="kpi-label">Diari totali</div></div>
+    <div class="kpi"><div class="kpi-val">${totInt}</div><div class="kpi-label">Interventi</div></div>
+    <div class="kpi"><div class="kpi-val">${totFoto}</div><div class="kpi-label">Foto</div></div>
+    <div class="kpi"><div class="kpi-val">${totChk100}</div><div class="kpi-label">Checklist 100%</div></div>
+  </div>
+
+  <h2>Bandiere esposte</h2>
+  <table><thead><tr><th>Bandiera</th><th>Giorni</th><th>%</th><th>Distribuzione</th></tr></thead><tbody>
+  ${[['Verde','verde','#1A8A4A'],['Gialla','gialla','#F59E0B'],['Rossa','rossa','#C0392B']].map(([l,k,c])=>{
+    const n=bandCount[k]||0; const pct=allDocs.length?Math.round(n/allDocs.length*100):0;
+    return `<tr><td><span class="badge ${k}">${l}</span></td><td>${n}</td><td>${pct}%</td>
+    <td><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div></td></tr>`;
+  }).join('')}
+  </tbody></table>
+
+  <h2>Stato del mare</h2>
+  <table><thead><tr><th>Condizione</th><th>Giorni</th><th>%</th></tr></thead><tbody>
+  ${['calmo','poco_mosso','mosso','agitato','molto_agitato'].map(k=>{
+    const n=mareCount[k]||0; const pct=allDocs.length?Math.round(n/allDocs.length*100):0;
+    return `<tr><td style="text-transform:capitalize">${k.replace(/_/g,' ')}</td><td>${n}</td><td>${pct}%</td></tr>`;
+  }).join('')}
+  </tbody></table>
+
+  <h2>Intensità vento</h2>
+  <table><thead><tr><th>Intensità</th><th>Giorni</th><th>%</th></tr></thead><tbody>
+  ${[['assente','Assente'],['debole','Debole'],['moderato','Moderato'],['forte','Forte'],['molto_forte','Molto forte']].map(([k,l])=>{
+    const n=ventoCount[k]||0; const pct=allDocs.length?Math.round(n/allDocs.length*100):0;
+    return `<tr><td>${l}</td><td>${n}</td><td>${pct}%</td></tr>`;
+  }).join('')}
+  </tbody></table>
+
+  <h2>Presenze in acqua</h2>
+  <table><thead><tr><th>Livello</th><th>Giorni</th><th>%</th></tr></thead><tbody>
+  ${[['bassa','Bassa (≤30 pers)'],['media','Media (30–100)'],['alta','Alta (100–500)'],['molto_alta','Molto alta (>500)']].map(([k,l])=>{
+    const n=afCount[k]||0; const pct=allDocs.length?Math.round(n/allDocs.length*100):0;
+    return `<tr><td>${l}</td><td>${n}</td><td>${pct}%</td></tr>`;
+  }).join('')}
+  </tbody></table>
+
+  <h2>Registro diari (${allDocs.length})</h2>
+  <table><thead><tr><th>Data</th><th>Postazione</th><th>Bagnino</th><th>Mare</th><th>Vento</th><th>Bandiera</th><th>Acqua</th><th>Int.</th><th>Chk%</th></tr></thead><tbody>
+  ${allDocs.map(d=>{
+    const dt=d.dataOra?.toDate?d.dataOra.toDate():new Date(d.dataOra);
+    const b=d.meteo?.bandiera||'';
+    return `<tr>
+      <td>${dt.toLocaleDateString('it-IT')}<br><span style="color:#999;font-size:10px">${dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</span></td>
+      <td>${d.postazione||'—'}</td>
+      <td>${d.bagnino||'—'}</td>
+      <td style="text-transform:capitalize;font-size:10px">${(d.meteo?.stateMare||'—').replace(/_/g,' ')}</td>
+      <td style="font-size:10px">${ventoIntLabel(d.meteo?.ventoInt)}</td>
+      <td><span class="badge ${b}">${b||'—'}</span></td>
+      <td style="font-size:10px">${(d.presenze?.affluenza||'—').replace('_',' ')}</td>
+      <td>${(d.interventi||[]).length||'—'}</td>
+      <td>${chkPercent(d.checklist)}%</td>
+    </tr>`;
+  }).join('')}
+  </tbody></table>
+  </body></html>`);
+  win.document.close();
 }
 
 // ── TABS ──
@@ -1266,6 +1441,92 @@ function renderStats() {
     options: { responsive:true, maintainAspectRatio:false,
       plugins:{legend:{position:'top', labels:{font:{size:12}}}},
       scales:{x:{ticks:{font:{size:10}}}, y:{beginAtZero:true, ticks:{stepSize:1}}} }
+  });
+
+  // 5b. VENTO intensity
+  const vOrder = ['assente','debole','moderato','forte','molto_forte'];
+  const vLabels = ['Assente','Debole','Moderato','Forte','Molto forte'];
+  const vColors = ['#BAE6FD','#6EE7B7','#FDE68A','#FCA5A5','#F87171'];
+  const vCount = {};
+  allDocs.forEach(d => { const v = d.meteo?.ventoInt; if(v) vCount[v]=(vCount[v]||0)+1; });
+  destroyChart('vento');
+  charts.vento = new Chart(document.getElementById('chartVento'), {
+    type: 'bar',
+    data: {
+      labels: vLabels,
+      datasets: [{ label:'Giorni', data: vOrder.map(k=>vCount[k]||0),
+        backgroundColor: vColors, borderRadius:6, borderWidth:0 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.raw} giorn${ctx.raw===1?'o':'i'}`}}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{font:{size:11}}}} }
+  });
+
+  // 5c. AFFLUENZA in acqua
+  const afOrder  = ['bassa','media','alta','molto_alta'];
+  const afLabels = ['🟢 Bassa
+≤30 pers','🟡 Media
+30–100','🟠 Alta
+100–500','🔴 Molto alta
+>500'];
+  const afColors = ['#6EE7B7','#FDE68A','#FB923C','#F87171'];
+  const afCount  = {};
+  allDocs.forEach(d => { const a = d.presenze?.affluenza; if(a) afCount[a]=(afCount[a]||0)+1; });
+  destroyChart('affluenza');
+  charts.affluenza = new Chart(document.getElementById('chartAfluenza'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Bassa (≤30)','Media (30–100)','Alta (100–500)','Molto alta (>500)'],
+      datasets: [{ data: afOrder.map(k=>afCount[k]||0),
+        backgroundColor: afColors, borderWidth:2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:8}}} }
+  });
+
+  // 5d. CIELO
+  const cOrder  = ['sereno','nuvoloso','coperto','pioggia','temporale'];
+  const cLabels = ['☀️ Sereno','⛅ Nuvoloso','☁️ Coperto','🌧 Pioggia','⛈ Temporale'];
+  const cColors = ['#FDE68A','#CBD5E1','#94A3B8','#60A5FA','#7C3AED'];
+  const cCount  = {};
+  allDocs.forEach(d => { const c = d.meteo?.cielo; if(c) cCount[c]=(cCount[c]||0)+1; });
+  destroyChart('cielo');
+  charts.cielo = new Chart(document.getElementById('chartCielo'), {
+    type: 'polarArea',
+    data: {
+      labels: cLabels,
+      datasets: [{ data: cOrder.map(k=>cCount[k]||0),
+        backgroundColor: cColors.map(c=>c+'CC'), borderColor: cColors, borderWidth:1.5 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:6}}} }
+  });
+
+  // 5e. MARE vs BANDIERA stacked bar
+  const mareOrder = ['calmo','poco_mosso','mosso','agitato','molto_agitato'];
+  const mareLabel = ['Calmo','Poco mosso','Mosso','Agitato','Molto agitato'];
+  const bandColors= { verde:'#1A8A4A', gialla:'#F59E0B', rossa:'#C0392B' };
+  const mb = {}; // mb[mare][bandiera] = count
+  mareOrder.forEach(m => { mb[m]={verde:0,gialla:0,rossa:0}; });
+  allDocs.forEach(d => {
+    const m = d.meteo?.stateMare; const b = d.meteo?.bandiera;
+    if(m && b && mb[m] && mb[m][b]!==undefined) mb[m][b]++;
+  });
+  destroyChart('mareBand');
+  charts.mareBand = new Chart(document.getElementById('chartMareBand'), {
+    type: 'bar',
+    data: {
+      labels: mareLabel,
+      datasets: [
+        { label:'🟢 Verde', data: mareOrder.map(m=>mb[m].verde),  backgroundColor:'#1A8A4A', borderRadius:3 },
+        { label:'🟡 Gialla',data: mareOrder.map(m=>mb[m].gialla), backgroundColor:'#F59E0B', borderRadius:3 },
+        { label:'🔴 Rossa', data: mareOrder.map(m=>mb[m].rossa),  backgroundColor:'#C0392B', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11}}}},
+      scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}} }
   });
 
   // 6. STATION TABLE
