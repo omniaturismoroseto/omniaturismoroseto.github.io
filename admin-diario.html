@@ -455,6 +455,129 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
   .chart-card.full { grid-column: span 1; }
 }
 
+
+/* ── CONTROLLO TURNI ── */
+.turni-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+.turno-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.turno-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.turno-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--navy);
+}
+.turno-ora { font-size: 11.5px; color: var(--gray); font-weight: 500; }
+.turno-score {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700;
+  line-height: 1;
+}
+.turno-score.ok   { color: var(--success); }
+.turno-score.warn { color: var(--orange); }
+.turno-score.bad  { color: var(--danger); }
+.turno-body { padding: 0.75rem 1rem; }
+.turno-miss-title {
+  font-size: 11px; font-weight: 700; color: var(--gray);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+.turno-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip-miss {
+  padding: 3px 8px; border-radius: 4px;
+  font-size: 12px; font-weight: 600;
+  background: #FEF2F2; color: #991B1B;
+  border: 1px solid #FCA5A5;
+}
+.chip-ok-all {
+  font-size: 13px; color: var(--success); font-weight: 600;
+}
+
+/* ── TAB MANCANTI ── */
+.miss-controls {
+  display: flex; gap: 0.75rem; align-items: flex-end;
+  margin-bottom: 1rem; flex-wrap: wrap;
+}
+.miss-controls label { font-size:12px; font-weight:600; color:var(--gray); display:block; margin-bottom:3px; }
+.miss-controls input { padding:0.45rem 0.75rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Barlow',sans-serif; font-size:14px; outline:none; background:var(--gray-bg); color:var(--navy); }
+.miss-controls input:focus { border-color:var(--navy-mid); background:#fff; }
+.btn-small {
+  padding: 0.5rem 1rem;
+  background: var(--navy); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+  cursor: pointer; white-space: nowrap;
+  align-self: flex-end;
+}
+.btn-small:hover { background: var(--navy-mid); }
+
+.miss-grid-wrap { overflow-x: auto; }
+.miss-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.miss-table th {
+  padding: 6px 8px;
+  background: var(--navy); color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  position: sticky; top: 0; z-index: 1;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.miss-table th:first-child { left: 0; z-index: 2; min-width: 80px; }
+.miss-table td {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  text-align: center; vertical-align: middle;
+}
+.miss-table td:first-child {
+  font-weight: 600; font-size: 11.5px;
+  background: var(--white);
+  position: sticky; left: 0; z-index: 1;
+  border-right: 2px solid var(--border);
+}
+.cell-both  { background: #DCFCE7; color: #166534; font-weight:700; }
+.cell-mat   { background: #FEF9C3; color: #854D0E; font-weight:600; }
+.cell-pom   { background: #DBEAFE; color: #1E40AF; font-weight:600; }
+.cell-none  { background: #FEE2E2; color: #991B1B; font-weight:700; }
+.cell-na    { background: #F9F9F9; color: #ccc; }
+
+.miss-legend {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 0.875rem; font-size: 12px;
+}
+.leg-item { display:flex; align-items:center; gap:5px; }
+.leg-dot {
+  width: 14px; height: 14px; border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.miss-summary-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 0.75rem; margin-bottom: 1rem;
+}
+
+@media (max-width:900px) {
+  .turni-bar { grid-template-columns: 1fr; }
+  .miss-summary-row { grid-template-columns: 1fr; }
+}
+
 </style>
 </head>
 
@@ -516,10 +639,16 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
   <!-- ── MAIN ── -->
   <main class="content">
 
+    <!-- CONTROLLO TURNI OGGI -->
+    <div class="turni-bar" id="turniBar">
+      <!-- populated by JS -->
+    </div>
+
     <!-- TABS -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('diari')">📋 Diari</button>
       <button class="tab-btn" onclick="switchTab('stats')">📊 Statistiche</button>
+      <button class="tab-btn" onclick="switchTab('mancanti')">🚨 Mancanti</button>
     </div>
 
     <!-- TAB: DIARI -->
@@ -625,6 +754,39 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
 
     </div><!-- /tab-stats -->
 
+    <!-- TAB: MANCANTI -->
+    <div class="tab-panel" id="tab-mancanti">
+
+      <div class="miss-controls">
+        <div>
+          <label>Da</label>
+          <input type="date" id="m-da">
+        </div>
+        <div>
+          <label>A</label>
+          <input type="date" id="m-a">
+        </div>
+        <button class="btn-small" onclick="renderMancanti()">Aggiorna</button>
+      </div>
+
+      <div class="miss-summary-row" id="missSummary"></div>
+
+      <div class="miss-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#DCFCE7"></div> Mattina + Pomeriggio</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#FEF9C3"></div> Solo Mattina</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#DBEAFE"></div> Solo Pomeriggio</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#FEE2E2"></div> Nessuno</div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Compilazioni per giorno × postazione (09–14 Mattina · 14–19 Pomeriggio)</div>
+        <div class="miss-grid-wrap">
+          <table class="miss-table" id="missTable"></table>
+        </div>
+      </div>
+
+    </div><!-- /tab-mancanti -->
+
   </main>
 </div>
 
@@ -678,6 +840,7 @@ const PAGE = 30;
 window.addEventListener('DOMContentLoaded', () => {
   // Di default carica tutto (nessun filtro data)
   loadData();
+  loadTurniOggi();
 });
 
 // ── LOAD ──
@@ -799,6 +962,7 @@ function render() {
   });
 
   document.getElementById('hd-count').textContent = `${allDocs.length} diari`;
+  loadTurniOggi();
 }
 
 // ── DETAIL TOGGLE ──
@@ -1111,6 +1275,219 @@ function renderStats() {
     `;
     stnBody.appendChild(tr);
   });
+}
+
+
+// ══════════════════════════════════════════
+//  TURNI — CONSTANTS
+// ══════════════════════════════════════════
+const MAT_START = 9,  MAT_END = 14;  // 09:00–14:00
+const POM_START = 14, POM_END = 19;  // 14:00–19:00
+
+const ALL_STATIONS = Array.from({length:26}, (_,i) => `P.${i+10}`);
+
+// ── TURNO OGGI ──
+async function loadTurniOggi() {
+  const bar = document.getElementById('turniBar');
+  bar.innerHTML = `
+    <div class="turno-card"><div class="turno-body" style="padding:1rem"><span style="color:var(--gray);font-size:13px">⏳ Controllo turni in corso...</span></div></div>
+    <div class="turno-card"><div class="turno-body" style="padding:1rem"></div></div>`;
+
+  const today = new Date();
+  const todayStart = new Date(today); todayStart.setHours(0,0,0,0);
+  const todayEnd   = new Date(today); todayEnd.setHours(23,59,59,999);
+
+  try {
+    const snap = await db.collection('diariogiornaliero')
+      .where('dataOra', '>=', todayStart)
+      .where('dataOra', '<=', todayEnd)
+      .get();
+
+    const matOk = new Set();
+    const pomOk = new Set();
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+      const h = dt.getHours();
+      const p = d.postazione;
+      if (!p) return;
+      if (h >= MAT_START && h < MAT_END) matOk.add(p);
+      if (h >= POM_START && h < POM_END) pomOk.add(p);
+    });
+
+    bar.innerHTML = buildTurnoCard('🌅 Mattina', '09:00 – 14:00', matOk, 'mat') +
+                    buildTurnoCard('🌇 Pomeriggio', '14:00 – 19:00', pomOk, 'pom');
+
+  } catch(err) {
+    // Firestore index missing for today query — fallback to allDocs
+    const today2 = new Date();
+    const matOk = new Set(); const pomOk = new Set();
+    allDocs.forEach(d => {
+      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+      if (dt.toDateString() !== today2.toDateString()) return;
+      const h = dt.getHours();
+      if (h >= MAT_START && h < MAT_END) matOk.add(d.postazione);
+      if (h >= POM_START && h < POM_END) pomOk.add(d.postazione);
+    });
+    bar.innerHTML = buildTurnoCard('🌅 Mattina', '09:00 – 14:00', matOk, 'mat') +
+                    buildTurnoCard('🌇 Pomeriggio', '14:00 – 19:00', pomOk, 'pom');
+  }
+}
+
+function buildTurnoCard(label, orario, okSet, turno) {
+  const missing = ALL_STATIONS.filter(s => !okSet.has(s));
+  const nOk = okSet.size;
+  const tot = ALL_STATIONS.length;
+  const pct = Math.round(nOk/tot*100);
+  const scoreClass = pct === 100 ? 'ok' : pct >= 60 ? 'warn' : 'bad';
+
+  const chipsHtml = missing.length === 0
+    ? `<span class="chip-ok-all">✅ Tutte le postazioni hanno compilato</span>`
+    : missing.map(s => `<span class="chip-miss">${s}</span>`).join('');
+
+  return `<div class="turno-card">
+    <div class="turno-header">
+      <div>
+        <div class="turno-label">${label}</div>
+        <div class="turno-ora">${orario}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="turno-score ${scoreClass}">${nOk}/${tot}</div>
+        <div style="font-size:11px;color:var(--gray)">${missing.length} mancanti</div>
+      </div>
+    </div>
+    <div class="turno-body">
+      ${missing.length > 0 ? `<div class="turno-miss-title">Postazioni mancanti</div>` : ''}
+      <div class="turno-chips">${chipsHtml}</div>
+    </div>
+  </div>`;
+}
+
+// ── MANCANTI STORICO ──
+async function renderMancanti() {
+  const da = document.getElementById('m-da').value;
+  const a  = document.getElementById('m-a').value;
+  if (!da || !a) return;
+
+  const daDate = new Date(da);
+  const aDate  = new Date(a);
+
+  // Build list of dates in range
+  const dates = [];
+  const cur = new Date(daDate);
+  while (cur <= aDate) {
+    dates.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  // Group allDocs by date+station+turno
+  // Use allDocs (already loaded) and also query extra if needed
+  const compiled = {}; // key: "YYYY-MM-DD|P.XX|mat" or "pom"
+
+  // Fetch data for the range (use allDocs + fetch more if needed)
+  let rangeDocs = allDocs.filter(d => {
+    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+    return dt >= daDate && dt <= new Date(a + 'T23:59:59');
+  });
+
+  // If range might have data not in allDocs, fetch from Firestore
+  try {
+    const snap = await db.collection('diariogiornaliero')
+      .where('dataOra', '>=', daDate)
+      .where('dataOra', '<=', new Date(a + 'T23:59:59'))
+      .get();
+    rangeDocs = snap.docs.map(d => ({id:d.id,...d.data()}));
+  } catch(e) {
+    // use allDocs subset already filtered above
+  }
+
+  rangeDocs.forEach(d => {
+    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
+    const dateKey = dt.toISOString().slice(0,10);
+    const h = dt.getHours();
+    const p = d.postazione;
+    if (!p) return;
+    if (h >= MAT_START && h < MAT_END) compiled[`${dateKey}|${p}|mat`] = true;
+    if (h >= POM_START && h < POM_END) compiled[`${dateKey}|${p}|pom`] = true;
+  });
+
+  // Summary stats
+  let totalSlots = dates.length * ALL_STATIONS.length * 2;
+  let totalMiss  = 0;
+  let daysAllOk  = 0;
+
+  dates.forEach(d => {
+    const dk = d.toISOString().slice(0,10);
+    let dayOk = true;
+    ALL_STATIONS.forEach(s => {
+      if (!compiled[`${dk}|${s}|mat`]) { totalMiss++; dayOk=false; }
+      if (!compiled[`${dk}|${s}|pom`]) { totalMiss++; dayOk=false; }
+    });
+    if (dayOk) daysAllOk++;
+  });
+
+  const missRate = Math.round(totalMiss/totalSlots*100);
+
+  document.getElementById('missSummary').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val" style="color:${missRate>20?'var(--danger)':'var(--success)'}">${100-missRate}%</div>
+      <div class="stat-label">Compilazione media</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--danger)">${totalMiss}</div>
+      <div class="stat-label">Turni non compilati</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--success)">${daysAllOk}</div>
+      <div class="stat-label">Giorni 100% completi</div>
+    </div>`;
+
+  // Build table: rows = dates, cols = stations
+  const table = document.getElementById('missTable');
+  let thead = '<thead><tr><th>Data</th>';
+  ALL_STATIONS.forEach(s => thead += `<th>${s}</th>`);
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  dates.forEach(d => {
+    const dk = d.toISOString().slice(0,10);
+    const label = d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    let row = `<tr><td>${label}</td>`;
+    ALL_STATIONS.forEach(s => {
+      const mat = compiled[`${dk}|${s}|mat`];
+      const pom = compiled[`${dk}|${s}|pom`];
+      if (mat && pom)       row += `<td class="cell-both" title="${s} — M+P">M P</td>`;
+      else if (mat && !pom) row += `<td class="cell-mat"  title="${s} — solo Mattina">M</td>`;
+      else if (!mat && pom) row += `<td class="cell-pom"  title="${s} — solo Pomeriggio">P</td>`;
+      else                  row += `<td class="cell-none" title="${s} — nessuno">✗</td>`;
+    });
+    row += '</tr>';
+    tbody += row;
+  });
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+}
+
+// Override switchTab to init mancanti dates
+const _origSwitch = typeof switchTab !== 'undefined' ? switchTab : null;
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'stats') renderStats();
+  if (name === 'mancanti') {
+    // Default range: last 7 days
+    if (!document.getElementById('m-da').value) {
+      const today = new Date();
+      const ago7  = new Date(today); ago7.setDate(today.getDate()-6);
+      document.getElementById('m-da').value = fmtDate(ago7);
+      document.getElementById('m-a').value  = fmtDate(today);
+    }
+    renderMancanti();
+  }
 }
 
 </script>
