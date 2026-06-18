@@ -567,39 +567,25 @@ select {
         <span class="chip" data-v="rossa">🔴 Rossa</span>
       </div>
     </div>
-
-    <div class="field" style="margin-top:.75rem">
-      <label>Intensità vento</label>
-      <div class="chips" id="ventoInt">
-        <span class="chip" data-v="assente">Assente</span>
-        <span class="chip" data-v="debole">Debole</span>
-        <span class="chip" data-v="moderato">Moderato</span>
-        <span class="chip" data-v="forte">Forte</span>
-        <span class="chip" data-v="molto_forte">Molto forte</span>
-      </div>
-    </div>
   </div>
 
   <!-- ③ PRESENZE -->
   <div class="card">
-    <div class="sec-title">Persone in Acqua</div>
+    <div class="sec-title">Presenze</div>
 
-    <div class="field">
-      <label>Stima presenze in acqua</label>
-      <div class="chips" id="affluenza">
-        <span class="chip" data-v="bassa">Bassa</span>
-        <span class="chip on" data-v="media">Media</span>
-        <span class="chip" data-v="alta">Alta</span>
-        <span class="chip" data-v="molto_alta">Molto alta</span>
-      </div>
-      <div style="margin-top:8px; padding:8px 12px; background:var(--gray-bg); border-radius:var(--radius-sm); border:1px solid var(--border);">
-        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--navy-mid);">Riferimento persone in acqua</span>
-        <div style="margin-top:5px; display:grid; grid-template-columns:1fr 1fr; gap:3px 12px;">
-          <span style="font-size:12px; color:var(--gray-text);">🟢 <b>Bassa</b> — fino a 30 pers.</span>
-          <span style="font-size:12px; color:var(--gray-text);">🟡 <b>Media</b> — 30–100 pers.</span>
-          <span style="font-size:12px; color:var(--gray-text);">🟠 <b>Alta</b> — 100–500 pers.</span>
-          <span style="font-size:12px; color:var(--gray-text);">🔴 <b>Molto alta</b> — oltre 500 pers.</span>
+    <div class="row2">
+      <div class="field">
+        <label>Affluenza spiaggia</label>
+        <div class="chips" id="affluenza">
+          <span class="chip" data-v="bassa">Bassa</span>
+          <span class="chip on" data-v="media">Media</span>
+          <span class="chip" data-v="alta">Alta</span>
+          <span class="chip" data-v="molto_alta">Molto alta</span>
         </div>
+      </div>
+      <div class="field">
+        <label>Persone in acqua (stima)</label>
+        <input type="number" id="inAcqua" min="0" placeholder="es. 45">
       </div>
     </div>
   </div>
@@ -627,9 +613,9 @@ select {
   <div class="card">
     <div class="sec-title">Foto</div>
     <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
-      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+      <input type="file" id="photoInput" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotos(event)">
       <div class="upload-icon">📷</div>
-      <div class="upload-hint">Tocca per aggiungere foto (max 6)</div>
+      <div class="upload-hint">Tocca per aggiungere foto o video (max 10)</div>
     </div>
     <div id="photoGrid" class="photo-grid"></div>
     <div id="uploadProg" class="upload-prog"></div>
@@ -661,7 +647,7 @@ const firebaseConfig = {
   apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
   authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
   projectId:         "app-segnalazioni-omnia-roseto",
-  storageBucket:     "app-segnalazioni-omnia-roseto.appspot.com",
+  storageBucket:     "app-segnalazioni-omnia-roseto.firebasestorage.app",
   messagingSenderId: "699028105579",
   appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
 };
@@ -713,7 +699,7 @@ const storage = firebase.storage();
   setNow();
 
   // Chip groups single-select
-  ['mare', 'cielo', 'bandiera', 'affluenza', 'ventoInt'].forEach(id => {
+  ['mare', 'cielo', 'bandiera', 'affluenza'].forEach(id => {
     chipGroup(id, false);
   });
 })();
@@ -857,22 +843,33 @@ let files = [];
 
 function handlePhotos(e) {
   Array.from(e.target.files).forEach(f => {
-    if (files.filter(Boolean).length >= 6) return;
+    if (files.filter(Boolean).length >= 10) return;
+    if (f.size > 50 * 1024 * 1024) {
+      showBanner('err', `⚠️ File "${f.name}" troppo grande (max 50MB).`);
+      return;
+    }
     const idx = files.length;
     files.push(f);
     const reader = new FileReader();
-    reader.onload = ev => addThumb(ev.target.result, idx);
-    reader.readAsDataURL(f);
+    if (f.type.startsWith('video/')) {
+        addThumb(null, idx, f, true);
+      } else {
+        reader.onload = ev => addThumb(ev.target.result, idx, f, false);
+        reader.readAsDataURL(f);
+      }
   });
   e.target.value = '';
 }
 
-function addThumb(src, idx) {
+function addThumb(src, idx, file, isVideo) {
   const grid = document.getElementById('photoGrid');
   const div = document.createElement('div');
   div.className = 'photo-thumb';
   div.id = 'th_' + idx;
-  div.innerHTML = `<img src="${src}" alt="foto"><button class="photo-rm" onclick="removeThumb(${idx})">×</button>`;
+  const media = isVideo
+    ? `<div style="width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;font-size:22px">🎥</div>`
+    : `<img src="${src}" alt="foto">`;
+  div.innerHTML = `${media}<button class="photo-rm" onclick="removeThumb(${idx})">×</button>`;
   grid.appendChild(div);
 }
 
@@ -909,7 +906,7 @@ async function submitForm() {
     if (validFiles.length > 0) {
       prog.style.display = 'block';
       for (let i = 0; i < validFiles.length; i++) {
-        prog.textContent = `📤 Caricamento foto ${i+1} di ${validFiles.length}…`;
+        prog.textContent = `📤 Caricamento file ${i+1} di ${validFiles.length}…`;
         const ts  = Date.now();
         const ref = storage.ref(`diario/${postazione}/${ts}_${i}`);
         await ref.put(validFiles[i]);
@@ -927,10 +924,10 @@ async function submitForm() {
         stateMare:  getChips('mare')[0] || null,
         cielo:      getChips('cielo')[0] || null,
         bandiera:   getChips('bandiera')[0] || null,
-        ventoInt:   getChips('ventoInt')[0] || null,
       },
       presenze: {
         affluenza: getChips('affluenza')[0] || null,
+        inAcqua:   parseInt(document.getElementById('inAcqua').value) || null,
       },
       checklist: collectChecklist(),
       interventi: collectInterventi(),
@@ -960,7 +957,7 @@ function showBanner(type, msg) {
 }
 
 function resetForm() {
-  ['postazione','bagnino','note'].forEach(id => {
+  ['postazione','bagnino','note','inAcqua'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -969,7 +966,7 @@ function resetForm() {
   files = []; intCount = 0;
 
   // Reset chip visual states (mantieni solo i default)
-  ['mare','cielo','bandiera','affluenza','ventoInt'].forEach(id => {
+  ['mare','cielo','bandiera','affluenza'].forEach(id => {
     document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
   });
 
