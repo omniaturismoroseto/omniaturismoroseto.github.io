@@ -1304,6 +1304,15 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
   if (name === 'stats') renderStats();
+  if (name === 'mancanti') {
+    if (!document.getElementById('m-da').value) {
+      const today = new Date();
+      const ago7  = new Date(today); ago7.setDate(today.getDate()-6);
+      document.getElementById('m-da').value = fmtDate(ago7);
+      document.getElementById('m-a').value  = fmtDate(today);
+    }
+    renderMancanti();
+  }
 }
 
 // ── CHARTS STATE ──
@@ -1661,25 +1670,7 @@ async function renderMancanti() {
   table.innerHTML = thead + tbody;
 }
 
-// Override switchTab to init mancanti dates
-const _origSwitch = typeof switchTab !== 'undefined' ? switchTab : null;
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'stats') renderStats();
-  if (name === 'mancanti') {
-    // Default range: last 7 days
-    if (!document.getElementById('m-da').value) {
-      const today = new Date();
-      const ago7  = new Date(today); ago7.setDate(today.getDate()-6);
-      document.getElementById('m-da').value = fmtDate(ago7);
-      document.getElementById('m-a').value  = fmtDate(today);
-    }
-    renderMancanti();
-  }
-}
+
 
 </script>
 
