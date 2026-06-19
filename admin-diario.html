@@ -4,871 +4,354 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Diario — Omnia</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-
 <style>
 :root {
-  --navy:      #0B2545;
-  --navy-mid:  #1B3A6B;
-  --orange:    #E8731A;
-  --sand:      #F4F1EB;
-  --white:     #FFFFFF;
-  --gray:      #6B7280;
-  --gray-bg:   #F0EEE9;
-  --border:    rgba(11,37,69,0.13);
-  --radius:    12px;
-  --radius-sm: 8px;
-  --success:   #1A8A4A;
-  --danger:    #C0392B;
+  --navy:#0B2545; --navy2:#1B3A6B; --orange:#E8731A;
+  --sand:#F4F1EB; --white:#fff; --gray:#6B7280;
+  --gray-bg:#F0EEE9; --border:rgba(11,37,69,0.13);
+  --r:12px; --r2:8px; --green:#1A8A4A; --red:#C0392B;
 }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--sand);color:var(--navy);min-height:100vh}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+header{background:var(--navy);padding:.875rem 1.25rem;display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:100;border-bottom:2px solid var(--orange)}
+.hbadge{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:3px 9px;border-radius:4px}
+header h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#fff}
+#hcount{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.5)}
 
-body {
-  font-family: 'Barlow', sans-serif;
-  background: var(--sand);
-  color: var(--navy);
-  min-height: 100vh;
-}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 54px)}
 
-/* ── HEADER ── */
-header {
-  background: var(--navy);
-  padding: 0.875rem 1.5rem;
-  display: flex; align-items: center; gap: 14px;
-  position: sticky; top: 0; z-index: 200;
-  border-bottom: 2px solid var(--orange);
-}
-.hd-badge {
-  background: var(--orange);
-  color: #fff;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  padding: 3px 9px; border-radius: 4px; flex-shrink: 0;
-}
-header h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 20px; font-weight: 700;
-  color: #fff; letter-spacing: 0.03em;
-}
-.hd-count {
-  margin-left: auto;
-  font-size: 12px; color: rgba(255,255,255,0.5);
-  font-weight: 500; white-space: nowrap;
-}
+/* SIDEBAR */
+.sidebar{background:var(--white);border-right:1px solid var(--border);
+  padding:1.125rem;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.ftitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--orange);
+  margin-bottom:.75rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.fg{margin-bottom:.875rem}
+.fl{display:block;font-size:11.5px;font-weight:600;color:var(--gray);margin-bottom:4px}
+select.fi,input.fi{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);
+  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);
+  background:var(--gray-bg);outline:none;appearance:none;-webkit-appearance:none}
+select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:2rem}
+.btn-p{width:100%;padding:.6rem;background:var(--navy);color:#fff;border:none;
+  border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:15px;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:.25rem}
+.btn-s{width:100%;padding:.5rem;background:none;border:1.5px solid var(--border);
+  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;
+  color:var(--gray);cursor:pointer;margin-top:.5rem}
 
-/* ── LAYOUT ── */
-.layout {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  min-height: calc(100vh - 56px);
-}
+/* MAIN */
+.main{padding:1.125rem;overflow-x:auto}
 
-/* ── SIDEBAR FILTERS ── */
-.sidebar {
-  background: var(--white);
-  border-right: 1px solid var(--border);
-  padding: 1.25rem;
-  position: sticky;
-  top: 56px;
-  height: calc(100vh - 56px);
-  overflow-y: auto;
-}
+/* MANCANZE ALERT */
+.malert{background:#FFF7ED;border:2px solid var(--orange);border-radius:var(--r);
+  margin-bottom:1rem;overflow:hidden;display:none}
+.malert-hd{background:var(--orange);padding:.625rem 1rem;display:flex;
+  align-items:center;justify-content:space-between}
+.malert-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:#fff}
+.malert-cnt{background:rgba(255,255,255,.25);color:#fff;border-radius:12px;
+  padding:1px 8px;font-size:12px;font-weight:700}
+.malert-body{padding:.75rem 1rem}
+.mrow{display:flex;align-items:flex-start;gap:10px;padding:.5rem 0;
+  border-bottom:1px solid rgba(232,115,26,.15);font-size:13px}
+.mrow:last-child{border-bottom:none}
+.mpost{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  color:var(--navy);min-width:46px}
+.mmeta{color:var(--gray);font-size:11.5px;margin-bottom:3px}
+.mchips{display:flex;flex-wrap:wrap;gap:4px}
+.mchip{padding:2px 8px;border-radius:4px;background:#FEE2E2;color:#991B1B;
+  font-size:11.5px;font-weight:600;border:1px solid #FCA5A5}
 
-.filter-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--orange);
-  margin-bottom: 0.75rem;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 6px;
-}
-.filter-title::before {
-  content: '';
-  width: 3px; height: 13px;
-  background: var(--orange); border-radius: 2px;
-}
+/* TURNI */
+.turni{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:1rem}
+.tcard{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.tcard-hd{display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.tcard-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}
+.tcard-ora{font-size:11.5px;color:var(--gray);font-weight:500}
+.tscore{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.tscore.ok{color:var(--green)}.tscore.warn{color:var(--orange)}.tscore.bad{color:var(--red)}
+.tcard-body{padding:.75rem 1rem}
+.tmiss-title{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:.5rem}
+.tchips{display:flex;flex-wrap:wrap;gap:5px}
+.tchip{padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;
+  background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
+.tok{font-size:13px;color:var(--green);font-weight:600}
 
-.filter-group { margin-bottom: 1.125rem; }
+/* TABS */
+.tabs{display:flex;background:var(--white);border-radius:var(--r) var(--r) 0 0;
+  border:1px solid var(--border);border-bottom:2px solid var(--border);
+  margin-bottom:1rem;overflow:hidden}
+.tbtn{padding:.75rem 1.25rem;font-family:'Barlow Condensed',sans-serif;font-size:14px;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;
+  background:none;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tbtn.on{color:var(--orange);border-bottom-color:var(--orange)}
+.tpanel{display:none}.tpanel.on{display:block}
 
-label.fl {
-  display: block;
-  font-size: 11.5px; font-weight: 600;
-  color: var(--gray); margin-bottom: 4px;
-}
+/* STATS CARDS */
+.scards{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+.scard{background:var(--white);border-radius:var(--r2);padding:.875rem 1rem;border:1px solid var(--border)}
+.sval{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--navy);line-height:1}
+.slbl{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
 
-select.fi, input.fi {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'Barlow', sans-serif;
-  font-size: 14px; color: var(--navy);
-  background: var(--gray-bg);
-  outline: none;
-  appearance: none; -webkit-appearance: none;
-  transition: border-color 0.15s;
-}
-select.fi:focus, input.fi:focus { border-color: var(--navy-mid); background: #fff; }
-select.fi {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 2rem;
-}
-
-.btn-filter {
-  width: 100%;
-  padding: 0.625rem;
-  background: var(--navy);
-  color: #fff;
-  border: none; border-radius: var(--radius-sm);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 15px; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-top: 0.25rem;
-}
-.btn-filter:hover { background: var(--navy-mid); }
-
-.btn-reset {
-  width: 100%;
-  padding: 0.5rem;
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'Barlow', sans-serif;
-  font-size: 13px; font-weight: 600;
-  color: var(--gray);
-  cursor: pointer; margin-top: 0.5rem;
-  transition: border-color 0.15s;
-}
-.btn-reset:hover { border-color: var(--navy); color: var(--navy); }
-
-/* ── MAIN CONTENT ── */
-.content { padding: 1.25rem; overflow-x: auto; }
-
-/* ── STATS ROW ── */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-.stat-card {
-  background: var(--white);
-  border-radius: var(--radius-sm);
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border);
-}
-.stat-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 28px; font-weight: 700;
-  color: var(--navy); line-height: 1;
-}
-.stat-label {
-  font-size: 11px; font-weight: 600;
-  color: var(--gray);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  margin-top: 3px;
-}
-
-/* ── TABLE ── */
-.table-wrap {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  margin-bottom: 1.25rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-thead tr {
-  background: var(--navy);
-  color: #fff;
-}
-th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  white-space: nowrap;
-}
-th:first-child { width: 40px; }
-
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.12s;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #F8F6F2; }
-tbody tr.active { background: #EEF3FB; }
-
-td {
-  padding: 0.7rem 1rem;
-  color: var(--navy);
-  white-space: nowrap;
-}
-td.wrap { white-space: normal; }
-
-.td-arrow {
-  color: var(--gray);
-  font-size: 16px;
-  transition: transform 0.2s;
-}
-tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
+/* TABLE */
+.twrap{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--navy);color:#fff}
+th{padding:.7rem .875rem;text-align:left;font-family:'Barlow Condensed',sans-serif;
+  font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F8F6F2}
+tbody tr.on{background:#EEF3FB}
+td{padding:.65rem .875rem;color:var(--navy);white-space:nowrap}
+.arr{color:var(--gray);font-size:16px;transition:transform .2s}
+tr.on .arr{transform:rotate(90deg);color:var(--orange)}
 
 /* BADGES */
-.badge {
-  display: inline-block;
-  padding: 2px 8px; border-radius: 20px;
-  font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.06em;
-}
-.badge-verde  { background: #ECFDF5; color: #065F46; }
-.badge-gialla { background: #FFFBEB; color: #92400E; }
-.badge-rossa  { background: #FEF2F2; color: #991B1B; }
-.badge-int    { background: #EEF3FB; color: var(--navy-mid); }
-.badge-ok     { background: #ECFDF5; color: #065F46; }
-.badge-warn   { background: #FEF2F2; color: #991B1B; }
+.bv{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.bv-g{background:#ECFDF5;color:#065F46}
+.bv-y{background:#FFFBEB;color:#92400E}
+.bv-r{background:#FEF2F2;color:#991B1B}
+.bv-b{background:#EEF3FB;color:var(--navy2)}
+.bv-ok{background:#ECFDF5;color:#065F46}
+.bv-w{background:#FEE2E2;color:#991B1B}
+.bv-m{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;
+  font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
 
-/* ── DETAIL PANEL ── */
-.detail-row td {
-  padding: 0;
-  background: #F8F6F2;
-  cursor: default;
-}
-.detail-inner {
-  padding: 1.25rem 1.5rem;
-  border-top: 2px solid var(--orange);
-}
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-.detail-section {
-  background: var(--white);
-  border-radius: var(--radius-sm);
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border);
-}
-.detail-section.span2 { grid-column: span 2; }
-.detail-section.span3 { grid-column: span 3; }
+/* DETAIL */
+.drow td{padding:0;background:#F8F6F2;cursor:default}
+.dinner{padding:1.125rem 1.25rem;border-top:2px solid var(--orange)}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-bottom:.875rem}
+.dc{background:var(--white);border-radius:var(--r2);padding:.875rem 1rem;border:1px solid var(--border)}
+.dc.s2{grid-column:span 2}.dc.s3{grid-column:span 3}
+.dct{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--orange);
+  margin-bottom:.5rem;border-bottom:1px solid var(--border);padding-bottom:4px}
+.dr{display:flex;gap:6px;font-size:13px;margin-bottom:3px}
+.dk{color:var(--gray);font-weight:600;flex-shrink:0;min-width:85px}
+.dv{color:var(--navy);font-weight:500}
+.ckgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px 1rem}
+.ckline{display:flex;align-items:center;gap:5px;font-size:12.5px}
+.ibox{background:var(--gray-bg);border-radius:6px;padding:.6rem .75rem;
+  margin-bottom:.5rem;font-size:13px;border-left:3px solid var(--orange)}
+.igal{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.igal a{display:block;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.igal img{width:100%;height:100%;object-fit:cover}
 
-.ds-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--orange); margin-bottom: 0.625rem;
-  border-bottom: 1px solid var(--border); padding-bottom: 4px;
-}
+/* STATS PAGE */
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--orange);
+  margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
+.stitle::before{content:'';width:3px;height:13px;background:var(--orange);border-radius:2px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:1.25rem}
+.cc{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:1rem 1.25rem}
+.cc.full{grid-column:span 2}
+.ctitle{font-size:11.5px;font-weight:700;color:var(--gray);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:.875rem}
+.cwrap{position:relative;height:200px}
+.cwrap.tall{height:300px}
 
-.ds-row {
-  display: flex; gap: 6px;
-  font-size: 13px; margin-bottom: 4px;
-}
-.ds-key { color: var(--gray); font-weight: 600; flex-shrink: 0; min-width: 90px; }
-.ds-val { color: var(--navy); font-weight: 500; }
+/* MANCANTI TAB */
+.mcontrols{display:flex;gap:.75rem;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap}
+.mcontrols label{font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:3px}
+.mcontrols input{padding:.45rem .75rem;border:1.5px solid var(--border);
+  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;
+  outline:none;background:var(--gray-bg);color:var(--navy)}
+.btn-sm{padding:.5rem 1rem;background:var(--navy);color:#fff;border:none;
+  border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;
+  font-weight:700;letter-spacing:.06em;cursor:pointer;align-self:flex-end}
+.mlegend{display:flex;gap:.875rem;flex-wrap:wrap;margin-bottom:.875rem;font-size:12px}
+.mleg{display:flex;align-items:center;gap:5px}
+.mleg-dot{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
+.mtable-wrap{overflow-x:auto}
+.mtable{border-collapse:collapse;font-size:12px;white-space:nowrap}
+.mtable th{padding:5px 7px;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  position:sticky;top:0;border-right:1px solid rgba(255,255,255,.1)}
+.mtable th:first-child{left:0;z-index:2;min-width:75px}
+.mtable td{padding:4px 6px;border:1px solid var(--border);text-align:center}
+.mtable td:first-child{font-weight:600;font-size:11.5px;background:var(--white);
+  position:sticky;left:0;border-right:2px solid var(--border)}
+.cb{background:#DCFCE7;color:#166534;font-weight:700}
+.cm{background:#FEF9C3;color:#854D0E;font-weight:600}
+.cp{background:#DBEAFE;color:#1E40AF;font-weight:600}
+.cn{background:#FEE2E2;color:#991B1B;font-weight:700}
 
-/* CHECKLIST IN DETAIL */
-.chk-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px 1rem;
-}
-.chk-line {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 12.5px;
-}
-.chk-ico { font-size: 13px; }
+/* STATE */
+.smsg{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:15px}
+.smsg .ic{font-size:36px;margin-bottom:8px}
+.btnmore{display:block;width:100%;padding:.75rem;background:none;border:1.5px solid var(--border);
+  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;
+  color:var(--navy2);cursor:pointer}
 
-/* INTERVENTIONS */
-.int-item {
-  background: var(--gray-bg);
-  border-radius: 6px; padding: 0.625rem 0.75rem;
-  margin-bottom: 0.5rem; font-size: 13px;
-  border-left: 3px solid var(--orange);
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .scards{grid-template-columns:1fr 1fr}
+  .turni{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:1fr}
+  .dc.s2,.dc.s3{grid-column:span 1}
+  .ckgrid{grid-template-columns:1fr}
+  .cgrid{grid-template-columns:1fr}
+  .cc.full{grid-column:span 1}
 }
-.int-item:last-child { margin-bottom: 0; }
-.int-tipo { font-weight: 700; color: var(--navy); }
-.int-meta { color: var(--gray); font-size: 11.5px; margin: 2px 0; }
-.int-desc { color: var(--navy); }
-
-/* PHOTOS */
-.photo-gallery {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  margin-top: 6px;
-}
-.photo-gallery a {
-  display: block;
-  width: 80px; height: 80px;
-  border-radius: 6px; overflow: hidden;
-  border: 1px solid var(--border);
-}
-.photo-gallery img {
-  width: 100%; height: 100%; object-fit: cover;
-}
-
-/* ── LOADING / EMPTY ── */
-.state-msg {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--gray);
-  font-size: 15px;
-}
-.state-msg .icon { font-size: 36px; margin-bottom: 8px; }
-
-/* ── LOAD MORE ── */
-.btn-more {
-  display: block; width: 100%;
-  padding: 0.75rem;
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'Barlow', sans-serif;
-  font-size: 14px; font-weight: 600;
-  color: var(--navy-mid);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.btn-more:hover { background: var(--white); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .detail-grid { grid-template-columns: 1fr; }
-  .detail-section.span2, .detail-section.span3 { grid-column: span 1; }
-  .chk-grid { grid-template-columns: 1fr; }
-}
-
-/* ── TABS ── */
-.tabs {
-  display: flex; gap: 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 1.25rem;
-  background: var(--white);
-  border-radius: var(--radius) var(--radius) 0 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-.tab-btn {
-  padding: 0.75rem 1.5rem;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 14px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  border: none; background: none;
-  color: var(--gray); cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -2px;
-}
-.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
-.tab-btn:hover:not(.active) { color: var(--navy); }
-
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-/* ── STATS PAGE ── */
-.stats-page { padding-bottom: 2rem; }
-
-.stats-section-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--orange); margin-bottom: 0.875rem;
-  display: flex; align-items: center; gap: 7px;
-}
-.stats-section-title::before {
-  content:''; width:3px; height:14px;
-  background:var(--orange); border-radius:2px;
-}
-
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-.chart-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 1rem 1.25rem 1.25rem;
-}
-.chart-card.full { grid-column: span 2; }
-.chart-title {
-  font-size: 12px; font-weight: 700;
-  color: var(--gray); text-transform: uppercase;
-  letter-spacing: 0.1em; margin-bottom: 0.875rem;
-}
-.chart-wrap { position: relative; height: 220px; }
-.chart-wrap.tall { height: 320px; }
-
-/* STATION TABLE */
-.stn-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.stn-table th {
-  padding: 0.5rem 0.75rem;
-  background: var(--navy); color: #fff;
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:11px; font-weight:700;
-  letter-spacing:0.1em; text-transform:uppercase;
-  text-align:left;
-}
-.stn-table td {
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--navy);
-}
-.stn-table tr:last-child td { border-bottom: none; }
-.stn-table tr:nth-child(even) td { background: #fafaf8; }
-
-.bar-inline {
-  height: 6px; border-radius: 3px;
-  background: var(--orange); display: inline-block;
-  vertical-align: middle; margin-left: 6px;
-  min-width: 2px;
-}
-
-@media (max-width: 900px) {
-  .charts-grid { grid-template-columns: 1fr; }
-  .chart-card.full { grid-column: span 1; }
-}
-
-
-/* ── CONTROLLO TURNI ── */
-.turni-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.875rem;
-  margin-bottom: 1.25rem;
-}
-.turno-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-.turno-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-.turno-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--navy);
-}
-.turno-ora { font-size: 11.5px; color: var(--gray); font-weight: 500; }
-.turno-score {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 22px; font-weight: 700;
-  line-height: 1;
-}
-.turno-score.ok   { color: var(--success); }
-.turno-score.warn { color: var(--orange); }
-.turno-score.bad  { color: var(--danger); }
-.turno-body { padding: 0.75rem 1rem; }
-.turno-miss-title {
-  font-size: 11px; font-weight: 700; color: var(--gray);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-}
-.turno-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.chip-miss {
-  padding: 3px 8px; border-radius: 4px;
-  font-size: 12px; font-weight: 600;
-  background: #FEF2F2; color: #991B1B;
-  border: 1px solid #FCA5A5;
-}
-.chip-ok-all {
-  font-size: 13px; color: var(--success); font-weight: 600;
-}
-
-/* ── TAB MANCANTI ── */
-.miss-controls {
-  display: flex; gap: 0.75rem; align-items: flex-end;
-  margin-bottom: 1rem; flex-wrap: wrap;
-}
-.miss-controls label { font-size:12px; font-weight:600; color:var(--gray); display:block; margin-bottom:3px; }
-.miss-controls input { padding:0.45rem 0.75rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Barlow',sans-serif; font-size:14px; outline:none; background:var(--gray-bg); color:var(--navy); }
-.miss-controls input:focus { border-color:var(--navy-mid); background:#fff; }
-.btn-small {
-  padding: 0.5rem 1rem;
-  background: var(--navy); color: #fff;
-  border: none; border-radius: var(--radius-sm);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
-  cursor: pointer; white-space: nowrap;
-  align-self: flex-end;
-}
-.btn-small:hover { background: var(--navy-mid); }
-
-.miss-grid-wrap { overflow-x: auto; }
-.miss-table {
-  border-collapse: collapse;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.miss-table th {
-  padding: 6px 8px;
-  background: var(--navy); color: #fff;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  position: sticky; top: 0; z-index: 1;
-  border-right: 1px solid rgba(255,255,255,0.1);
-}
-.miss-table th:first-child { left: 0; z-index: 2; min-width: 80px; }
-.miss-table td {
-  padding: 4px 6px;
-  border: 1px solid var(--border);
-  text-align: center; vertical-align: middle;
-}
-.miss-table td:first-child {
-  font-weight: 600; font-size: 11.5px;
-  background: var(--white);
-  position: sticky; left: 0; z-index: 1;
-  border-right: 2px solid var(--border);
-}
-.cell-both  { background: #DCFCE7; color: #166534; font-weight:700; }
-.cell-mat   { background: #FEF9C3; color: #854D0E; font-weight:600; }
-.cell-pom   { background: #DBEAFE; color: #1E40AF; font-weight:600; }
-.cell-none  { background: #FEE2E2; color: #991B1B; font-weight:700; }
-.cell-na    { background: #F9F9F9; color: #ccc; }
-
-.miss-legend {
-  display: flex; gap: 1rem; flex-wrap: wrap;
-  margin-bottom: 0.875rem; font-size: 12px;
-}
-.leg-item { display:flex; align-items:center; gap:5px; }
-.leg-dot {
-  width: 14px; height: 14px; border-radius: 3px;
-  border: 1px solid rgba(0,0,0,0.1);
-}
-
-.miss-summary-row {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 0.75rem; margin-bottom: 1rem;
-}
-
-@media (max-width:900px) {
-  .turni-bar { grid-template-columns: 1fr; }
-  .miss-summary-row { grid-template-columns: 1fr; }
-}
-
-
-/* ── MANCANZE ALERT ── */
-.mancanze-bar {
-  background: #FFF7ED;
-  border: 2px solid var(--orange);
-  border-radius: var(--radius);
-  margin-bottom: 1.25rem;
-  overflow: hidden;
-}
-.mancanze-header {
-  background: var(--orange);
-  padding: 0.625rem 1rem;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.mancanze-header-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: #fff; display: flex; align-items: center; gap: 6px;
-}
-.mancanze-body { padding: 0.875rem 1rem; }
-.mancanze-empty {
-  font-size: 13px; color: var(--success); font-weight: 600;
-  display: flex; align-items: center; gap: 6px;
-}
-.mancanza-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(232,115,26,0.15);
-  font-size: 13px;
-}
-.mancanza-row:last-child { border-bottom: none; }
-.mancanza-post {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 14px; font-weight: 700;
-  color: var(--navy); min-width: 46px;
-}
-.mancanza-bagnino {
-  color: var(--gray); font-size: 12px; margin-bottom: 3px;
-}
-.mancanza-items { display: flex; flex-wrap: wrap; gap: 4px; }
-.mancanza-chip {
-  padding: 2px 8px; border-radius: 4px;
-  background: #FEE2E2; color: #991B1B;
-  font-size: 11.5px; font-weight: 600;
-  border: 1px solid #FCA5A5;
-}
-.mancanze-count {
-  background: rgba(255,255,255,0.25);
-  color: #fff; border-radius: 12px;
-  padding: 1px 8px; font-size: 12px; font-weight: 700;
-}
-
-/* badge mancanze nella tabella */
-.badge-mancanza {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 7px; border-radius: 4px;
-  font-size: 11px; font-weight: 700;
-  background: #FEE2E2; color: #991B1B;
-  border: 1px solid #FCA5A5;
-  white-space: nowrap;
-}
-
 </style>
 </head>
-
 <body>
 
 <header>
-  <span class="hd-badge">Admin</span>
+  <span class="hbadge">Admin</span>
   <h1>Diario Giornaliero — Pannello</h1>
-  <span class="hd-count" id="hd-count"></span>
+  <span id="hcount"></span>
 </header>
 
 <div class="layout">
+<aside class="sidebar">
+  <div class="ftitle">Filtri</div>
+  <div class="fg"><label class="fl">Data da</label><input type="date" id="f-da" class="fi"></div>
+  <div class="fg"><label class="fl">Data a</label><input type="date" id="f-a" class="fi"></div>
+  <div class="fg"><label class="fl">Postazione</label>
+    <select id="f-post" class="fi"><option value="">Tutte</option></select>
+  </div>
+  <div class="fg"><label class="fl">Bandiera</label>
+    <select id="f-band" class="fi">
+      <option value="">Tutte</option>
+      <option value="verde">🟢 Verde</option>
+      <option value="gialla">🟡 Gialla</option>
+      <option value="rossa">🔴 Rossa</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl">Interventi</label>
+    <select id="f-int" class="fi">
+      <option value="">Tutti</option>
+      <option value="si">Con interventi</option>
+      <option value="no">Senza interventi</option>
+    </select>
+  </div>
+  <button class="btn-p" onclick="applyFilters()">🔍 Cerca</button>
+  <button class="btn-s" onclick="resetFilters()">✕ Azzera</button>
+  <div style="margin-top:1.25rem">
+    <div class="ftitle">Esporta</div>
+    <button class="btn-s" style="margin-top:.5rem" onclick="exportCSV()">⬇ Scarica CSV</button>
+  </div>
+</aside>
 
-  <!-- ── SIDEBAR ── -->
-  <aside class="sidebar">
-    <div class="filter-title">Filtri</div>
+<main class="main">
 
-    <div class="filter-group">
-      <label class="fl">Data da</label>
-      <input type="date" id="f-da" class="fi">
+  <!-- MANCANZE OGGI -->
+  <div id="malert" class="malert"></div>
+
+  <!-- TURNI OGGI -->
+  <div class="turni" id="turni">
+    <div class="tcard"><div class="tcard-body"><span style="color:var(--gray);font-size:13px">⏳ Caricamento turni...</span></div></div>
+    <div class="tcard"><div class="tcard-body"></div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tbtn on" onclick="tab('diari',this)">📋 Diari</button>
+    <button class="tbtn" onclick="tab('stats',this)">📊 Statistiche</button>
+    <button class="tbtn" onclick="tab('mancanti',this)">🚨 Mancanti</button>
+  </div>
+
+  <!-- TAB DIARI -->
+  <div class="tpanel on" id="tab-diari">
+    <div class="scards">
+      <div class="scard"><div class="sval" id="s-tot">—</div><div class="slbl">Diari totali</div></div>
+      <div class="scard"><div class="sval" id="s-int">—</div><div class="slbl">Interventi</div></div>
+      <div class="scard"><div class="sval" id="s-foto">—</div><div class="slbl">Foto</div></div>
+      <div class="scard"><div class="sval" id="s-chk">—</div><div class="slbl">Checklist complete</div></div>
     </div>
-    <div class="filter-group">
-      <label class="fl">Data a</label>
-      <input type="date" id="f-a" class="fi">
-    </div>
-    <div class="filter-group">
-      <label class="fl">Postazione</label>
-      <select id="f-post" class="fi">
-        <option value="">Tutte le postazioni</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="fl">Bandiera</label>
-      <select id="f-band" class="fi">
-        <option value="">Tutte</option>
-        <option value="verde">🟢 Verde</option>
-        <option value="gialla">🟡 Gialla</option>
-        <option value="rossa">🔴 Rossa</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="fl">Interventi</label>
-      <select id="f-int" class="fi">
-        <option value="">Tutti</option>
-        <option value="si">Con interventi</option>
-        <option value="no">Nessun intervento</option>
-      </select>
-    </div>
-
-    <button class="btn-filter" onclick="applyFilters()">🔍 Cerca</button>
-    <button class="btn-reset" onclick="resetFilters()">✕ Azzera filtri</button>
-
-    <div style="margin-top:1.5rem">
-      <div class="filter-title">Esporta</div>
-      <button class="btn-reset" style="margin-top:.5rem" onclick="exportCSV()">⬇ Scarica CSV</button>
-    </div>
-  </aside>
-
-  <!-- ── MAIN ── -->
-  <main class="content">
-
-    <!-- MANCANZE OGGI -->
-    <div id="mancanze-bar" style="display:none" class="mancanze-bar"></div>
-
-    <!-- CONTROLLO TURNI OGGI -->
-    <div class="turni-bar" id="turniBar">
-      <!-- populated by JS -->
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('diari')">📋 Diari</button>
-      <button class="tab-btn" onclick="switchTab('stats')">📊 Statistiche</button>
-      <button class="tab-btn" onclick="switchTab('mancanti')">🚨 Mancanti</button>
-    </div>
-
-    <!-- TAB: DIARI -->
-    <div class="tab-panel active" id="tab-diari">
-
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-val" id="s-tot">—</div>
-        <div class="stat-label">Diari totali</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="s-int">—</div>
-        <div class="stat-label">Interventi totali</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="s-foto">—</div>
-        <div class="stat-label">Foto caricate</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="s-chk">—</div>
-        <div class="stat-label">Checklist complete</div>
-      </div>
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-wrap">
-      <table id="mainTable">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Data / Ora</th>
-            <th>Postazione</th>
-            <th>Bagnino</th>
-            <th>Mare</th>
-            <th>Bandiera</th>
-            <th>Interventi</th>
-            <th>Checklist</th>
-            <th>Foto</th>
-            <th>⚠️ Mancanze</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
-        </tbody>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th></th><th>Data / Ora</th><th>Postazione</th><th>Bagnino</th>
+          <th>Mare</th><th>Bandiera</th><th>Interventi</th><th>Checklist</th>
+          <th>Foto</th><th>⚠️ Mancanze</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
       </table>
     </div>
+    <button class="btnmore" id="btnmore" style="display:none" onclick="loadMore()">Carica altri →</button>
+  </div>
 
-    <button class="btn-more" id="btnMore" style="display:none" onclick="loadMore()">Carica altri diari</button>
-
-    </div><!-- /tab-diari -->
-
-    <!-- TAB: STATISTICHE -->
-    <div class="tab-panel stats-page" id="tab-stats">
-
-      <!-- GENERALI -->
-      <div class="stats-section-title">Riepilogo generale</div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">Diari per giorno</div>
-          <div class="chart-wrap"><canvas id="chartTimeline"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Distribuzione bandiere</div>
-          <div class="chart-wrap"><canvas id="chartBandiere"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Stato del mare</div>
-          <div class="chart-wrap"><canvas id="chartMare"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Tipi di intervento</div>
-          <div class="chart-wrap"><canvas id="chartInterventi"></canvas></div>
-        </div>
+  <!-- TAB STATISTICHE -->
+  <div class="tpanel" id="tab-stats">
+    <div class="stitle">Riepilogo generale</div>
+    <div class="cgrid">
+      <div class="cc"><div class="ctitle">Diari per giorno</div><div class="cwrap"><canvas id="ch-timeline"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Bandiere</div><div class="cwrap"><canvas id="ch-band"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Stato mare</div><div class="cwrap"><canvas id="ch-mare"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Tipi intervento</div><div class="cwrap"><canvas id="ch-int"></canvas></div></div>
+    </div>
+    <div class="stitle">Dotazioni mancanti più segnalate</div>
+    <div class="cgrid" style="margin-bottom:1.25rem">
+      <div class="cc full"><div class="ctitle">Mancanze in checklist</div><div class="cwrap" id="ch-mwrap"><canvas id="ch-manc"></canvas></div></div>
+    </div>
+    <div class="stitle">Per postazione</div>
+    <div class="cgrid" style="margin-bottom:1.25rem">
+      <div class="cc full"><div class="ctitle">Diari e interventi per postazione</div><div class="cwrap tall"><canvas id="ch-post"></canvas></div></div>
+    </div>
+    <div class="cc" style="margin-bottom:1rem">
+      <div class="ctitle">Dettaglio per postazione</div>
+      <div style="overflow-x:auto">
+        <table style="font-size:12px">
+          <thead><tr style="background:var(--navy);color:#fff">
+            <th style="padding:6px 10px">Postazione</th>
+            <th style="padding:6px 10px">Diari</th>
+            <th style="padding:6px 10px">Interventi</th>
+            <th style="padding:6px 10px">Foto</th>
+            <th style="padding:6px 10px">Checklist media</th>
+          </tr></thead>
+          <tbody id="stn-tbody"></tbody>
+        </table>
       </div>
+    </div>
+  </div>
 
-      <!-- MANCANZE FREQUENTI -->
-      <div class="stats-section-title">Dotazioni mancanti più segnalate</div>
-      <div class="charts-grid" style="margin-bottom:1.5rem">
-        <div class="chart-card full">
-          <div class="chart-title">Item non spuntati nella checklist (totale segnalazioni)</div>
-          <div class="chart-wrap"><canvas id="chartMancanze"></canvas></div>
-        </div>
-      </div>
+  <!-- TAB MANCANTI -->
+  <div class="tpanel" id="tab-mancanti">
+    <div class="mcontrols">
+      <div><label>Da</label><input type="date" id="m-da"></div>
+      <div><label>A</label><input type="date" id="m-a"></div>
+      <button class="btn-sm" onclick="renderMancanti()">Aggiorna</button>
+    </div>
+    <div class="scards" id="m-stats"></div>
+    <div class="mlegend">
+      <div class="mleg"><div class="mleg-dot" style="background:#DCFCE7"></div>M + P compilati</div>
+      <div class="mleg"><div class="mleg-dot" style="background:#FEF9C3"></div>Solo Mattina</div>
+      <div class="mleg"><div class="mleg-dot" style="background:#DBEAFE"></div>Solo Pomeriggio</div>
+      <div class="mleg"><div class="mleg-dot" style="background:#FEE2E2"></div>Nessuno</div>
+    </div>
+    <div class="cc">
+      <div class="ctitle">Compilazioni per giorno × postazione</div>
+      <div class="mtable-wrap"><table class="mtable" id="mtable"></table></div>
+    </div>
+  </div>
 
-      <!-- PER POSTAZIONE -->
-      <div class="stats-section-title">Per postazione</div>
-      <div class="charts-grid">
-        <div class="chart-card full">
-          <div class="chart-title">Diari per postazione</div>
-          <div class="chart-wrap tall"><canvas id="chartPostazioni"></canvas></div>
-        </div>
-      </div>
-
-      <div class="chart-card" style="margin-bottom:1rem">
-        <div class="chart-title">Dettaglio per postazione</div>
-        <div style="overflow-x:auto">
-          <table class="stn-table" id="stnTable">
-            <thead>
-              <tr>
-                <th>Postazione</th>
-                <th>Diari</th>
-                <th>Interventi</th>
-                <th>Foto</th>
-                <th>Checklist media</th>
-                <th>Attività</th>
-              </tr>
-            </thead>
-            <tbody id="stnBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- /tab-stats -->
-
-    <!-- TAB: MANCANTI -->
-    <div class="tab-panel" id="tab-mancanti">
-
-      <div class="miss-controls">
-        <div>
-          <label>Da</label>
-          <input type="date" id="m-da">
-        </div>
-        <div>
-          <label>A</label>
-          <input type="date" id="m-a">
-        </div>
-        <button class="btn-small" onclick="renderMancanti()">Aggiorna</button>
-      </div>
-
-      <div class="miss-summary-row" id="missSummary"></div>
-
-      <div class="miss-legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#DCFCE7"></div> Mattina + Pomeriggio</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#FEF9C3"></div> Solo Mattina</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#DBEAFE"></div> Solo Pomeriggio</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#FEE2E2"></div> Nessuno</div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title">Compilazioni per giorno × postazione (09–14 Mattina · 14–19 Pomeriggio)</div>
-        <div class="miss-grid-wrap">
-          <table class="miss-table" id="missTable"></table>
-        </div>
-      </div>
-
-    </div><!-- /tab-mancanti -->
-
-  </main>
+</main>
 </div>
 
 <script>
-// ── FIREBASE ──
-const firebaseConfig = {
+// ══════════════════════════════
+//  FIREBASE
+// ══════════════════════════════
+const FB = {
   apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
   authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
   projectId:         "app-segnalazioni-omnia-roseto",
@@ -876,807 +359,550 @@ const firebaseConfig = {
   messagingSenderId: "699028105579",
   appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
 };
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(FB);
 const db = firebase.firestore();
 
-// ── STATIONS ──
+// ══════════════════════════════
+//  COSTANTI
+// ══════════════════════════════
 const STATIONS = [
-  {num:10,name:"Spiaggia Libera tra Orsa Minore e Scirocco"},
-  {num:11,name:"Spiaggia Libera tra Ahamar e Papenoo"},
-  {num:12,name:"Lido La Vela"},
-  {num:13,name:"Bagni Marini"},
-  {num:14,name:"Bolla Mare"},
-  {num:15,name:"La Paranzella"},
-  {num:16,name:"Celommi"},
-  {num:17,name:"Marisella"},
-  {num:18,name:"Sirenetta"},
-  {num:19,name:"Lauretta"},
-  {num:20,name:"Lido Azzurra"},
-  {num:21,name:"Aurora"},
-  {num:22,name:"Bellavista"},
-  {num:23,name:"Lido Aragosta"},
-  {num:24,name:"Riva del Sol"},
-  {num:25,name:"Tropical"},
-  {num:26,name:"Lido38"},
-  {num:27,name:"Spiaggia Libera tra VVF e Lido Sahara"},
-  {num:28,name:"Casa del Mar"},
-  {num:29,name:"Maldimare"},
-  {num:30,name:"Bora Bora"},
-  {num:31,name:"Spiaggia Libera tra Lo Squalo e Bagni Bruno"},
-  {num:32,name:"Camping Nino"},
-  {num:33,name:"Camping Surabaia"},
-  {num:34,name:"Tartaruga"},
-  {num:35,name:"Cabana Park"}
+  {n:10,name:"Spiaggia Libera Orsa Minore-Scirocco"},
+  {n:11,name:"Spiaggia Libera Ahamar-Papenoo"},
+  {n:12,name:"Lido La Vela"},{n:13,name:"Bagni Marini"},
+  {n:14,name:"Bolla Mare"},{n:15,name:"La Paranzella"},
+  {n:16,name:"Celommi"},{n:17,name:"Marisella"},
+  {n:18,name:"Sirenetta"},{n:19,name:"Lauretta"},
+  {n:20,name:"Lido Azzurra"},{n:21,name:"Aurora"},
+  {n:22,name:"Bellavista"},{n:23,name:"Lido Aragosta"},
+  {n:24,name:"Riva del Sol"},{n:25,name:"Tropical"},
+  {n:26,name:"Lido38"},
+  {n:27,name:"Spiaggia Libera VVF-Lido Sahara"},
+  {n:28,name:"Casa del Mar"},{n:29,name:"Maldimare"},
+  {n:30,name:"Bora Bora"},
+  {n:31,name:"Spiaggia Libera Lo Squalo-Bagni Bruno"},
+  {n:32,name:"Camping Nino"},{n:33,name:"Camping Surabaia"},
+  {n:34,name:"Tartaruga"},{n:35,name:"Cabana Park"}
 ];
+const ALL_P = STATIONS.map(s=>`P.${s.n}`);
 
-(function initSelects() {
+const CHK = {
+  kit_medico:'Kit medico',giubbino:'Giubbino',rullo:'Rullo',
+  caschetto:'Caschetto',scalmi_remi:'Scalmi e remi',
+  mezzo_marinaio:'Mezzo marinaio',ancora:'Ancora',
+  salvagente_pattino:'Salvagente pattino',canotta_rossa:'Canotta rossa',
+  fischietto:'Fischietto',pinne_maschera:'Pinne/maschera',
+  binocolo:'Binocolo',documenti:'Brevetto/BLSD/Visita',
+  salvagente_concessione:'Salvagente concessione',
+  bandiere_ok:'Bandiere',limite_acque:'Limiti acque',boa_300m:'Boa 300m'
+};
+
+// ══════════════════════════════
+//  STATO
+// ══════════════════════════════
+let ALL = [];   // tutti i docs caricati
+let VIEW = [];  // docs filtrati
+
+// ══════════════════════════════
+//  INIT
+// ══════════════════════════════
+(function init(){
+  // Postazioni select
   const sel = document.getElementById('f-post');
-  STATIONS.forEach(s => {
+  STATIONS.forEach(s=>{
     const o = document.createElement('option');
-    o.value = `P.${s.num}`;
-    o.textContent = `P.${s.num} — ${s.name}`;
+    o.value=`P.${s.n}`; o.textContent=`P.${s.n} — ${s.name}`;
     sel.appendChild(o);
   });
+  load();
 })();
 
-// ── STATE ──
-let allDocs = [];
-let lastDoc  = null;
-let activeId = null;
-const PAGE = 30;
-
-// ── INIT ──
-window.addEventListener('DOMContentLoaded', () => {
-  // Di default carica tutto (nessun filtro data)
-  loadData();
-  loadTurniOggi();
-});
-
-// ── LOAD ──
-async function loadData(append = false) {
-  if (!append) { allDocs = []; lastDoc = null; }
-
-  const tbody = document.getElementById('tableBody');
-  if (!append) tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
+// ══════════════════════════════
+//  LOAD DA FIRESTORE
+// ══════════════════════════════
+async function load(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento...</div></td></tr>`;
 
   try {
-    // Query semplice senza indici compositi — filtri tutti lato client
-    let q = db.collection('diariogiornaliero').orderBy('dataOra', 'desc').limit(500);
-    if (lastDoc) q = q.startAfter(lastDoc);
+    // Nessun orderBy per evitare problemi di indici — ordiniamo client-side
+    const snap = await db.collection('diariogiornaliero').limit(500).get();
+    ALL = snap.docs.map(d=>({id:d.id,...d.data()}));
 
-    const snap = await q.get();
-    if (!snap.empty) lastDoc = snap.docs[snap.docs.length - 1];
+    // Ordina per dataOra desc
+    ALL.sort((a,b)=>{
+      const da = a.dataOra?.toDate ? a.dataOra.toDate() : new Date(a.dataOra||0);
+      const db2 = b.dataOra?.toDate ? b.dataOra.toDate() : new Date(b.dataOra||0);
+      return db2 - da;
+    });
 
-    let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    applyFilters();
+    buildTurni();
 
-    // Filtri client-side
-    const da   = document.getElementById('f-da').value;
-    const a    = document.getElementById('f-a').value;
-    const post = document.getElementById('f-post').value;
-    const band = document.getElementById('f-band').value;
-    const intF = document.getElementById('f-int').value;
-
-    if (da) {
-      const daDate = new Date(da);
-      docs = docs.filter(d => {
-        const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-        return dt >= daDate;
-      });
-    }
-    if (a) {
-      const aDate = new Date(a + 'T23:59:59');
-      docs = docs.filter(d => {
-        const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-        return dt <= aDate;
-      });
-    }
-    if (post) docs = docs.filter(d => d.postazione === post);
-    if (band) docs = docs.filter(d => d.meteo?.bandiera === band);
-    if (intF === 'si') docs = docs.filter(d => (d.interventi||[]).length > 0);
-    if (intF === 'no') docs = docs.filter(d => (d.interventi||[]).length === 0);
-
-    if (append) allDocs = [...allDocs, ...docs];
-    else allDocs = docs;
-
-    render();
-    document.getElementById('btnMore').style.display = snap.docs.length === 500 ? 'block' : 'none';
-
-  } catch(err) {
-    console.error('Firestore error:', err);
-    const msg = err.code === 'failed-precondition'
-      ? 'Indice Firestore mancante. Contatta l'amministratore.'
-      : (err.message || err.code || 'Errore sconosciuto');
-    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">❌</div>${msg}</div></td></tr>`;
+  } catch(err){
+    console.error(err);
+    tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">❌</div>
+      Errore: ${err.message||err.code}<br>
+      <small>Codice: ${err.code||'—'}</small></div></td></tr>`;
   }
 }
 
-function applyFilters() { loadData(false); }
-function loadMore()     { loadData(true);  }
-function resetFilters() {
-  document.getElementById('f-da').value   = '';
-  document.getElementById('f-a').value    = '';
-  document.getElementById('f-post').value = '';
-  document.getElementById('f-band').value = '';
-  document.getElementById('f-int').value  = '';
-  loadData(false);
+function loadMore(){ /* gestito dal limite 500 per ora */ }
+
+// ══════════════════════════════
+//  FILTRI
+// ══════════════════════════════
+function applyFilters(){
+  const da   = document.getElementById('f-da').value;
+  const a    = document.getElementById('f-a').value;
+  const post = document.getElementById('f-post').value;
+  const band = document.getElementById('f-band').value;
+  const intF = document.getElementById('f-int').value;
+
+  VIEW = ALL.filter(d=>{
+    const dt = toDate(d.dataOra);
+    if(da && dt < new Date(da)) return false;
+    if(a  && dt > new Date(a+'T23:59:59')) return false;
+    if(post && d.postazione!==post) return false;
+    if(band && d.meteo?.bandiera!==band) return false;
+    if(intF==='si' && !(d.interventi||[]).length) return false;
+    if(intF==='no' && (d.interventi||[]).length>0) return false;
+    return true;
+  });
+
+  render();
+  buildMalert();
 }
 
-// ── RENDER ──
-function render() {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
+function resetFilters(){
+  ['f-da','f-a','f-post','f-band','f-int'].forEach(id=>document.getElementById(id).value='');
+  applyFilters();
+}
 
-  if (allDocs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
-    updateStats([]);
+// ══════════════════════════════
+//  RENDER TABELLA
+// ══════════════════════════════
+function render(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML='';
+
+  document.getElementById('hcount').textContent=`${VIEW.length} diari`;
+  updateCards();
+
+  if(!VIEW.length){
+    tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">📭</div>Nessun diario trovato.</div></td></tr>`;
     return;
   }
 
-  updateStats(allDocs);
+  VIEW.forEach(doc=>{
+    const dt      = toDate(doc.dataOra);
+    const dstr    = dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const tstr    = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    const nInt    = (doc.interventi||[]).length;
+    const nFoto   = (doc.foto||[]).length;
+    const pct     = chkPct(doc.checklist);
+    const band    = doc.meteo?.bandiera||'';
+    const mare    = doc.meteo?.stateMare||'—';
+    const manc    = getManc(doc.checklist);
 
-  allDocs.forEach(doc => {
-    const dt = doc.dataOra?.toDate ? doc.dataOra.toDate() : new Date(doc.dataOra);
-    const dateStr = dt.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'});
-    const timeStr = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
-    const nInt  = (doc.interventi||[]).length;
-    const nFoto = (doc.foto||[]).length;
-    const chkPct = chkPercent(doc.checklist);
-    const band  = doc.meteo?.bandiera || '—';
-    const mare  = doc.meteo?.stateMare || '—';
-
-    // Summary row
     const tr = document.createElement('tr');
-    tr.dataset.id = doc.id;
-    tr.innerHTML = `
-      <td class="td-arrow">›</td>
-      <td><strong>${dateStr}</strong><br><span style="color:var(--gray);font-size:11.5px">${timeStr}</span></td>
+    tr.innerHTML=`
+      <td><span class="arr">›</span></td>
+      <td><strong>${dstr}</strong><br><span style="color:var(--gray);font-size:11px">${tstr}</span></td>
       <td><strong>${doc.postazione||'—'}</strong></td>
       <td>${doc.bagnino||'—'}</td>
       <td style="text-transform:capitalize">${mare}</td>
-      <td>${bandBadge(band)}</td>
-      <td>${nInt > 0 ? `<span class="badge badge-int">${nInt} intervento${nInt>1?'i':''}</span>` : '<span style="color:var(--gray);font-size:12px">—</span>'}</td>
-      <td>${chkBadge(chkPct)}</td>
-      <td>${nFoto > 0 ? `📷 ${nFoto}` : '—'}</td>
-      <td>${getMancanze(doc.checklist).length > 0 ? `<span class="badge-mancanza">⚠️ ${getMancanze(doc.checklist).length}</span>` : '<span style="color:#aaa;font-size:13px">✓</span>'}</td>
-    `;
-    tr.addEventListener('click', () => toggleDetail(doc, tr));
+      <td>${bBand(band)}</td>
+      <td>${nInt>0?`<span class="bv bv-b">${nInt} interv.</span>`:'<span style="color:#ccc">—</span>'}</td>
+      <td>${bChk(pct)}</td>
+      <td>${nFoto>0?`📷 ${nFoto}`:'—'}</td>
+      <td>${manc.length>0?`<span class="bv-m">⚠️ ${manc.length}</span>`:'<span style="color:#aaa">✓</span>'}</td>`;
+    tr.addEventListener('click',()=>toggleDetail(doc,tr));
     tbody.appendChild(tr);
 
-    // Detail row (hidden)
-    const trD = document.createElement('tr');
-    trD.className = 'detail-row';
-    trD.id = 'detail-' + doc.id;
-    trD.style.display = 'none';
-    const tdD = document.createElement('td');
-    tdD.colSpan = 10;
-    tdD.innerHTML = buildDetail(doc);
-    trD.appendChild(tdD);
-    tbody.appendChild(trD);
+    const drow = document.createElement('tr');
+    drow.className='drow';
+    drow.id='d-'+doc.id;
+    drow.style.display='none';
+    const dtd = document.createElement('td');
+    dtd.colSpan=10;
+    dtd.innerHTML=buildDetail(doc);
+    drow.appendChild(dtd);
+    tbody.appendChild(drow);
   });
-
-  document.getElementById('hd-count').textContent = `${allDocs.length} diari`;
-  renderMancanzaBar(allDocs);
-  loadTurniOggi();
 }
 
-// ── DETAIL TOGGLE ──
-function toggleDetail(doc, tr) {
-  const detailRow = document.getElementById('detail-' + doc.id);
-  const isOpen = detailRow.style.display !== 'none';
-
-  // Close all
-  document.querySelectorAll('.detail-row').forEach(r => r.style.display = 'none');
-  document.querySelectorAll('tbody tr:not(.detail-row)').forEach(r => r.classList.remove('active'));
-
-  if (!isOpen) {
-    detailRow.style.display = '';
-    tr.classList.add('active');
-    tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
+// ══════════════════════════════
+//  DETAIL
+// ══════════════════════════════
+function toggleDetail(doc,tr){
+  const drow = document.getElementById('d-'+doc.id);
+  const wasOpen = drow.style.display!=='none';
+  document.querySelectorAll('.drow').forEach(r=>r.style.display='none');
+  document.querySelectorAll('tbody tr:not(.drow)').forEach(r=>r.classList.remove('on'));
+  if(!wasOpen){ drow.style.display=''; tr.classList.add('on'); }
 }
 
-// ── BUILD DETAIL ──
-function buildDetail(doc) {
-  const dt = doc.dataOra?.toDate ? doc.dataOra.toDate() : new Date(doc.dataOra);
-  const dtStr = dt.toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+function buildDetail(doc){
+  const dt  = toDate(doc.dataOra);
+  const dts = dt.toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const m   = doc.meteo||{};
+  const p   = doc.presenze||{};
 
-  // Checklist
-  const chkLabels = {
-    kit_medico:'Kit medico', giubbino:'Giubbino salvataggio', rullo:'Rullo',
-    caschetto:'Caschetto', scalmi_remi:'Scalmi e remi', mezzo_marinaio:'Mezzo marinaio',
-    ancora:'Ancora', salvagente_pattino:'Salvagente pattino', canotta_rossa:'Canotta rossa',
-    fischietto:'Fischietto', pinne_maschera:'Pinne/maschera/boccaglio', binocolo:'Binocolo',
-    documenti:'Brevetto/BLSD/Visita', salvagente_concessione:'Salvagente concessione',
-    bandiere_ok:'Bandiere ok', limite_acque:'Limiti acque sicure', boa_300m:'Boa 300m'
-  };
-  const chk = doc.checklist || {};
-  const chkItems = Object.entries(chkLabels).map(([k,v]) =>
-    `<div class="chk-line">
-      <span class="chk-ico">${chk[k] ? '✅' : '❌'}</span>
-      <span style="font-size:12.5px;color:${chk[k]?'var(--navy)':'var(--gray)'}">${v}</span>
-    </div>`
-  ).join('');
+  const chkHtml = Object.entries(CHK).map(([k,v])=>{
+    const ok = doc.checklist?.[k];
+    return `<div class="ckline"><span>${ok?'✅':'❌'}</span>
+      <span style="color:${ok?'var(--navy)':'var(--gray)'}">${v}</span></div>`;
+  }).join('');
 
-  // Interventi
-  const interventi = (doc.interventi||[]);
-  const intHtml = interventi.length === 0
-    ? '<p style="font-size:13px;color:var(--gray)">Nessun intervento registrato.</p>'
-    : interventi.map(i => {
-        const allertato = (i.allertato||[]).join(', ') || 'nessuno';
-        const ora = i.ora ? new Date(i.ora).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '—';
-        return `<div class="int-item">
-          <div class="int-tipo">${i.tipo||'—'}</div>
-          <div class="int-meta">Ore ${ora} · Allertato: ${allertato}</div>
-          <div class="int-desc">${i.descrizione||'—'}</div>
-        </div>`;
+  const intHtml = (doc.interventi||[]).length===0
+    ? '<p style="font-size:13px;color:var(--gray)">Nessun intervento.</p>'
+    : (doc.interventi||[]).map(i=>{
+        const oh = i.ora ? toDate(i.ora).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '—';
+        const all = (i.allertato||[]).join(', ')||'nessuno';
+        return `<div class="ibox"><strong>${i.tipo||'—'}</strong>
+          <div style="color:var(--gray);font-size:11.5px;margin:2px 0">Ore ${oh} · ${all}</div>
+          <div>${i.descrizione||''}</div></div>`;
       }).join('');
 
-  // Foto
-  const foto = (doc.foto||[]);
-  const fotoHtml = foto.length === 0
+  const fotoHtml = (doc.foto||[]).length===0
     ? '<p style="font-size:13px;color:var(--gray)">Nessuna foto.</p>'
-    : `<div class="photo-gallery">${foto.map(u=>`<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`).join('')}</div>`;
+    : `<div class="igal">${(doc.foto||[]).map(u=>`<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`).join('')}</div>`;
 
-  // Meteo
-  const m = doc.meteo || {};
-  const p = doc.presenze || {};
-
-  return `<div class="detail-inner">
-    <div class="detail-grid">
-
-      <div class="detail-section">
-        <div class="ds-title">Identificazione</div>
-        <div class="ds-row"><span class="ds-key">Data/ora</span><span class="ds-val">${dtStr}</span></div>
-        <div class="ds-row"><span class="ds-key">Postazione</span><span class="ds-val">${doc.postazione||'—'}</span></div>
-        <div class="ds-row"><span class="ds-key">Bagnino</span><span class="ds-val">${doc.bagnino||'—'}</span></div>
-      </div>
-
-      <div class="detail-section">
-        <div class="ds-title">Meteo e Mare</div>
-        <div class="ds-row"><span class="ds-key">Stato mare</span><span class="ds-val">${m.stateMare||'—'}</span></div>
-        <div class="ds-row"><span class="ds-key">Cielo</span><span class="ds-val">${m.cielo||'—'}</span></div>
-        <div class="ds-row"><span class="ds-key">Bandiera</span><span class="ds-val">${bandBadge(m.bandiera||'—')}</span></div>
-      </div>
-
-      <div class="detail-section">
-        <div class="ds-title">Presenze</div>
-        <div class="ds-row"><span class="ds-key">Affluenza</span><span class="ds-val">${p.affluenza||'—'}</span></div>
-        <div class="ds-row"><span class="ds-key">In acqua</span><span class="ds-val">${p.inAcqua != null ? p.inAcqua + ' pers.' : '—'}</span></div>
-        <div class="ds-row"><span class="ds-key">Note</span><span class="ds-val">${doc.note||'—'}</span></div>
-      </div>
-
-      <div class="detail-section span3">
-        <div class="ds-title">Checklist postazione</div>
-        <div class="chk-grid">${chkItems}</div>
-      </div>
-
-      <div class="detail-section span2">
-        <div class="ds-title">Interventi e Soccorsi</div>
-        ${intHtml}
-      </div>
-
-      <div class="detail-section">
-        <div class="ds-title">Foto (${foto.length})</div>
-        ${fotoHtml}
-      </div>
-
+  return `<div class="dinner"><div class="dgrid">
+    <div class="dc"><div class="dct">Identificazione</div>
+      <div class="dr"><span class="dk">Data/ora</span><span class="dv">${dts}</span></div>
+      <div class="dr"><span class="dk">Postazione</span><span class="dv">${doc.postazione||'—'}</span></div>
+      <div class="dr"><span class="dk">Bagnino</span><span class="dv">${doc.bagnino||'—'}</span></div>
     </div>
-  </div>`;
+    <div class="dc"><div class="dct">Meteo</div>
+      <div class="dr"><span class="dk">Mare</span><span class="dv">${m.stateMare||'—'}</span></div>
+      <div class="dr"><span class="dk">Cielo</span><span class="dv">${m.cielo||'—'}</span></div>
+      <div class="dr"><span class="dk">Bandiera</span><span class="dv">${bBand(m.bandiera||'')}</span></div>
+    </div>
+    <div class="dc"><div class="dct">Presenze / Note</div>
+      <div class="dr"><span class="dk">Affluenza</span><span class="dv">${p.affluenza||'—'}</span></div>
+      <div class="dr"><span class="dk">In acqua</span><span class="dv">${p.inAcqua!=null?p.inAcqua+' pers.':'—'}</span></div>
+      <div class="dr"><span class="dk">Note</span><span class="dv">${doc.note||'—'}</span></div>
+    </div>
+    <div class="dc s3"><div class="dct">Checklist postazione</div><div class="ckgrid">${chkHtml}</div></div>
+    <div class="dc s2"><div class="dct">Interventi e Soccorsi</div>${intHtml}</div>
+    <div class="dc"><div class="dct">Foto (${(doc.foto||[]).length})</div>${fotoHtml}</div>
+  </div></div>`;
 }
 
-// ── STATS ──
-function updateStats(docs) {
-  const totInt  = docs.reduce((s,d) => s + (d.interventi||[]).length, 0);
-  const totFoto = docs.reduce((s,d) => s + (d.foto||[]).length, 0);
-  const totChk  = docs.filter(d => chkPercent(d.checklist) === 100).length;
-  document.getElementById('s-tot').textContent  = docs.length;
+// ══════════════════════════════
+//  STAT CARDS
+// ══════════════════════════════
+function updateCards(){
+  const totInt  = VIEW.reduce((s,d)=>s+(d.interventi||[]).length,0);
+  const totFoto = VIEW.reduce((s,d)=>s+(d.foto||[]).length,0);
+  const totChk  = VIEW.filter(d=>chkPct(d.checklist)===100).length;
+  document.getElementById('s-tot').textContent  = VIEW.length;
   document.getElementById('s-int').textContent  = totInt;
   document.getElementById('s-foto').textContent = totFoto;
   document.getElementById('s-chk').textContent  = totChk;
 }
 
-// ── HELPERS ──
-function chkPercent(chk) {
-  if (!chk) return 0;
-  const vals = Object.values(chk);
-  if (!vals.length) return 0;
-  return Math.round(vals.filter(Boolean).length / vals.length * 100);
-}
-
-function chkBadge(pct) {
-  if (pct === 100) return `<span class="badge badge-ok">✓ ${pct}%</span>`;
-  if (pct >= 80)   return `<span class="badge badge-int">${pct}%</span>`;
-  return `<span class="badge badge-warn">⚠ ${pct}%</span>`;
-}
-
-function bandBadge(b) {
-  if (b === 'verde')  return `<span class="badge badge-verde">🟢 Verde</span>`;
-  if (b === 'gialla') return `<span class="badge badge-gialla">🟡 Gialla</span>`;
-  if (b === 'rossa')  return `<span class="badge badge-rossa">🔴 Rossa</span>`;
-  return `<span style="color:var(--gray)">—</span>`;
-}
-
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
-// ── EXPORT CSV ──
-function exportCSV() {
-  const rows = [['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Note']];
-  allDocs.forEach(d => {
-    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-    rows.push([
-      dt.toLocaleDateString('it-IT'),
-      dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-      d.postazione||'',
-      d.bagnino||'',
-      d.meteo?.stateMare||'',
-      d.meteo?.bandiera||'',
-      (d.interventi||[]).length,
-      chkPercent(d.checklist),
-      (d.foto||[]).length,
-      (d.note||'').replace(/,/g,' ')
-    ]);
-  });
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `diario_omnia_${fmtDate(new Date())}.csv`;
-  a.click();
-}
-
-
-// ── MANCANZE ──
-const CHK_LABELS = {
-  kit_medico:              'Kit medico',
-  giubbino:                'Giubbino salvataggio',
-  rullo:                   'Rullo',
-  caschetto:               'Caschetto',
-  scalmi_remi:             'Scalmi e remi',
-  mezzo_marinaio:          'Mezzo marinaio',
-  ancora:                  'Ancora',
-  salvagente_pattino:      'Salvagente pattino',
-  canotta_rossa:           'Canotta rossa',
-  fischietto:              'Fischietto',
-  pinne_maschera:          'Pinne/maschera/boccaglio',
-  binocolo:                'Binocolo',
-  documenti:               'Brevetto/BLSD/Visita',
-  salvagente_concessione:  'Salvagente concessione',
-  bandiere_ok:             'Bandiere',
-  limite_acque:            'Limiti acque sicure',
-  boa_300m:                'Boa 300m'
-};
-
-function getMancanze(checklist) {
-  if (!checklist) return [];
-  return Object.entries(checklist)
-    .filter(([k, v]) => v === false)
-    .map(([k]) => CHK_LABELS[k] || k);
-}
-
-function renderMancanzaBar(docs) {
-  const bar = document.getElementById('mancanze-bar');
+// ══════════════════════════════
+//  MANCANZE ALERT (OGGI)
+// ══════════════════════════════
+function buildMalert(){
   const today = new Date().toDateString();
-
-  // Filtra diari di oggi con mancanze
-  const alerts = docs
-    .filter(d => {
-      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-      return dt.toDateString() === today && getMancanze(d.checklist).length > 0;
-    })
-    .sort((a,b) => {
-      const da = a.dataOra?.toDate ? a.dataOra.toDate() : new Date(a.dataOra);
-      const db2 = b.dataOra?.toDate ? b.dataOra.toDate() : new Date(b.dataOra);
-      return db2 - da;
-    });
-
-  if (alerts.length === 0) {
-    bar.style.display = 'none';
-    return;
-  }
-
-  bar.style.display = 'block';
-  const rows = alerts.map(d => {
-    const items = getMancanze(d.checklist);
-    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-    const ora = dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-    const chips = items.map(i => `<span class="mancanza-chip">${i}</span>`).join('');
-    return `<div class="mancanza-row">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-          <span class="mancanza-post">${d.postazione}</span>
-          <span class="mancanza-bagnino">${d.bagnino || '—'} · ore ${ora}</span>
-        </div>
-        <div class="mancanza-items">${chips}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  bar.innerHTML = `
-    <div class="mancanze-header">
-      <span class="mancanze-header-title">⚠️ Mancanze segnalate oggi</span>
-      <span class="mancanze-count">${alerts.length} segnalazione${alerts.length>1?'i':''}</span>
-    </div>
-    <div class="mancanze-body">${rows}</div>`;
+  const alerts = ALL.filter(d=>{
+    const dt = toDate(d.dataOra);
+    return dt.toDateString()===today && getManc(d.checklist).length>0;
+  });
+  const el = document.getElementById('malert');
+  if(!alerts.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML=`<div class="malert-hd">
+    <span class="malert-title">⚠️ Mancanze segnalate oggi</span>
+    <span class="malert-cnt">${alerts.length}</span>
+  </div><div class="malert-body">${alerts.map(d=>{
+    const dt = toDate(d.dataOra);
+    const ora = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    const chips = getManc(d.checklist).map(m=>`<span class="mchip">${m}</span>`).join('');
+    return `<div class="mrow"><div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span class="mpost">${d.postazione}</span>
+        <span class="mmeta">${d.bagnino||'—'} · ore ${ora}</span>
+      </div><div class="mchips">${chips}</div>
+    </div></div>`;
+  }).join('')}</div>`;
 }
 
-// ── TABS ──
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'stats') renderStats();
-  if (name === 'mancanti') {
-    if (!document.getElementById('m-da').value) {
-      const today = new Date();
-      const ago7  = new Date(today); ago7.setDate(today.getDate()-6);
-      document.getElementById('m-da').value = fmtDate(ago7);
-      document.getElementById('m-a').value  = fmtDate(today);
+// ══════════════════════════════
+//  TURNI OGGI
+// ══════════════════════════════
+function buildTurni(){
+  const today = new Date().toDateString();
+  const todayDocs = ALL.filter(d=>toDate(d.dataOra).toDateString()===today);
+  const matOk=new Set(), pomOk=new Set();
+  todayDocs.forEach(d=>{
+    const h=toDate(d.dataOra).getHours();
+    if(h>=9 && h<14) matOk.add(d.postazione);
+    if(h>=14 && h<19) pomOk.add(d.postazione);
+  });
+  document.getElementById('turni').innerHTML=
+    turnoCard('🌅 Mattina','09:00–14:00',matOk)+
+    turnoCard('🌇 Pomeriggio','14:00–19:00',pomOk);
+}
+
+function turnoCard(label,ora,okSet){
+  const miss=ALL_P.filter(p=>!okSet.has(p));
+  const pct=Math.round(okSet.size/ALL_P.length*100);
+  const cls=pct===100?'ok':pct>=60?'warn':'bad';
+  return `<div class="tcard">
+    <div class="tcard-hd">
+      <div><div class="tcard-label">${label}</div><div class="tcard-ora">${ora}</div></div>
+      <div style="text-align:right">
+        <div class="tscore ${cls}">${okSet.size}/${ALL_P.length}</div>
+        <div style="font-size:11px;color:var(--gray)">${miss.length} mancanti</div>
+      </div>
+    </div>
+    <div class="tcard-body">
+      ${miss.length===0
+        ? '<span class="tok">✅ Tutte le postazioni hanno compilato</span>'
+        : `<div class="tmiss-title">Mancanti</div><div class="tchips">${miss.map(p=>`<span class="tchip">${p}</span>`).join('')}</div>`}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════
+//  TABS
+// ══════════════════════════════
+function tab(name,btn){
+  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+name).classList.add('on');
+  btn.classList.add('on');
+  if(name==='stats') renderStats();
+  if(name==='mancanti'){
+    if(!document.getElementById('m-da').value){
+      const t=new Date(), a7=new Date(t); a7.setDate(t.getDate()-6);
+      document.getElementById('m-da').value=fmt(a7);
+      document.getElementById('m-a').value=fmt(t);
     }
     renderMancanti();
   }
 }
 
-// ── CHARTS STATE ──
-let charts = {};
+// ══════════════════════════════
+//  STATISTICHE
+// ══════════════════════════════
+let CH={};
+function dk(id){ if(CH[id]){CH[id].destroy();delete CH[id];} }
 
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-}
+function renderStats(){
+  if(!VIEW.length) return;
 
-// ── RENDER STATS ──
-function renderStats() {
-  if (!allDocs.length) return;
-
-  // 1. TIMELINE — diari per giorno
-  const byDay = {};
-  allDocs.forEach(d => {
-    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-    const key = dt.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit'});
-    byDay[key] = (byDay[key]||0) + 1;
+  // Timeline
+  const byDay={};
+  VIEW.forEach(d=>{
+    const k=toDate(d.dataOra).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    byDay[k]=(byDay[k]||0)+1;
   });
-  const dayKeys = Object.keys(byDay).slice(-30);
-  destroyChart('timeline');
-  charts.timeline = new Chart(document.getElementById('chartTimeline'), {
-    type: 'bar',
-    data: {
-      labels: dayKeys,
-      datasets: [{ label: 'Diari', data: dayKeys.map(k=>byDay[k]),
-        backgroundColor: '#E8731A', borderRadius: 4 }]
-    },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true, ticks:{stepSize:1}}, x:{ticks:{font:{size:10}}}} }
-  });
+  const dk2=Object.keys(byDay);
+  dk('tl');
+  CH.tl=new Chart(document.getElementById('ch-timeline'),{type:'bar',
+    data:{labels:dk2,datasets:[{label:'Diari',data:dk2.map(k=>byDay[k]),backgroundColor:'#E8731A',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{font:{size:9}}}}}});
 
-  // 2. BANDIERE
-  const bCount = {verde:0, gialla:0, rossa:0};
-  allDocs.forEach(d => { const b = d.meteo?.bandiera; if(b) bCount[b]=(bCount[b]||0)+1; });
-  destroyChart('bandiere');
-  charts.bandiere = new Chart(document.getElementById('chartBandiere'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Verde','Gialla','Rossa'],
-      datasets: [{ data: [bCount.verde, bCount.gialla, bCount.rossa],
-        backgroundColor: ['#1A8A4A','#F59E0B','#C0392B'],
-        borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom', labels:{font:{size:12}}}} }
-  });
+  // Bandiere
+  const bc={verde:0,gialla:0,rossa:0};
+  VIEW.forEach(d=>{const b=d.meteo?.bandiera;if(b)bc[b]=(bc[b]||0)+1;});
+  dk('bd');
+  CH.bd=new Chart(document.getElementById('ch-band'),{type:'doughnut',
+    data:{labels:['Verde','Gialla','Rossa'],
+      datasets:[{data:[bc.verde,bc.gialla,bc.rossa],
+        backgroundColor:['#1A8A4A','#F59E0B','#C0392B'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
 
-  // 3. STATO MARE
-  const mCount = {};
-  allDocs.forEach(d => { const m = d.meteo?.stateMare; if(m) mCount[m]=(mCount[m]||0)+1; });
-  const mKeys = Object.keys(mCount).sort();
-  destroyChart('mare');
-  charts.mare = new Chart(document.getElementById('chartMare'), {
-    type: 'bar',
-    data: {
-      labels: mKeys,
-      datasets: [{ label:'Giorni', data: mKeys.map(k=>mCount[k]),
-        backgroundColor: '#1B3A6B', borderRadius:4 }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y',
-      plugins:{legend:{display:false}},
-      scales:{x:{beginAtZero:true, ticks:{stepSize:1}}, y:{ticks:{font:{size:11}}}} }
-  });
+  // Mare
+  const mc={};
+  VIEW.forEach(d=>{const m=d.meteo?.stateMare;if(m)mc[m]=(mc[m]||0)+1;});
+  const mk=Object.keys(mc).sort();
+  dk('mr');
+  CH.mr=new Chart(document.getElementById('ch-mare'),{type:'bar',
+    data:{labels:mk,datasets:[{label:'Giorni',data:mk.map(k=>mc[k]),backgroundColor:'#1B3A6B',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
 
-  // 4. TIPI INTERVENTO
-  const iCount = {};
-  allDocs.forEach(d => (d.interventi||[]).forEach(i => {
-    const t = i.tipo||'Altro'; iCount[t]=(iCount[t]||0)+1;
-  }));
-  const iKeys = Object.keys(iCount).sort((a,b)=>iCount[b]-iCount[a]);
-  destroyChart('interventi');
-  charts.interventi = new Chart(document.getElementById('chartInterventi'), {
-    type: 'bar',
-    data: {
-      labels: iKeys.length ? iKeys : ['Nessun intervento'],
-      datasets: [{ label:'Interventi', data: iKeys.length ? iKeys.map(k=>iCount[k]) : [0],
-        backgroundColor: '#E8731A', borderRadius:4 }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y',
-      plugins:{legend:{display:false}},
-      scales:{x:{beginAtZero:true, ticks:{stepSize:1}}, y:{ticks:{font:{size:10}}}} }
-  });
+  // Interventi tipo
+  const ic={};
+  VIEW.forEach(d=>(d.interventi||[]).forEach(i=>{const t=i.tipo||'Altro';ic[t]=(ic[t]||0)+1;}));
+  const ik=Object.keys(ic).sort((a,b)=>ic[b]-ic[a]);
+  dk('it');
+  if(ik.length){
+    CH.it=new Chart(document.getElementById('ch-int'),{type:'bar',
+      data:{labels:ik,datasets:[{label:'N',data:ik.map(k=>ic[k]),backgroundColor:'#E8731A',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
+  }
 
-  // MANCANZE CHART
-  const mCount = {};
-  allDocs.forEach(d => {
-    getMancanze(d.checklist).forEach(label => {
-      mCount[label] = (mCount[label]||0) + 1;
-    });
-  });
-  const mKeys = Object.keys(mCount).sort((a,b) => mCount[b]-mCount[a]);
-  destroyChart('mancanze');
-  if (mKeys.length > 0) {
-    charts.mancanze = new Chart(document.getElementById('chartMancanze'), {
-      type: 'bar',
-      data: {
-        labels: mKeys,
-        datasets: [{ label:'Segnalazioni', data: mKeys.map(k=>mCount[k]),
-          backgroundColor: '#C0392B', borderRadius:4 }]
-      },
-      options: { responsive:true, maintainAspectRatio:false, indexAxis:'y',
-        plugins:{legend:{display:false}},
-        scales:{x:{beginAtZero:true, ticks:{stepSize:1}}, y:{ticks:{font:{size:11}}}} }
-    });
+  // Mancanze
+  const mancC={};
+  VIEW.forEach(d=>getManc(d.checklist).forEach(m=>{mancC[m]=(mancC[m]||0)+1;}));
+  const mancK=Object.keys(mancC).sort((a,b)=>mancC[b]-mancC[a]);
+  dk('mn');
+  const mwrap=document.getElementById('ch-mwrap');
+  if(mancK.length){
+    mwrap.innerHTML='<canvas id="ch-manc"></canvas>';
+    CH.mn=new Chart(document.getElementById('ch-manc'),{type:'bar',
+      data:{labels:mancK,datasets:[{label:'Segnalazioni',data:mancK.map(k=>mancC[k]),backgroundColor:'#C0392B',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
   } else {
-    const ctx = document.getElementById('chartMancanze');
-    if (ctx) ctx.parentElement.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--success);font-weight:600">✅ Nessuna mancanza segnalata nel periodo</div>';
+    mwrap.innerHTML='<div style="text-align:center;padding:2rem;color:var(--green);font-weight:600">✅ Nessuna mancanza nel periodo</div>';
   }
 
-  // 5. POSTAZIONI BAR
-  const pCount = {}; const pInt = {}; const pFoto = {}; const pChk = {};
-  allDocs.forEach(d => {
-    const p = d.postazione||'?';
-    pCount[p] = (pCount[p]||0)+1;
-    pInt[p]   = (pInt[p]||0) + (d.interventi||[]).length;
-    pFoto[p]  = (pFoto[p]||0) + (d.foto||[]).length;
-    if (!pChk[p]) pChk[p] = [];
-    pChk[p].push(chkPercent(d.checklist));
+  // Postazioni
+  const pc={},pi={},pf={},pchk={};
+  VIEW.forEach(d=>{
+    const p=d.postazione||'?';
+    pc[p]=(pc[p]||0)+1;
+    pi[p]=(pi[p]||0)+(d.interventi||[]).length;
+    pf[p]=(pf[p]||0)+(d.foto||[]).length;
+    if(!pchk[p])pchk[p]=[];
+    pchk[p].push(chkPct(d.checklist));
   });
-  const pKeys = Object.keys(pCount).sort((a,b)=>{
-    const na=parseInt(a.replace('P.','')), nb=parseInt(b.replace('P.',''));
-    return na-nb;
-  });
+  const pk=Object.keys(pc).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
+  dk('pp');
+  CH.pp=new Chart(document.getElementById('ch-post'),{type:'bar',
+    data:{labels:pk,datasets:[
+      {label:'Diari',data:pk.map(k=>pc[k]),backgroundColor:'#0B2545',borderRadius:3},
+      {label:'Interventi',data:pk.map(k=>pi[k]||0),backgroundColor:'#E8731A',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11}}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 
-  destroyChart('postazioni');
-  charts.postazioni = new Chart(document.getElementById('chartPostazioni'), {
-    type: 'bar',
-    data: {
-      labels: pKeys,
-      datasets: [
-        { label:'Diari', data: pKeys.map(k=>pCount[k]), backgroundColor:'#0B2545', borderRadius:3 },
-        { label:'Interventi', data: pKeys.map(k=>pInt[k]), backgroundColor:'#E8731A', borderRadius:3 }
-      ]
-    },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'top', labels:{font:{size:12}}}},
-      scales:{x:{ticks:{font:{size:10}}}, y:{beginAtZero:true, ticks:{stepSize:1}}} }
-  });
-
-  // 6. STATION TABLE
-  const maxDiari = Math.max(...pKeys.map(k=>pCount[k]));
-  const stnBody = document.getElementById('stnBody');
-  stnBody.innerHTML = '';
-  pKeys.forEach(p => {
-    const avgChk = pChk[p].length
-      ? Math.round(pChk[p].reduce((s,v)=>s+v,0)/pChk[p].length) : 0;
-    const barW = Math.round(pCount[p]/maxDiari * 80);
-    const stnName = STATIONS.find(s=>`P.${s.num}`===p)?.name || '';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${stnName}</span></td>
-      <td>${pCount[p]}</td>
-      <td>${pInt[p]||0}</td>
-      <td>${pFoto[p]||0}</td>
-      <td>${chkBadge(avgChk)}</td>
-      <td><span class="bar-inline" style="width:${barW}px"></span></td>
-    `;
-    stnBody.appendChild(tr);
+  // Tabella postazioni
+  const stb=document.getElementById('stn-tbody');
+  stb.innerHTML='';
+  pk.forEach(p=>{
+    const avg=pchk[p]?Math.round(pchk[p].reduce((s,v)=>s+v,0)/pchk[p].length):0;
+    const sn=STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="padding:5px 10px"><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${sn}</span></td>
+      <td style="padding:5px 10px;text-align:center">${pc[p]}</td>
+      <td style="padding:5px 10px;text-align:center">${pi[p]||0}</td>
+      <td style="padding:5px 10px;text-align:center">${pf[p]||0}</td>
+      <td style="padding:5px 10px;text-align:center">${bChk(avg)}</td>`;
+    tr.style.borderBottom='1px solid var(--border)';
+    stb.appendChild(tr);
   });
 }
 
+// ══════════════════════════════
+//  MANCANTI STORICO
+// ══════════════════════════════
+async function renderMancanti(){
+  const da=document.getElementById('m-da').value;
+  const a=document.getElementById('m-a').value;
+  if(!da||!a) return;
 
-// ══════════════════════════════════════════
-//  TURNI — CONSTANTS
-// ══════════════════════════════════════════
-const MAT_START = 9,  MAT_END = 14;  // 09:00–14:00
-const POM_START = 14, POM_END = 19;  // 14:00–19:00
+  const daD=new Date(da), aD=new Date(a+'T23:59:59');
+  const dates=[];
+  const cur=new Date(daD);
+  while(cur<=aD){dates.push(new Date(cur));cur.setDate(cur.getDate()+1);}
 
-const ALL_STATIONS = Array.from({length:26}, (_,i) => `P.${i+10}`);
+  // Usa ALL (già caricati) filtrati per range
+  const docs=ALL.filter(d=>{const dt=toDate(d.dataOra);return dt>=daD&&dt<=aD;});
 
-// ── TURNO OGGI ──
-async function loadTurniOggi() {
-  const bar = document.getElementById('turniBar');
-  bar.innerHTML = `
-    <div class="turno-card"><div class="turno-body" style="padding:1rem"><span style="color:var(--gray);font-size:13px">⏳ Controllo turni in corso...</span></div></div>
-    <div class="turno-card"><div class="turno-body" style="padding:1rem"></div></div>`;
+  const comp={};
+  docs.forEach(d=>{
+    const dk3=toDate(d.dataOra).toISOString().slice(0,10);
+    const h=toDate(d.dataOra).getHours();
+    const p=d.postazione; if(!p) return;
+    if(h>=9&&h<14)  comp[`${dk3}|${p}|m`]=true;
+    if(h>=14&&h<19) comp[`${dk3}|${p}|p`]=true;
+  });
 
-  const today = new Date();
-  const todayStart = new Date(today); todayStart.setHours(0,0,0,0);
-  const todayEnd   = new Date(today); todayEnd.setHours(23,59,59,999);
-
-  try {
-    const snap = await db.collection('diariogiornaliero')
-      .where('dataOra', '>=', todayStart)
-      .where('dataOra', '<=', todayEnd)
-      .get();
-
-    const matOk = new Set();
-    const pomOk = new Set();
-
-    snap.forEach(doc => {
-      const d = doc.data();
-      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-      const h = dt.getHours();
-      const p = d.postazione;
-      if (!p) return;
-      if (h >= MAT_START && h < MAT_END) matOk.add(p);
-      if (h >= POM_START && h < POM_END) pomOk.add(p);
+  // Stats
+  let tot=dates.length*ALL_P.length*2, miss=0, daysOk=0;
+  dates.forEach(d=>{
+    const dk4=d.toISOString().slice(0,10);
+    let ok=true;
+    ALL_P.forEach(p=>{
+      if(!comp[`${dk4}|${p}|m`]){miss++;ok=false;}
+      if(!comp[`${dk4}|${p}|p`]){miss++;ok=false;}
     });
+    if(ok) daysOk++;
+  });
+  const pct2=Math.round((1-miss/tot)*100);
 
-    bar.innerHTML = buildTurnoCard('🌅 Mattina', '09:00 – 14:00', matOk, 'mat') +
-                    buildTurnoCard('🌇 Pomeriggio', '14:00 – 19:00', pomOk, 'pom');
+  document.getElementById('m-stats').innerHTML=`
+    <div class="scard"><div class="sval" style="color:${pct2<80?'var(--red)':'var(--green)'}">${pct2}%</div><div class="slbl">Compilazione media</div></div>
+    <div class="scard"><div class="sval" style="color:var(--red)">${miss}</div><div class="slbl">Turni non compilati</div></div>
+    <div class="scard"><div class="sval" style="color:var(--green)">${daysOk}</div><div class="slbl">Giorni 100% completi</div></div>
+    <div class="scard"><div class="sval">${dates.length}</div><div class="slbl">Giorni analizzati</div></div>`;
 
-  } catch(err) {
-    // Firestore index missing for today query — fallback to allDocs
-    const today2 = new Date();
-    const matOk = new Set(); const pomOk = new Set();
-    allDocs.forEach(d => {
-      const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-      if (dt.toDateString() !== today2.toDateString()) return;
-      const h = dt.getHours();
-      if (h >= MAT_START && h < MAT_END) matOk.add(d.postazione);
-      if (h >= POM_START && h < POM_END) pomOk.add(d.postazione);
+  // Griglia
+  const tbl=document.getElementById('mtable');
+  let h2=`<thead><tr><th>Data</th>${ALL_P.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
+  let body='<tbody>';
+  dates.forEach(d=>{
+    const dk5=d.toISOString().slice(0,10);
+    const lbl=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    let row=`<tr><td>${lbl}</td>`;
+    ALL_P.forEach(p=>{
+      const m=comp[`${dk5}|${p}|m`], pp=comp[`${dk5}|${p}|p`];
+      if(m&&pp)    row+=`<td class="cb" title="${p}">MP</td>`;
+      else if(m)   row+=`<td class="cm" title="${p}">M</td>`;
+      else if(pp)  row+=`<td class="cp" title="${p}">P</td>`;
+      else         row+=`<td class="cn" title="${p}">✗</td>`;
     });
-    bar.innerHTML = buildTurnoCard('🌅 Mattina', '09:00 – 14:00', matOk, 'mat') +
-                    buildTurnoCard('🌇 Pomeriggio', '14:00 – 19:00', pomOk, 'pom');
-  }
+    row+='</tr>';
+    body+=row;
+  });
+  body+='</tbody>';
+  tbl.innerHTML=h2+body;
 }
 
-function buildTurnoCard(label, orario, okSet, turno) {
-  const missing = ALL_STATIONS.filter(s => !okSet.has(s));
-  const nOk = okSet.size;
-  const tot = ALL_STATIONS.length;
-  const pct = Math.round(nOk/tot*100);
-  const scoreClass = pct === 100 ? 'ok' : pct >= 60 ? 'warn' : 'bad';
-
-  const chipsHtml = missing.length === 0
-    ? `<span class="chip-ok-all">✅ Tutte le postazioni hanno compilato</span>`
-    : missing.map(s => `<span class="chip-miss">${s}</span>`).join('');
-
-  return `<div class="turno-card">
-    <div class="turno-header">
-      <div>
-        <div class="turno-label">${label}</div>
-        <div class="turno-ora">${orario}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="turno-score ${scoreClass}">${nOk}/${tot}</div>
-        <div style="font-size:11px;color:var(--gray)">${missing.length} mancanti</div>
-      </div>
-    </div>
-    <div class="turno-body">
-      ${missing.length > 0 ? `<div class="turno-miss-title">Postazioni mancanti</div>` : ''}
-      <div class="turno-chips">${chipsHtml}</div>
-    </div>
-  </div>`;
+// ══════════════════════════════
+//  EXPORT CSV
+// ══════════════════════════════
+function exportCSV(){
+  const rows=[['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Mancanze','Note']];
+  VIEW.forEach(d=>{
+    const dt=toDate(d.dataOra);
+    rows.push([
+      dt.toLocaleDateString('it-IT'),
+      dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+      d.postazione||'',d.bagnino||'',
+      d.meteo?.stateMare||'',d.meteo?.bandiera||'',
+      (d.interventi||[]).length,chkPct(d.checklist),
+      (d.foto||[]).length,getManc(d.checklist).join(' / '),
+      (d.note||'').replace(/,/g,' ')
+    ]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a2=document.createElement('a');
+  a2.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
+  a2.download=`diario_omnia_${fmt(new Date())}.csv`;
+  a2.click();
 }
 
-// ── MANCANTI STORICO ──
-async function renderMancanti() {
-  const da = document.getElementById('m-da').value;
-  const a  = document.getElementById('m-a').value;
-  if (!da || !a) return;
-
-  const daDate = new Date(da);
-  const aDate  = new Date(a);
-
-  // Build list of dates in range
-  const dates = [];
-  const cur = new Date(daDate);
-  while (cur <= aDate) {
-    dates.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
-  }
-
-  // Group allDocs by date+station+turno
-  // Use allDocs (already loaded) and also query extra if needed
-  const compiled = {}; // key: "YYYY-MM-DD|P.XX|mat" or "pom"
-
-  // Fetch data for the range (use allDocs + fetch more if needed)
-  let rangeDocs = allDocs.filter(d => {
-    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-    return dt >= daDate && dt <= new Date(a + 'T23:59:59');
-  });
-
-  // If range might have data not in allDocs, fetch from Firestore
-  try {
-    const snap = await db.collection('diariogiornaliero')
-      .where('dataOra', '>=', daDate)
-      .where('dataOra', '<=', new Date(a + 'T23:59:59'))
-      .get();
-    rangeDocs = snap.docs.map(d => ({id:d.id,...d.data()}));
-  } catch(e) {
-    // use allDocs subset already filtered above
-  }
-
-  rangeDocs.forEach(d => {
-    const dt = d.dataOra?.toDate ? d.dataOra.toDate() : new Date(d.dataOra);
-    const dateKey = dt.toISOString().slice(0,10);
-    const h = dt.getHours();
-    const p = d.postazione;
-    if (!p) return;
-    if (h >= MAT_START && h < MAT_END) compiled[`${dateKey}|${p}|mat`] = true;
-    if (h >= POM_START && h < POM_END) compiled[`${dateKey}|${p}|pom`] = true;
-  });
-
-  // Summary stats
-  let totalSlots = dates.length * ALL_STATIONS.length * 2;
-  let totalMiss  = 0;
-  let daysAllOk  = 0;
-
-  dates.forEach(d => {
-    const dk = d.toISOString().slice(0,10);
-    let dayOk = true;
-    ALL_STATIONS.forEach(s => {
-      if (!compiled[`${dk}|${s}|mat`]) { totalMiss++; dayOk=false; }
-      if (!compiled[`${dk}|${s}|pom`]) { totalMiss++; dayOk=false; }
-    });
-    if (dayOk) daysAllOk++;
-  });
-
-  const missRate = Math.round(totalMiss/totalSlots*100);
-
-  document.getElementById('missSummary').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-val" style="color:${missRate>20?'var(--danger)':'var(--success)'}">${100-missRate}%</div>
-      <div class="stat-label">Compilazione media</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" style="color:var(--danger)">${totalMiss}</div>
-      <div class="stat-label">Turni non compilati</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" style="color:var(--success)">${daysAllOk}</div>
-      <div class="stat-label">Giorni 100% completi</div>
-    </div>`;
-
-  // Build table: rows = dates, cols = stations
-  const table = document.getElementById('missTable');
-  let thead = '<thead><tr><th>Data</th>';
-  ALL_STATIONS.forEach(s => thead += `<th>${s}</th>`);
-  thead += '</tr></thead>';
-
-  let tbody = '<tbody>';
-  dates.forEach(d => {
-    const dk = d.toISOString().slice(0,10);
-    const label = d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
-    let row = `<tr><td>${label}</td>`;
-    ALL_STATIONS.forEach(s => {
-      const mat = compiled[`${dk}|${s}|mat`];
-      const pom = compiled[`${dk}|${s}|pom`];
-      if (mat && pom)       row += `<td class="cell-both" title="${s} — M+P">M P</td>`;
-      else if (mat && !pom) row += `<td class="cell-mat"  title="${s} — solo Mattina">M</td>`;
-      else if (!mat && pom) row += `<td class="cell-pom"  title="${s} — solo Pomeriggio">P</td>`;
-      else                  row += `<td class="cell-none" title="${s} — nessuno">✗</td>`;
-    });
-    row += '</tr>';
-    tbody += row;
-  });
-  tbody += '</tbody>';
-
-  table.innerHTML = thead + tbody;
+// ══════════════════════════════
+//  HELPERS
+// ══════════════════════════════
+function toDate(v){ return v?.toDate ? v.toDate() : (v ? new Date(v) : new Date(0)); }
+function fmt(d){ return d.toISOString().slice(0,10); }
+function chkPct(c){ if(!c) return 0; const v=Object.values(c); return v.length?Math.round(v.filter(Boolean).length/v.length*100):0; }
+function getManc(c){ if(!c) return []; return Object.entries(c).filter(([,v])=>v===false).map(([k])=>CHK[k]||k); }
+function bBand(b){
+  if(b==='verde')  return '<span class="bv bv-g">🟢 Verde</span>';
+  if(b==='gialla') return '<span class="bv bv-y">🟡 Gialla</span>';
+  if(b==='rossa')  return '<span class="bv bv-r">🔴 Rossa</span>';
+  return '<span style="color:#ccc">—</span>';
 }
-
-
-
+function bChk(p){
+  if(p===100) return `<span class="bv bv-ok">✓ 100%</span>`;
+  if(p>=80)   return `<span class="bv bv-b">${p}%</span>`;
+  return `<span class="bv bv-w">⚠ ${p}%</span>`;
+}
 </script>
-
 </body>
 </html>
