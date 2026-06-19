@@ -758,7 +758,7 @@ tr.active .td-arrow { transform: rotate(90deg); color: var(--orange); }
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
+          <tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -937,11 +937,11 @@ async function loadData(append = false) {
   if (!append) { allDocs = []; lastDoc = null; }
 
   const tbody = document.getElementById('tableBody');
-  if (!append) tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
+  if (!append) tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">⏳</div>Caricamento...</div></td></tr>`;
 
   try {
     // Query semplice senza indici compositi — filtri tutti lato client
-    let q = db.collection('diariogiornaliero').orderBy('ts', 'desc').limit(500);
+    let q = db.collection('diariogiornaliero').orderBy('dataOra', 'desc').limit(500);
     if (lastDoc) q = q.startAfter(lastDoc);
 
     const snap = await q.get();
@@ -983,7 +983,10 @@ async function loadData(append = false) {
 
   } catch(err) {
     console.error('Firestore error:', err);
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">❌</div>Errore caricamento: ${err.message}<br><small style="margin-top:6px;display:block">Apri la console del browser (F12) per i dettagli.</small></div></td></tr>`;
+    const msg = err.code === 'failed-precondition'
+      ? 'Indice Firestore mancante. Contatta l'amministratore.'
+      : (err.message || err.code || 'Errore sconosciuto');
+    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">❌</div>${msg}</div></td></tr>`;
   }
 }
 
@@ -1004,7 +1007,7 @@ function render() {
   tbody.innerHTML = '';
 
   if (allDocs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="state-msg"><div class="icon">📭</div>Nessun diario trovato per i filtri selezionati.</div></td></tr>`;
     updateStats([]);
     return;
   }
@@ -1034,6 +1037,7 @@ function render() {
       <td>${nInt > 0 ? `<span class="badge badge-int">${nInt} intervento${nInt>1?'i':''}</span>` : '<span style="color:var(--gray);font-size:12px">—</span>'}</td>
       <td>${chkBadge(chkPct)}</td>
       <td>${nFoto > 0 ? `📷 ${nFoto}` : '—'}</td>
+      <td>${getMancanze(doc.checklist).length > 0 ? `<span class="badge-mancanza">⚠️ ${getMancanze(doc.checklist).length}</span>` : '<span style="color:#aaa;font-size:13px">✓</span>'}</td>
     `;
     tr.addEventListener('click', () => toggleDetail(doc, tr));
     tbody.appendChild(tr);
@@ -1044,7 +1048,7 @@ function render() {
     trD.id = 'detail-' + doc.id;
     trD.style.display = 'none';
     const tdD = document.createElement('td');
-    tdD.colSpan = 9;
+    tdD.colSpan = 10;
     tdD.innerHTML = buildDetail(doc);
     trD.appendChild(tdD);
     tbody.appendChild(trD);
