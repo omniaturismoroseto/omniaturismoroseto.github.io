@@ -362,6 +362,59 @@ select {
   background: var(--orange-pale); color: var(--orange);
   margin-left: 6px;
 }
+
+/* ── PER-LIDO CHECKLIST ── */
+.lido-group {
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 0.625rem;
+  overflow: hidden;
+}
+.lido-group:last-child { margin-bottom: 0; }
+.lido-title {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 0.875rem;
+  background: var(--navy-mid);
+  cursor: pointer;
+  user-select: none;
+}
+.lido-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fff;
+}
+.lido-score {
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.7);
+}
+.lido-score.ok { color: #6EE7B7; }
+.lido-score.warn { color: #FCD34D; }
+.lido-items { padding: 0.25rem 0; }
+.lido-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid rgba(11,37,69,0.08);
+  cursor: pointer; user-select: none;
+}
+.lido-item:last-child { border-bottom: none; }
+.lido-box {
+  flex-shrink: 0; width: 20px; height: 20px;
+  border-radius: 5px; border: 1.5px solid rgba(11,37,69,0.25);
+  background: #fff; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; margin-top: 1px;
+  transition: background 0.14s, border-color 0.14s;
+}
+.lido-item.checked .lido-box { background: #1A8A4A; border-color: #1A8A4A; color: #fff; }
+.lido-item.checked .lido-text { text-decoration: line-through; color: var(--gray-text); }
+.lido-text { font-size: 13.5px; line-height: 1.4; }
+.lido-sub { font-size: 11px; color: var(--gray-text); display: block; margin-top: 1px; }
+.no-post-msg {
+  font-size: 13px; color: var(--gray-text); font-style: italic;
+  padding: 0.5rem 0;
+}
+
 </style>
 </head>
 
@@ -389,7 +442,7 @@ select {
     <div class="row2">
       <div class="field">
         <label>Postazione</label>
-        <select id="postazione">
+        <select id="postazione" onchange="buildLidiSection(this.value)">
           <option value="">— Seleziona —</option>
         </select>
       </div>
@@ -501,33 +554,11 @@ select {
       </div>
     </div>
 
-    <!-- CONTROLLI GENERALI -->
+    <!-- CONTROLLI GENERALI PER LIDO -->
     <div class="chk-group">
-      <div class="chk-group-title">Controlli generali (ogni lido)</div>
-      <div class="chk-item" data-id="salvagente_concessione">
-        <div class="chk-box"></div>
-        <div class="chk-text">
-          N.2 salvagente agli estremi di ogni concessione pattugliata
-          <span class="chk-sub">Sagola in ordine</span>
-        </div>
-      </div>
-      <div class="chk-item" data-id="bandiere_ok">
-        <div class="chk-box"></div>
-        <div class="chk-text">
-          Bandiere verde, gialla e rossa presenti
-          <span class="chk-sub">Se il palo ha una sola corda, la bandiera gialla deve essere nel cassone</span>
-        </div>
-      </div>
-      <div class="chk-item" data-id="limite_acque">
-        <div class="chk-box"></div>
-        <div class="chk-text">Limiti acque sicure posizionati in mare</div>
-      </div>
-      <div class="chk-item" data-id="boa_300m">
-        <div class="chk-box"></div>
-        <div class="chk-text">
-          Boa dei 300m dietro gli scogli
-          <span class="chk-sub">Verificare per ogni lido coperto</span>
-        </div>
+      <div class="chk-group-title">Controlli generali per lido</div>
+      <div id="lidi-container">
+        <div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>
       </div>
     </div>
 
@@ -734,8 +765,8 @@ const storage = firebase.storage();
 })();
 
 function updateChkCounter() {
-  const total  = document.querySelectorAll('.chk-item').length;
-  const done   = document.querySelectorAll('.chk-item.checked').length;
+  const total  = document.querySelectorAll('.chk-item').length + document.querySelectorAll('.lido-item').length;
+  const done   = document.querySelectorAll('.chk-item.checked').length + document.querySelectorAll('.lido-item.checked').length;
   document.getElementById('chkDone').textContent  = done;
   document.getElementById('chkTotal').textContent = total;
   document.getElementById('chkAlert').classList.toggle('show', done < total);
@@ -951,6 +982,7 @@ async function submitForm() {
         affluenza: getChips('affluenza')[0] || null,
       },
       checklist: collectChecklist(),
+      lidiChecklist: collectLidiState(),
       interventi: collectInterventi(),
       note:  document.getElementById('note').value.trim(),
       foto:  fotoUrls,
@@ -992,6 +1024,7 @@ function resetForm() {
   });
 
   resetChecklist();
+  resetLidiSection();
   setNow();
 }
 
@@ -1041,6 +1074,123 @@ async function loadStorico() {
     list.innerHTML = `<p style="font-size:13px;color:#991B1B">Errore: ${err.message}</p>`;
   }
 }
+
+// ══════════════════════════════════════
+//  MAPPA LIDI PER POSTAZIONE
+// ══════════════════════════════════════
+const LIDI_MAP = {
+  'P.10': ['Orsa Minore','Scirocco'],
+  'P.11': ['Ahamar','Papenoo'],
+  'P.12': ['Lido La Vela','Mirage'],
+  'P.13': ['Bagni Marini','Nettuno'],
+  'P.14': ['Bolla Mare','Lido Luigi'],
+  'P.15': ['La Paranzella','Costa Est'],
+  'P.16': ['Celommi','Lucciola'],
+  'P.17': ['Marisella','Mirella'],
+  'P.18': ['Sirenetta','Mediterraneo'],
+  'P.19': ['Lauretta','Atlantic'],
+  'P.20': ['Lido Azzurra','Circolo Velico'],
+  'P.21': ['Aurora','Moro'],
+  'P.22': ['Bellavista','Oltremare'],
+  'P.23': ['Lido Aragosta'],
+  'P.24': ['Riva del Sol','Luna Rossa'],
+  'P.25': ['Onda Blu','Tropical','Oasis'],
+  'P.26': ['Lido38'],
+  'P.27': ['VVF','Lido Sahara'],
+  'P.28': ['Casa del Mar','Vista Mare','Di Matteo'],
+  'P.29': ['Maldimare','Embarcadero'],
+  'P.30': ['Bora Bora','Roses'],
+  'P.31': ['Lo Squalo','Bagni Bruno'],
+  'P.32': ['Camping Nino','Stella Maris'],
+  'P.33': ['Camping Surabaia'],
+  'P.34': ['Tartaruga','Narcisi'],
+  'P.35': ['Cabana Park','Altamira','Baia de Cuba']
+};
+
+const LIDO_ITEMS = [
+  {id:'salvagente', label:'N.2 salvagente agli estremi', sub:'Sagola in ordine'},
+  {id:'bandiere',   label:'Bandiere verde, gialla e rossa presenti', sub:'Se palo con una corda → bandiera gialla nel cassone'},
+  {id:'acque',      label:'Limiti acque sicure in mare', sub:''},
+  {id:'boa',        label:'Boa dei 300m dietro gli scogli', sub:''},
+];
+
+// lidiState: { 'Orsa Minore': { salvagente: false, bandiere: false, ... }, ... }
+let lidiState = {};
+
+function buildLidiSection(postazione) {
+  const container = document.getElementById('lidi-container');
+  const lidi = LIDI_MAP[postazione];
+
+  if (!lidi) {
+    container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
+    lidiState = {};
+    return;
+  }
+
+  // Init state
+  lidiState = {};
+  lidi.forEach(lido => {
+    lidiState[lido] = {};
+    LIDO_ITEMS.forEach(item => lidiState[lido][item.id] = false);
+  });
+
+  container.innerHTML = lidi.map(lido => buildLidoCard(lido)).join('');
+
+  // Attach click handlers
+  container.querySelectorAll('.lido-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const lido = el.dataset.lido;
+      const iid  = el.dataset.item;
+      const checked = el.classList.toggle('checked');
+      const box = el.querySelector('.lido-box');
+      box.textContent = checked ? '✓' : '';
+      lidiState[lido][iid] = checked;
+      updateLidoScore(lido);
+      updateChkCounter();
+    });
+  });
+}
+
+function buildLidoCard(lido) {
+  const items = LIDO_ITEMS.map(item => `
+    <div class="lido-item" data-lido="${lido}" data-item="${item.id}">
+      <div class="lido-box"></div>
+      <div class="lido-text">${item.label}
+        ${item.sub ? `<span class="lido-sub">${item.sub}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `<div class="lido-group" id="lido-${lido.replace(/[^a-zA-Z0-9]/g,'_')}">
+    <div class="lido-title">
+      <span class="lido-name">🏖 ${lido}</span>
+      <span class="lido-score warn" id="score-${lido.replace(/[^a-zA-Z0-9]/g,'_')}">0/${LIDO_ITEMS.length}</span>
+    </div>
+    <div class="lido-items">${items}</div>
+  </div>`;
+}
+
+function updateLidoScore(lido) {
+  const state = lidiState[lido];
+  if (!state) return;
+  const tot = LIDO_ITEMS.length;
+  const done = Object.values(state).filter(Boolean).length;
+  const scoreEl = document.getElementById('score-' + lido.replace(/[^a-zA-Z0-9]/g,'_'));
+  if (scoreEl) {
+    scoreEl.textContent = `${done}/${tot}`;
+    scoreEl.className = 'lido-score ' + (done === tot ? 'ok' : 'warn');
+  }
+}
+
+function collectLidiState() {
+  return lidiState;
+}
+
+function resetLidiSection() {
+  lidiState = {};
+  const container = document.getElementById('lidi-container');
+  container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
+}
+
 </script>
 
 </body>
