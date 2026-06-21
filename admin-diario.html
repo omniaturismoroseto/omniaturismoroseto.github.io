@@ -13,99 +13,69 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root {
-  --navy:#0B2545; --navy2:#1B3A6B; --orange:#E8731A;
-  --sand:#F4F1EB; --white:#fff; --gray:#6B7280;
-  --gray-bg:#F0EEE9; --border:rgba(11,37,69,0.13);
-  --r:12px; --r2:8px; --green:#1A8A4A; --red:#C0392B;
+:root{
+  --navy:#0B2545;--navy2:#1B3A6B;--orange:#E8731A;
+  --sand:#F4F1EB;--white:#fff;--gray:#6B7280;
+  --gray-bg:#F0EEE9;--border:rgba(11,37,69,0.13);
+  --r:12px;--r2:8px;--green:#1A8A4A;--red:#C0392B;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Barlow',sans-serif;background:var(--sand);color:var(--navy);min-height:100vh}
 
 /* HEADER */
-header{background:var(--navy);padding:.875rem 1.25rem;display:flex;align-items:center;gap:12px;
-  position:sticky;top:0;z-index:100;border-bottom:2px solid var(--orange)}
-.hbadge{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;
-  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  padding:3px 9px;border-radius:4px}
+header{background:var(--navy);padding:.875rem 1.25rem;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--orange)}
+.hbadge{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:4px}
 header h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#fff}
 #hcount{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.5)}
 
 /* LAYOUT */
-.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 54px)}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 54px)}
 
 /* SIDEBAR */
-.sidebar{background:var(--white);border-right:1px solid var(--border);
-  padding:1.125rem;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
-.ftitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--orange);
-  margin-bottom:.75rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:1.125rem;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.ftitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:.75rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
 .fg{margin-bottom:.875rem}
 .fl{display:block;font-size:11.5px;font-weight:600;color:var(--gray);margin-bottom:4px}
-select.fi,input.fi{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);
-  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);
-  background:var(--gray-bg);outline:none;appearance:none;-webkit-appearance:none}
-select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center;padding-right:2rem}
-.btn-p{width:100%;padding:.6rem;background:var(--navy);color:#fff;border:none;
-  border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:15px;
-  font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:.25rem}
-.btn-s{width:100%;padding:.5rem;background:none;border:1.5px solid var(--border);
-  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;
-  color:var(--gray);cursor:pointer;margin-top:.5rem}
+select.fi,input.fi{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);background:var(--gray-bg);outline:none;appearance:none;-webkit-appearance:none}
+select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:2rem}
+.btn-p{width:100%;padding:.6rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:.25rem}
+.btn-s{width:100%;padding:.5rem;background:none;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;margin-top:.5rem}
 
 /* MAIN */
 .main{padding:1.125rem;overflow-x:auto}
 
 /* MANCANZE ALERT */
-.malert{background:#FFF7ED;border:2px solid var(--orange);border-radius:var(--r);
-  margin-bottom:1rem;overflow:hidden;display:none}
-.malert-hd{background:var(--orange);padding:.625rem 1rem;display:flex;
-  align-items:center;justify-content:space-between}
-.malert-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;color:#fff}
-.malert-cnt{background:rgba(255,255,255,.25);color:#fff;border-radius:12px;
-  padding:1px 8px;font-size:12px;font-weight:700}
+.malert{background:#FFF7ED;border:2px solid var(--orange);border-radius:var(--r);margin-bottom:1rem;overflow:hidden;display:none}
+.malert-hd{background:var(--orange);padding:.625rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.malert-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff}
+.malert-cnt{background:rgba(255,255,255,.25);color:#fff;border-radius:12px;padding:1px 8px;font-size:12px;font-weight:700}
 .malert-body{padding:.75rem 1rem}
-.mrow{display:flex;align-items:flex-start;gap:10px;padding:.5rem 0;
-  border-bottom:1px solid rgba(232,115,26,.15);font-size:13px}
+.mrow{display:flex;align-items:flex-start;gap:10px;padding:.5rem 0;border-bottom:1px solid rgba(232,115,26,.15);font-size:13px}
 .mrow:last-child{border-bottom:none}
-.mpost{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
-  color:var(--navy);min-width:46px}
+.mpost{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--navy);min-width:46px}
 .mmeta{color:var(--gray);font-size:11.5px;margin-bottom:3px}
 .mchips{display:flex;flex-wrap:wrap;gap:4px}
-.mchip{padding:2px 8px;border-radius:4px;background:#FEE2E2;color:#991B1B;
-  font-size:11.5px;font-weight:600;border:1px solid #FCA5A5}
+.mchip{padding:2px 8px;border-radius:4px;background:#FEE2E2;color:#991B1B;font-size:11.5px;font-weight:600;border:1px solid #FCA5A5}
 
 /* TURNI */
 .turni{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:1rem}
 .tcard{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
-.tcard-hd{display:flex;align-items:center;justify-content:space-between;
-  padding:.75rem 1rem;border-bottom:1px solid var(--border)}
-.tcard-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}
+.tcard-hd{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.tcard-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}
 .tcard-ora{font-size:11.5px;color:var(--gray);font-weight:500}
 .tscore{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1}
 .tscore.ok{color:var(--green)}.tscore.warn{color:var(--orange)}.tscore.bad{color:var(--red)}
 .tcard-body{padding:.75rem 1rem}
-.tmiss-title{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:.5rem}
 .tchips{display:flex;flex-wrap:wrap;gap:5px}
-.tchip{padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;
-  background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
-.tok{font-size:13px;color:var(--green);font-weight:600}
+.tchip{padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
 
 /* TABS */
-.tabs{display:flex;background:var(--white);border-radius:var(--r) var(--r) 0 0;
-  border:1px solid var(--border);border-bottom:2px solid var(--border);
-  margin-bottom:1rem;overflow:hidden}
-.tbtn{padding:.75rem 1.25rem;font-family:'Barlow Condensed',sans-serif;font-size:14px;
-  font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;
-  background:none;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs{display:flex;background:var(--white);border-radius:var(--r) var(--r) 0 0;border:1px solid var(--border);margin-bottom:1rem;overflow:hidden}
+.tbtn{padding:.75rem 1.125rem;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;background:none;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
 .tbtn.on{color:var(--orange);border-bottom-color:var(--orange)}
 .tpanel{display:none}.tpanel.on{display:block}
 
-/* STATS CARDS */
+/* STAT CARDS */
 .scards{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
 .scard{background:var(--white);border-radius:var(--r2);padding:.875rem 1rem;border:1px solid var(--border)}
 .sval{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--navy);line-height:1}
@@ -113,15 +83,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 /* TABLE */
 .twrap{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:1rem}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead tr{background:var(--navy);color:#fff}
-th{padding:.7rem .875rem;text-align:left;font-family:'Barlow Condensed',sans-serif;
-  font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#F8F6F2}
-tbody tr.on{background:#EEF3FB}
-td{padding:.65rem .875rem;color:var(--navy);white-space:nowrap}
+table.main-table{width:100%;border-collapse:collapse;font-size:13px}
+table.main-table thead tr{background:var(--navy);color:#fff}
+table.main-table th{padding:.7rem .875rem;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+table.main-table tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+table.main-table tbody tr:last-child{border-bottom:none}
+table.main-table tbody tr:hover{background:#F8F6F2}
+table.main-table tbody tr.on{background:#EEF3FB}
+table.main-table td{padding:.65rem .875rem;color:var(--navy);white-space:nowrap}
 .arr{color:var(--gray);font-size:16px;transition:transform .2s}
 tr.on .arr{transform:rotate(90deg);color:var(--orange)}
 
@@ -133,165 +102,99 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
 .bv-b{background:#EEF3FB;color:var(--navy2)}
 .bv-ok{background:#ECFDF5;color:#065F46}
 .bv-w{background:#FEE2E2;color:#991B1B}
-.bv-m{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;
-  font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
+.bv-m{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
 
 /* DETAIL */
 .drow td{padding:0;background:#F8F6F2;cursor:default}
 .dinner{padding:1.125rem 1.25rem;border-top:2px solid var(--orange)}
-.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-bottom:.875rem}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}
 .dc{background:var(--white);border-radius:var(--r2);padding:.875rem 1rem;border:1px solid var(--border)}
 .dc.s2{grid-column:span 2}.dc.s3{grid-column:span 3}
-.dct{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--orange);
-  margin-bottom:.5rem;border-bottom:1px solid var(--border);padding-bottom:4px}
+.dct{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:.5rem;border-bottom:1px solid var(--border);padding-bottom:4px}
 .dr{display:flex;gap:6px;font-size:13px;margin-bottom:3px}
 .dk{color:var(--gray);font-weight:600;flex-shrink:0;min-width:85px}
 .dv{color:var(--navy);font-weight:500}
 .ckgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px 1rem}
 .ckline{display:flex;align-items:center;gap:5px;font-size:12.5px}
-.ibox{background:var(--gray-bg);border-radius:6px;padding:.6rem .75rem;
-  margin-bottom:.5rem;font-size:13px;border-left:3px solid var(--orange)}
+.ibox{background:var(--gray-bg);border-radius:6px;padding:.6rem .75rem;margin-bottom:.5rem;font-size:13px;border-left:3px solid var(--orange)}
 .igal{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .igal a{display:block;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
 .igal img{width:100%;height:100%;object-fit:cover}
+.lido-d-group{background:var(--gray-bg);border-radius:6px;border:1px solid var(--border);margin-bottom:.5rem;overflow:hidden}
+.lido-d-hd{background:var(--navy2);padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;display:flex;justify-content:space-between}
+.lido-d-body{padding:4px 0}
+.lido-d-line{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:12.5px;border-bottom:1px solid rgba(11,37,69,0.06)}
+.lido-d-line:last-child{border-bottom:none}
 
 /* STATS PAGE */
-.stitle{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--orange);
-  margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
 .stitle::before{content:'';width:3px;height:13px;background:var(--orange);border-radius:2px}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:1.25rem}
 .cc{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:1rem 1.25rem}
 .cc.full{grid-column:span 2}
-.ctitle{font-size:11.5px;font-weight:700;color:var(--gray);text-transform:uppercase;
-  letter-spacing:.1em;margin-bottom:.875rem}
+.ctitle{font-size:11.5px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.875rem}
 .cwrap{position:relative;height:200px}
 .cwrap.tall{height:300px}
 
 /* MANCANTI TAB */
 .mcontrols{display:flex;gap:.75rem;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap}
 .mcontrols label{font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:3px}
-.mcontrols input{padding:.45rem .75rem;border:1.5px solid var(--border);
-  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;
-  outline:none;background:var(--gray-bg);color:var(--navy)}
-.btn-sm{padding:.5rem 1rem;background:var(--navy);color:#fff;border:none;
-  border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;
-  font-weight:700;letter-spacing:.06em;cursor:pointer;align-self:flex-end}
+.mcontrols input{padding:.45rem .75rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;outline:none;background:var(--gray-bg);color:var(--navy)}
+.btn-sm{padding:.5rem 1rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;align-self:flex-end}
 .mlegend{display:flex;gap:.875rem;flex-wrap:wrap;margin-bottom:.875rem;font-size:12px}
 .mleg{display:flex;align-items:center;gap:5px}
 .mleg-dot{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
 .mtable-wrap{overflow-x:auto}
 .mtable{border-collapse:collapse;font-size:12px;white-space:nowrap}
-.mtable th{padding:5px 7px;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;
-  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  position:sticky;top:0;border-right:1px solid rgba(255,255,255,.1)}
+.mtable th{padding:5px 7px;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;position:sticky;top:0;border-right:1px solid rgba(255,255,255,.1)}
 .mtable th:first-child{left:0;z-index:2;min-width:75px}
 .mtable td{padding:4px 6px;border:1px solid var(--border);text-align:center}
-.mtable td:first-child{font-weight:600;font-size:11.5px;background:var(--white);
-  position:sticky;left:0;border-right:2px solid var(--border)}
+.mtable td:first-child{font-weight:600;font-size:11.5px;background:var(--white);position:sticky;left:0;border-right:2px solid var(--border)}
 .cb{background:#DCFCE7;color:#166534;font-weight:700}
 .cm{background:#FEF9C3;color:#854D0E;font-weight:600}
 .cp{background:#DBEAFE;color:#1E40AF;font-weight:600}
 .cn{background:#FEE2E2;color:#991B1B;font-weight:700}
 
+/* REPORT TAB */
+.rperiods{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.rperiod-btn{padding:.625rem 1.25rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--white);color:var(--navy);cursor:pointer;transition:all .15s}
+.rperiod-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rcustom{display:none;align-items:flex-end;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.rcustom.show{display:flex}
+.rcustom label{font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:3px}
+.rcustom input{padding:.45rem .75rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;outline:none;background:var(--gray-bg);color:var(--navy)}
+.rprev{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:1.125rem;margin-bottom:1.25rem}
+.rprev-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:.875rem}
+.rstat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.625rem}
+.rstat{background:var(--gray-bg);border-radius:var(--r2);padding:.625rem .75rem;text-align:center}
+.rstat-v{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--navy)}
+.rstat-l{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}
+.rdl-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.rdl-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:1.25rem;text-align:center}
+.rdl-icon{font-size:36px;margin-bottom:.5rem}
+.rdl-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:.25rem}
+.rdl-sub{font-size:12px;color:var(--gray);margin-bottom:1rem;line-height:1.5}
+.rdl-btn{padding:.55rem 1.25rem;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.rdl-btn.pdf{background:var(--red);color:#fff}
+.rdl-btn.xls{background:var(--green);color:#fff}
+.rdl-btn:disabled{opacity:.4;cursor:not-allowed}
+
 /* STATE */
 .smsg{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:15px}
 .smsg .ic{font-size:36px;margin-bottom:8px}
-.btnmore{display:block;width:100%;padding:.75rem;background:none;border:1.5px solid var(--border);
-  border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;
-  color:var(--navy2);cursor:pointer}
+.btnmore{display:block;width:100%;padding:.75rem;background:none;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;color:var(--navy2);cursor:pointer;margin-bottom:1rem}
 
 @media(max-width:900px){
   .layout{grid-template-columns:1fr}
   .sidebar{position:static;height:auto}
-  .scards{grid-template-columns:1fr 1fr}
-  .turni{grid-template-columns:1fr}
+  .scards,.rstat-grid{grid-template-columns:1fr 1fr}
+  .turni,.rdl-grid{grid-template-columns:1fr}
   .dgrid{grid-template-columns:1fr}
   .dc.s2,.dc.s3{grid-column:span 1}
   .ckgrid{grid-template-columns:1fr}
   .cgrid{grid-template-columns:1fr}
   .cc.full{grid-column:span 1}
 }
-
-.lido-detail-group {
-  background: var(--gray-bg);
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  margin-bottom: 0.5rem;
-  overflow: hidden;
-}
-.lido-detail-hd {
-  background: var(--navy-mid);
-  padding: 5px 10px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: #fff; display: flex; justify-content: space-between;
-}
-.lido-detail-body { padding: 4px 0; }
-.lido-detail-line {
-  display: flex; align-items: center; gap: 6px;
-  padding: 4px 10px; font-size: 12.5px;
-  border-bottom: 1px solid rgba(11,37,69,0.06);
-}
-.lido-detail-line:last-child { border-bottom: none; }
-
-
-/* ── REPORT TAB ── */
-.rperiods { display:flex; gap:.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
-.rperiod-btn {
-  padding:.625rem 1.25rem;
-  border:1.5px solid var(--border);
-  border-radius:var(--r2);
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  background:var(--white); color:var(--navy); cursor:pointer;
-  transition:all .15s;
-}
-.rperiod-btn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
-.rperiod-custom { display:none; align-items:flex-end; gap:.75rem; flex-wrap:wrap; margin-bottom:1rem; }
-.rperiod-custom.show { display:flex; }
-.rperiod-custom label { font-size:12px; font-weight:600; color:var(--gray); display:block; margin-bottom:3px; }
-.rperiod-custom input { padding:.45rem .75rem; border:1.5px solid var(--border); border-radius:var(--r2);
-  font-family:'Barlow',sans-serif; font-size:14px; outline:none; background:var(--gray-bg); color:var(--navy); }
-
-.rdl-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; }
-.rdl-card {
-  background:var(--white); border-radius:var(--r); border:1px solid var(--border);
-  padding:1.25rem; text-align:center;
-}
-.rdl-icon { font-size:36px; margin-bottom:.5rem; }
-.rdl-title { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700;
-  color:var(--navy); margin-bottom:.25rem; }
-.rdl-sub { font-size:12px; color:var(--gray); margin-bottom:1rem; }
-.rdl-btns { display:flex; gap:.625rem; justify-content:center; }
-.rdl-btn {
-  padding:.55rem 1.25rem; border:none; border-radius:var(--r2);
-  font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700;
-  letter-spacing:.06em; text-transform:uppercase; cursor:pointer; transition:opacity .15s;
-}
-.rdl-btn:hover { opacity:.85; }
-.rdl-btn.pdf { background:#C0392B; color:#fff; }
-.rdl-btn.xls { background:#1A8A4A; color:#fff; }
-.rdl-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-.rpreview {
-  background:var(--white); border-radius:var(--r); border:1px solid var(--border);
-  padding:1.25rem;
-}
-.rpreview-title { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--orange); margin-bottom:.875rem; }
-.rstat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.625rem; margin-bottom:1rem; }
-.rstat { background:var(--gray-bg); border-radius:var(--r2); padding:.625rem .75rem; text-align:center; }
-.rstat-v { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--navy); }
-.rstat-l { font-size:10px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.06em; }
-
-@media(max-width:900px){
-  .rdl-grid{grid-template-columns:1fr}
-  .rstat-grid{grid-template-columns:1fr 1fr}
-}
-
 </style>
 </head>
 <body>
@@ -329,30 +232,27 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
   <button class="btn-s" onclick="resetFilters()">✕ Azzera</button>
   <div style="margin-top:1.25rem">
     <div class="ftitle">Esporta</div>
-    <button class="btn-s" style="margin-top:.5rem" onclick="exportCSV()">⬇ Scarica CSV</button>
+    <button class="btn-s" style="margin-top:.5rem" onclick="exportCSV()">⬇ CSV rapido</button>
   </div>
 </aside>
 
 <main class="main">
 
-  <!-- MANCANZE OGGI -->
   <div id="malert" class="malert"></div>
 
-  <!-- TURNI OGGI -->
   <div class="turni" id="turni">
-    <div class="tcard"><div class="tcard-body"><span style="color:var(--gray);font-size:13px">⏳ Caricamento turni...</span></div></div>
+    <div class="tcard"><div class="tcard-body" style="padding:1rem"><span style="color:var(--gray);font-size:13px">⏳ Caricamento...</span></div></div>
     <div class="tcard"><div class="tcard-body"></div></div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
-    <button class="tbtn on" onclick="tab('diari',this)">📋 Diari</button>
-    <button class="tbtn" onclick="tab('stats',this)">📊 Statistiche</button>
-    <button class="tbtn" onclick="tab('mancanti',this)">🚨 Mancanti</button>
-    <button class="tbtn" onclick="tab('report',this)">📄 Report</button>
+    <button class="tbtn on" onclick="switchTab('diari',this)">📋 Diari</button>
+    <button class="tbtn"    onclick="switchTab('stats',this)">📊 Statistiche</button>
+    <button class="tbtn"    onclick="switchTab('mancanti',this)">🚨 Mancanti</button>
+    <button class="tbtn"    onclick="switchTab('report',this)">📄 Report</button>
   </div>
 
-  <!-- TAB DIARI -->
+  <!-- TAB: DIARI -->
   <div class="tpanel on" id="tab-diari">
     <div class="scards">
       <div class="scard"><div class="sval" id="s-tot">—</div><div class="slbl">Diari totali</div></div>
@@ -361,7 +261,7 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
       <div class="scard"><div class="sval" id="s-chk">—</div><div class="slbl">Checklist complete</div></div>
     </div>
     <div class="twrap">
-      <table>
+      <table class="main-table">
         <thead><tr>
           <th></th><th>Data / Ora</th><th>Postazione</th><th>Bagnino</th>
           <th>Mare</th><th>Bandiera</th><th>Interventi</th><th>Checklist</th>
@@ -373,29 +273,29 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
     <button class="btnmore" id="btnmore" style="display:none" onclick="loadMore()">Carica altri →</button>
   </div>
 
-  <!-- TAB STATISTICHE -->
+  <!-- TAB: STATISTICHE -->
   <div class="tpanel" id="tab-stats">
     <div class="stitle">Riepilogo generale</div>
     <div class="cgrid">
-      <div class="cc"><div class="ctitle">Diari per giorno</div><div class="cwrap"><canvas id="ch-timeline"></canvas></div></div>
-      <div class="cc"><div class="ctitle">Bandiere</div><div class="cwrap"><canvas id="ch-band"></canvas></div></div>
-      <div class="cc"><div class="ctitle">Stato mare</div><div class="cwrap"><canvas id="ch-mare"></canvas></div></div>
-      <div class="cc"><div class="ctitle">Tipi intervento</div><div class="cwrap"><canvas id="ch-int"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Diari per giorno</div><div class="cwrap"><canvas id="cvTimeline"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Bandiere</div><div class="cwrap"><canvas id="cvBand"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Stato mare</div><div class="cwrap"><canvas id="cvMare"></canvas></div></div>
+      <div class="cc"><div class="ctitle">Tipi intervento</div><div class="cwrap"><canvas id="cvInt"></canvas></div></div>
     </div>
     <div class="stitle">Dotazioni mancanti più segnalate</div>
-    <div class="cgrid" style="margin-bottom:1.25rem">
-      <div class="cc full"><div class="ctitle">Mancanze in checklist</div><div class="cwrap" id="ch-mwrap"><canvas id="ch-manc"></canvas></div></div>
+    <div class="cgrid">
+      <div class="cc full"><div class="ctitle">Mancanze checklist</div><div class="cwrap" id="cvMancWrap"><canvas id="cvManc"></canvas></div></div>
     </div>
     <div class="stitle">Per postazione</div>
-    <div class="cgrid" style="margin-bottom:1.25rem">
-      <div class="cc full"><div class="ctitle">Diari e interventi per postazione</div><div class="cwrap tall"><canvas id="ch-post"></canvas></div></div>
+    <div class="cgrid">
+      <div class="cc full"><div class="ctitle">Diari e interventi per postazione</div><div class="cwrap tall"><canvas id="cvPost"></canvas></div></div>
     </div>
     <div class="cc" style="margin-bottom:1rem">
       <div class="ctitle">Dettaglio per postazione</div>
       <div style="overflow-x:auto">
-        <table style="font-size:12px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead><tr style="background:var(--navy);color:#fff">
-            <th style="padding:6px 10px">Postazione</th>
+            <th style="padding:6px 10px;text-align:left">Postazione</th>
             <th style="padding:6px 10px">Diari</th>
             <th style="padding:6px 10px">Interventi</th>
             <th style="padding:6px 10px">Foto</th>
@@ -407,7 +307,7 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
     </div>
   </div>
 
-  <!-- TAB MANCANTI -->
+  <!-- TAB: MANCANTI -->
   <div class="tpanel" id="tab-mancanti">
     <div class="mcontrols">
       <div><label>Da</label><input type="date" id="m-da"></div>
@@ -422,76 +322,63 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
       <div class="mleg"><div class="mleg-dot" style="background:#FEE2E2"></div>Nessuno</div>
     </div>
     <div class="cc">
-      <div class="ctitle">Compilazioni per giorno × postazione</div>
+      <div class="ctitle">Compilazioni giorno × postazione</div>
       <div class="mtable-wrap"><table class="mtable" id="mtable"></table></div>
     </div>
   </div>
 
-
-  <!-- TAB REPORT -->
+  <!-- TAB: REPORT -->
   <div class="tpanel" id="tab-report">
-
     <div class="rperiods">
       <button class="rperiod-btn on" onclick="setRperiod('oggi',this)">📅 Oggi</button>
       <button class="rperiod-btn" onclick="setRperiod('settimana',this)">📅 Questa settimana</button>
-      <button class="rperiod-btn" onclick="setRperiod('custom',this)">🗓 Periodo personalizzato</button>
+      <button class="rperiod-btn" onclick="setRperiod('custom',this)">🗓 Personalizzato</button>
     </div>
-
-    <div class="rperiod-custom" id="rCustomRange">
+    <div class="rcustom" id="rcustom">
       <div><label>Da</label><input type="date" id="r-da"></div>
       <div><label>A</label><input type="date" id="r-a"></div>
       <button class="btn-sm" onclick="refreshReport()">Aggiorna</button>
     </div>
-
-    <!-- Anteprima dati periodo -->
-    <div class="rpreview" style="margin-bottom:1.25rem">
-      <div class="rpreview-title" id="rpreview-label">Riepilogo periodo</div>
-      <div class="rstat-grid" id="rpreview-stats"></div>
+    <div class="rprev">
+      <div class="rprev-title" id="rprev-label">Riepilogo periodo</div>
+      <div class="rstat-grid" id="rprev-stats"></div>
     </div>
-
-    <!-- Download cards -->
     <div class="rdl-grid">
       <div class="rdl-card">
         <div class="rdl-icon">📊</div>
         <div class="rdl-title">Report Excel</div>
-        <div class="rdl-sub">Fogli separati per riepilogo, mancanze,<br>turni non compilati e statistiche per postazione</div>
-        <div class="rdl-btns">
-          <button class="rdl-btn xls" id="btnXls" onclick="downloadXLS()">⬇ Scarica .xlsx</button>
-        </div>
+        <div class="rdl-sub">Riepilogo · Diari · Mancanze<br>Turni non compilati · Statistiche</div>
+        <button class="rdl-btn xls" id="btnXls" onclick="downloadXLS()">⬇ Scarica .xlsx</button>
       </div>
       <div class="rdl-card">
         <div class="rdl-icon">📄</div>
         <div class="rdl-title">Report PDF</div>
-        <div class="rdl-sub">Documento formattato pronto per<br>WhatsApp, email o stampa</div>
-        <div class="rdl-btns">
-          <button class="rdl-btn pdf" id="btnPdf" onclick="downloadPDF()">⬇ Scarica .pdf</button>
-        </div>
+        <div class="rdl-sub">Documento formattato pronto<br>per WhatsApp, email o stampa</div>
+        <button class="rdl-btn pdf" id="btnPdf" onclick="downloadPDF()">⬇ Scarica .pdf</button>
       </div>
     </div>
-
-  </div><!-- /tab-report -->
+  </div>
 
 </main>
 </div>
 
 <script>
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  FIREBASE
-// ══════════════════════════════
-const FB = {
+// ═══════════════════════════════════════
+firebase.initializeApp({
   apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
   authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
   projectId:         "app-segnalazioni-omnia-roseto",
   storageBucket:     "app-segnalazioni-omnia-roseto.firebasestorage.app",
   messagingSenderId: "699028105579",
   appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
-};
-firebase.initializeApp(FB);
+});
 const db = firebase.firestore();
 
-// ══════════════════════════════
-//  COSTANTI
-// ══════════════════════════════
+// ═══════════════════════════════════════
+//  DATI STATICI
+// ═══════════════════════════════════════
 const STATIONS = [
   {n:10,name:"Spiaggia Libera Orsa Minore-Scirocco"},
   {n:11,name:"Spiaggia Libera Ahamar-Papenoo"},
@@ -502,14 +389,13 @@ const STATIONS = [
   {n:20,name:"Lido Azzurra"},{n:21,name:"Aurora"},
   {n:22,name:"Bellavista"},{n:23,name:"Lido Aragosta"},
   {n:24,name:"Riva del Sol"},{n:25,name:"Tropical"},
-  {n:26,name:"Lido38"},
-  {n:27,name:"Spiaggia Libera VVF-Lido Sahara"},
+  {n:26,name:"Lido38"},{n:27,name:"Spiaggia Libera VVF-Lido Sahara"},
   {n:28,name:"Casa del Mar"},{n:29,name:"Maldimare"},
-  {n:30,name:"Bora Bora"},
-  {n:31,name:"Spiaggia Libera Lo Squalo-Bagni Bruno"},
+  {n:30,name:"Bora Bora"},{n:31,name:"Spiaggia Libera Lo Squalo-Bagni Bruno"},
   {n:32,name:"Camping Nino"},{n:33,name:"Camping Surabaia"},
   {n:34,name:"Tartaruga"},{n:35,name:"Cabana Park"}
 ];
+const ALL_P = STATIONS.map(s => `P.${s.n}`);
 
 const LIDI_MAP = {
   'P.10':['Orsa Minore','Scirocco'],
@@ -539,6 +425,16 @@ const LIDI_MAP = {
   'P.34':['Tartaruga','Narcisi'],
   'P.35':['Cabana Park','Altamira','Baia de Cuba']
 };
+
+const CHK_LABELS = {
+  kit_medico:'Kit medico',giubbino:'Giubbino',rullo:'Rullo',caschetto:'Caschetto',
+  scalmi_remi:'Scalmi e remi',mezzo_marinaio:'Mezzo marinaio',ancora:'Ancora',
+  salvagente_pattino:'Salvagente pattino',canotta_rossa:'Canotta rossa',
+  fischietto:'Fischietto',pinne_maschera:'Pinne/maschera',binocolo:'Binocolo',
+  documenti:'Brevetto/BLSD/Visita',salvagente_concessione:'Salvagente concessione',
+  bandiere_ok:'Bandiere',limite_acque:'Limiti acque',boa_300m:'Boa 300m'
+};
+
 const LIDO_ITEM_LABELS = {
   salvagente:'N.2 salvagente (sagola ok)',
   bandiere:'Bandiere verde/gialla/rossa',
@@ -546,223 +442,188 @@ const LIDO_ITEM_LABELS = {
   boa:'Boa 300m dietro gli scogli'
 };
 
-const ALL_P = STATIONS.map(s=>`P.${s.n}`);
-
-const CHK = {
-  kit_medico:'Kit medico',giubbino:'Giubbino',rullo:'Rullo',
-  caschetto:'Caschetto',scalmi_remi:'Scalmi e remi',
-  mezzo_marinaio:'Mezzo marinaio',ancora:'Ancora',
-  salvagente_pattino:'Salvagente pattino',canotta_rossa:'Canotta rossa',
-  fischietto:'Fischietto',pinne_maschera:'Pinne/maschera',
-  binocolo:'Binocolo',documenti:'Brevetto/BLSD/Visita',
-  salvagente_concessione:'Salvagente concessione',
-  bandiere_ok:'Bandiere',limite_acque:'Limiti acque',boa_300m:'Boa 300m'
-};
-
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  STATO
-// ══════════════════════════════
-let ALL = [];   // tutti i docs caricati
-let VIEW = [];  // docs filtrati
+// ═══════════════════════════════════════
+let ALL = [];
+let VIEW = [];
+let CHARTS = {};
+let rPeriod = 'oggi';
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  INIT
-// ══════════════════════════════
-(function init(){
-  // Postazioni select
+// ═══════════════════════════════════════
+(function init() {
   const sel = document.getElementById('f-post');
-  STATIONS.forEach(s=>{
+  STATIONS.forEach(s => {
     const o = document.createElement('option');
-    o.value=`P.${s.n}`; o.textContent=`P.${s.n} — ${s.name}`;
+    o.value = `P.${s.n}`;
+    o.textContent = `P.${s.n} — ${s.name}`;
     sel.appendChild(o);
   });
   load();
 })();
 
-// ══════════════════════════════
-//  LOAD DA FIRESTORE
-// ══════════════════════════════
-async function load(){
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento...</div></td></tr>`;
-
+// ═══════════════════════════════════════
+//  FIRESTORE LOAD
+// ═══════════════════════════════════════
+async function load() {
+  document.getElementById('tbody').innerHTML =
+    '<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento dati...</div></td></tr>';
   try {
-    // Nessun orderBy per evitare problemi di indici — ordiniamo client-side
     const snap = await db.collection('diariogiornaliero').limit(500).get();
-    ALL = snap.docs.map(d=>({id:d.id,...d.data()}));
-
-    // Ordina per dataOra desc
-    ALL.sort((a,b)=>{
-      const da = a.dataOra?.toDate ? a.dataOra.toDate() : new Date(a.dataOra||0);
-      const db2 = b.dataOra?.toDate ? b.dataOra.toDate() : new Date(b.dataOra||0);
-      return db2 - da;
-    });
-
+    ALL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ALL.sort((a, b) => toDate(b.dataOra) - toDate(a.dataOra));
     applyFilters();
     buildTurni();
-
-  } catch(err){
+    buildMalert();
+  } catch (err) {
     console.error(err);
-    tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">❌</div>
-      Errore: ${err.message||err.code}<br>
-      <small>Codice: ${err.code||'—'}</small></div></td></tr>`;
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="10"><div class="smsg"><div class="ic">❌</div>Errore: ${err.message}</div></td></tr>`;
   }
 }
 
-function loadMore(){ /* gestito dal limite 500 per ora */ }
+function loadMore() {}
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  FILTRI
-// ══════════════════════════════
-function applyFilters(){
+// ═══════════════════════════════════════
+function applyFilters() {
   const da   = document.getElementById('f-da').value;
   const a    = document.getElementById('f-a').value;
   const post = document.getElementById('f-post').value;
   const band = document.getElementById('f-band').value;
   const intF = document.getElementById('f-int').value;
 
-  VIEW = ALL.filter(d=>{
+  VIEW = ALL.filter(d => {
     const dt = toDate(d.dataOra);
-    if(da && dt < new Date(da)) return false;
-    if(a  && dt > new Date(a+'T23:59:59')) return false;
-    if(post && d.postazione!==post) return false;
-    if(band && d.meteo?.bandiera!==band) return false;
-    if(intF==='si' && !(d.interventi||[]).length) return false;
-    if(intF==='no' && (d.interventi||[]).length>0) return false;
+    if (da && dt < new Date(da)) return false;
+    if (a  && dt > new Date(a + 'T23:59:59')) return false;
+    if (post && d.postazione !== post) return false;
+    if (band && d.meteo?.bandiera !== band) return false;
+    if (intF === 'si' && !(d.interventi || []).length) return false;
+    if (intF === 'no' && (d.interventi || []).length > 0) return false;
     return true;
   });
-
   render();
-  buildMalert();
 }
 
-function resetFilters(){
-  ['f-da','f-a','f-post','f-band','f-int'].forEach(id=>document.getElementById(id).value='');
+function resetFilters() {
+  ['f-da','f-a','f-post','f-band','f-int'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  RENDER TABELLA
-// ══════════════════════════════
-function render(){
+// ═══════════════════════════════════════
+function render() {
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML='';
-
-  document.getElementById('hcount').textContent=`${VIEW.length} diari`;
+  tbody.innerHTML = '';
+  document.getElementById('hcount').textContent = `${VIEW.length} diari`;
   updateCards();
 
-  if(!VIEW.length){
-    tbody.innerHTML=`<tr><td colspan="10"><div class="smsg"><div class="ic">📭</div>Nessun diario trovato.</div></td></tr>`;
+  if (!VIEW.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="smsg"><div class="ic">📭</div>Nessun diario trovato.</div></td></tr>';
     return;
   }
 
-  VIEW.forEach(doc=>{
-    const dt      = toDate(doc.dataOra);
-    const dstr    = dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const tstr    = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-    const nInt    = (doc.interventi||[]).length;
-    const nFoto   = (doc.foto||[]).length;
-    const pct     = chkPct(doc.checklist);
-    const band    = doc.meteo?.bandiera||'';
-    const mare    = doc.meteo?.stateMare||'—';
-    const manc    = getManc(doc.checklist);
+  VIEW.forEach(doc => {
+    const dt    = toDate(doc.dataOra);
+    const dstr  = dt.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const tstr  = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+    const nInt  = (doc.interventi || []).length;
+    const nFoto = (doc.foto || []).length;
+    const pct   = chkPct(doc.checklist);
+    const band  = doc.meteo?.bandiera || '';
+    const manc  = allMancanze(doc);
 
     const tr = document.createElement('tr');
-    tr.innerHTML=`
+    tr.innerHTML = `
       <td><span class="arr">›</span></td>
       <td><strong>${dstr}</strong><br><span style="color:var(--gray);font-size:11px">${tstr}</span></td>
-      <td><strong>${doc.postazione||'—'}</strong></td>
-      <td>${doc.bagnino||'—'}</td>
-      <td style="text-transform:capitalize">${mare}</td>
+      <td><strong>${doc.postazione || '—'}</strong></td>
+      <td>${doc.bagnino || '—'}</td>
+      <td style="text-transform:capitalize">${doc.meteo?.stateMare || '—'}</td>
       <td>${bBand(band)}</td>
-      <td>${nInt>0?`<span class="bv bv-b">${nInt} interv.</span>`:'<span style="color:#ccc">—</span>'}</td>
+      <td>${nInt > 0 ? `<span class="bv bv-b">${nInt} interv.</span>` : '<span style="color:#ccc">—</span>'}</td>
       <td>${bChk(pct)}</td>
-      <td>${nFoto>0?`📷 ${nFoto}`:'—'}</td>
-      <td>${manc.length>0?`<span class="bv-m">⚠️ ${manc.length}</span>`:'<span style="color:#aaa">✓</span>'}</td>`;
-    tr.addEventListener('click',()=>toggleDetail(doc,tr));
+      <td>${nFoto > 0 ? `📷 ${nFoto}` : '—'}</td>
+      <td>${manc.length > 0 ? `<span class="bv-m">⚠️ ${manc.length}</span>` : '<span style="color:#aaa">✓</span>'}</td>`;
+    tr.addEventListener('click', () => toggleDetail(doc, tr));
     tbody.appendChild(tr);
 
     const drow = document.createElement('tr');
-    drow.className='drow';
-    drow.id='d-'+doc.id;
-    drow.style.display='none';
+    drow.className = 'drow';
+    drow.id = 'dr-' + doc.id;
+    drow.style.display = 'none';
     const dtd = document.createElement('td');
-    dtd.colSpan=10;
-    dtd.innerHTML=buildDetail(doc);
+    dtd.colSpan = 10;
+    dtd.innerHTML = buildDetail(doc);
     drow.appendChild(dtd);
     tbody.appendChild(drow);
   });
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  DETAIL
-// ══════════════════════════════
-function toggleDetail(doc,tr){
-  const drow = document.getElementById('d-'+doc.id);
-  const wasOpen = drow.style.display!=='none';
-  document.querySelectorAll('.drow').forEach(r=>r.style.display='none');
-  document.querySelectorAll('tbody tr:not(.drow)').forEach(r=>r.classList.remove('on'));
-  if(!wasOpen){ drow.style.display=''; tr.classList.add('on'); }
+// ═══════════════════════════════════════
+function toggleDetail(doc, tr) {
+  const drow = document.getElementById('dr-' + doc.id);
+  const wasOpen = drow.style.display !== 'none';
+  document.querySelectorAll('.drow').forEach(r => r.style.display = 'none');
+  document.querySelectorAll('tbody tr:not(.drow)').forEach(r => r.classList.remove('on'));
+  if (!wasOpen) { drow.style.display = ''; tr.classList.add('on'); }
 }
 
-
-function buildLidiDetail(doc) {
-  const lc = doc.lidiChecklist;
-  const lidi = LIDI_MAP[doc.postazione];
-  if (!lc || !lidi) return '';
-
-  const groups = lidi.map(lido => {
-    const state = lc[lido] || {};
-    const tot = Object.keys(LIDO_ITEM_LABELS).length;
-    const done = Object.values(state).filter(Boolean).length;
-    const allOk = done === tot;
-    const items = Object.entries(LIDO_ITEM_LABELS).map(([k,v]) => {
-      const ok = state[k];
-      return `<div class="lido-detail-line">
-        <span>${ok ? '✅' : '❌'}</span>
-        <span style="color:${ok?'var(--navy)':'var(--gray)'}">${v}</span>
-      </div>`;
-    }).join('');
-    return `<div class="lido-detail-group">
-      <div class="lido-detail-hd">
-        <span>🏖 ${lido}</span>
-        <span style="color:${allOk?'#6EE7B7':'#FCD34D'}">${done}/${tot}</span>
-      </div>
-      <div class="lido-detail-body">${items}</div>
-    </div>`;
-  }).join('');
-
-  return `<div class="dc s3" style="margin-top:.875rem">
-    <div class="dct">Controlli per lido</div>
-    ${groups}
-  </div>`;
-}
-
-function buildDetail(doc){
+function buildDetail(doc) {
   const dt  = toDate(doc.dataOra);
-  const dts = dt.toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  const m   = doc.meteo||{};
-  const p   = doc.presenze||{};
+  const dts = dt.toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const m   = doc.meteo || {};
+  const p   = doc.presenze || {};
 
-  const chkHtml = Object.entries(CHK).map(([k,v])=>{
+  const chkHtml = Object.entries(CHK_LABELS).map(([k, v]) => {
     const ok = doc.checklist?.[k];
-    return `<div class="ckline"><span>${ok?'✅':'❌'}</span>
-      <span style="color:${ok?'var(--navy)':'var(--gray)'}">${v}</span></div>`;
+    return `<div class="ckline"><span>${ok ? '✅' : '❌'}</span>
+      <span style="color:${ok ? 'var(--navy)' : 'var(--gray)'}">${v}</span></div>`;
   }).join('');
 
-  const intHtml = (doc.interventi||[]).length===0
+  const intHtml = !(doc.interventi || []).length
     ? '<p style="font-size:13px;color:var(--gray)">Nessun intervento.</p>'
-    : (doc.interventi||[]).map(i=>{
-        const oh = i.ora ? toDate(i.ora).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '—';
-        const all = (i.allertato||[]).join(', ')||'nessuno';
-        return `<div class="ibox"><strong>${i.tipo||'—'}</strong>
-          <div style="color:var(--gray);font-size:11.5px;margin:2px 0">Ore ${oh} · ${all}</div>
-          <div>${i.descrizione||''}</div></div>`;
+    : doc.interventi.map(i => {
+        const oh = i.ora ? toDate(i.ora).toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<div class="ibox"><strong>${i.tipo || '—'}</strong>
+          <div style="color:var(--gray);font-size:11.5px;margin:2px 0">Ore ${oh} · ${(i.allertato||[]).join(', ')||'nessuno'}</div>
+          <div>${i.descrizione || ''}</div></div>`;
       }).join('');
 
-  const fotoHtml = (doc.foto||[]).length===0
+  const fotoHtml = !(doc.foto || []).length
     ? '<p style="font-size:13px;color:var(--gray)">Nessuna foto.</p>'
-    : `<div class="igal">${(doc.foto||[]).map(u=>`<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`).join('')}</div>`;
+    : `<div class="igal">${doc.foto.map(u => `<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`).join('')}</div>`;
+
+  // Lidi per lido
+  let lidiHtml = '';
+  const lidi = LIDI_MAP[doc.postazione];
+  const lc   = doc.lidiChecklist || {};
+  if (lidi && lidi.length) {
+    const groups = lidi.map(lido => {
+      const state = lc[lido] || {};
+      const tot  = Object.keys(LIDO_ITEM_LABELS).length;
+      const done = Object.values(state).filter(Boolean).length;
+      const items = Object.entries(LIDO_ITEM_LABELS).map(([k, v]) => {
+        const ok = state[k];
+        return `<div class="lido-d-line"><span>${ok ? '✅' : '❌'}</span>
+          <span style="color:${ok ? 'var(--navy)' : 'var(--gray)'}">${v}</span></div>`;
+      }).join('');
+      return `<div class="lido-d-group">
+        <div class="lido-d-hd"><span>🏖 ${lido}</span>
+          <span style="color:${done===tot?'#6EE7B7':'#FCD34D'}">${done}/${tot}</span></div>
+        <div class="lido-d-body">${items}</div>
+      </div>`;
+    }).join('');
+    lidiHtml = `<div class="dc s3" style="margin-top:.875rem">
+      <div class="dct">Controlli per lido</div>${groups}</div>`;
+  }
 
   return `<div class="dinner"><div class="dgrid">
     <div class="dc"><div class="dct">Identificazione</div>
@@ -783,88 +644,67 @@ function buildDetail(doc){
     <div class="dc s3"><div class="dct">Checklist postazione</div><div class="ckgrid">${chkHtml}</div></div>
     <div class="dc s2"><div class="dct">Interventi e Soccorsi</div>${intHtml}</div>
     <div class="dc"><div class="dct">Foto (${(doc.foto||[]).length})</div>${fotoHtml}</div>
-  </div>
-  ${buildLidiDetail(doc)}
-  </div>`;
+    ${lidiHtml}
+  </div></div>`;
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  STAT CARDS
-// ══════════════════════════════
-function updateCards(){
-  const totInt  = VIEW.reduce((s,d)=>s+(d.interventi||[]).length,0);
-  const totFoto = VIEW.reduce((s,d)=>s+(d.foto||[]).length,0);
-  const totChk  = VIEW.filter(d=>chkPct(d.checklist)===100).length;
+// ═══════════════════════════════════════
+function updateCards() {
   document.getElementById('s-tot').textContent  = VIEW.length;
-  document.getElementById('s-int').textContent  = totInt;
-  document.getElementById('s-foto').textContent = totFoto;
-  document.getElementById('s-chk').textContent  = totChk;
+  document.getElementById('s-int').textContent  = VIEW.reduce((s,d) => s+(d.interventi||[]).length, 0);
+  document.getElementById('s-foto').textContent = VIEW.reduce((s,d) => s+(d.foto||[]).length, 0);
+  document.getElementById('s-chk').textContent  = VIEW.filter(d => chkPct(d.checklist)===100).length;
 }
 
-// ══════════════════════════════
-//  MANCANZE ALERT (OGGI)
-// ══════════════════════════════
-function buildMalert(){
+// ═══════════════════════════════════════
+//  MANCANZE ALERT
+// ═══════════════════════════════════════
+function buildMalert() {
   const today = new Date().toDateString();
-  // Include anche lidi con mancanze
-  const lidoMancanze = (doc) => {
-    const lc = doc.lidiChecklist;
-    const lidi = LIDI_MAP[doc.postazione];
-    if (!lc || !lidi) return [];
-    const miss = [];
-    lidi.forEach(lido => {
-      const state = lc[lido] || {};
-      const bad = Object.entries(LIDO_ITEM_LABELS)
-        .filter(([k]) => state[k] === false)
-        .map(([,v]) => `${lido}: ${v}`);
-      miss.push(...bad);
-    });
-    return miss;
-  };
-  const alerts = ALL.filter(d=>{
-    const dt = toDate(d.dataOra);
-    return dt.toDateString()===today && (getManc(d.checklist).length>0 || lidoMancanze(d).length>0);
-  });
+  const alerts = ALL.filter(d => toDate(d.dataOra).toDateString()===today && allMancanze(d).length>0);
   const el = document.getElementById('malert');
-  if(!alerts.length){ el.style.display='none'; return; }
-  el.style.display='block';
-  el.innerHTML=`<div class="malert-hd">
-    <span class="malert-title">⚠️ Mancanze segnalate oggi</span>
-    <span class="malert-cnt">${alerts.length}</span>
-  </div><div class="malert-body">${alerts.map(d=>{
-    const dt = toDate(d.dataOra);
-    const ora = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-    const chips = [...getManc(d.checklist), ...lidoMancanze(d)].map(m=>`<span class="mchip">${m}</span>`).join('');
+  if (!alerts.length) { el.style.display='none'; return; }
+  el.style.display = 'block';
+  const rows = alerts.map(d => {
+    const dt  = toDate(d.dataOra);
+    const ora = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+    const chips = allMancanze(d).map(m => `<span class="mchip">${m}</span>`).join('');
     return `<div class="mrow"><div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
         <span class="mpost">${d.postazione}</span>
         <span class="mmeta">${d.bagnino||'—'} · ore ${ora}</span>
       </div><div class="mchips">${chips}</div>
     </div></div>`;
-  }).join('')}</div>`;
+  }).join('');
+  el.innerHTML = `<div class="malert-hd">
+    <span class="malert-title">⚠️ Mancanze segnalate oggi</span>
+    <span class="malert-cnt">${alerts.length}</span>
+  </div><div class="malert-body">${rows}</div>`;
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  TURNI OGGI
-// ══════════════════════════════
-function buildTurni(){
+// ═══════════════════════════════════════
+function buildTurni() {
   const today = new Date().toDateString();
-  const todayDocs = ALL.filter(d=>toDate(d.dataOra).toDateString()===today);
-  const matOk=new Set(), pomOk=new Set();
-  todayDocs.forEach(d=>{
-    const h=toDate(d.dataOra).getHours();
-    if(h>=9 && h<14) matOk.add(d.postazione);
-    if(h>=14 && h<19) pomOk.add(d.postazione);
+  const todayDocs = ALL.filter(d => toDate(d.dataOra).toDateString()===today);
+  const matOk = new Set(), pomOk = new Set();
+  todayDocs.forEach(d => {
+    const h = toDate(d.dataOra).getHours();
+    if (h>=9  && h<14) matOk.add(d.postazione);
+    if (h>=14 && h<19) pomOk.add(d.postazione);
   });
-  document.getElementById('turni').innerHTML=
-    turnoCard('🌅 Mattina','09:00–14:00',matOk)+
+  document.getElementById('turni').innerHTML =
+    turnoCard('🌅 Mattina','09:00–14:00',matOk) +
     turnoCard('🌇 Pomeriggio','14:00–19:00',pomOk);
 }
 
-function turnoCard(label,ora,okSet){
-  const miss=ALL_P.filter(p=>!okSet.has(p));
-  const pct=Math.round(okSet.size/ALL_P.length*100);
-  const cls=pct===100?'ok':pct>=60?'warn':'bad';
+function turnoCard(label, ora, okSet) {
+  const miss = ALL_P.filter(p => !okSet.has(p));
+  const pct  = Math.round(okSet.size/ALL_P.length*100);
+  const cls  = pct===100?'ok':pct>=60?'warn':'bad';
   return `<div class="tcard">
     <div class="tcard-hd">
       <div><div class="tcard-label">${label}</div><div class="tcard-ora">${ora}</div></div>
@@ -875,646 +715,535 @@ function turnoCard(label,ora,okSet){
     </div>
     <div class="tcard-body">
       ${miss.length===0
-        ? '<span class="tok">✅ Tutte le postazioni hanno compilato</span>'
-        : `<div class="tmiss-title">Mancanti</div><div class="tchips">${miss.map(p=>`<span class="tchip">${p}</span>`).join('')}</div>`}
+        ? '<span style="font-size:13px;color:var(--green);font-weight:600">✅ Tutte le postazioni hanno compilato</span>'
+        : `<div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Mancanti</div>
+           <div class="tchips">${miss.map(p=>`<span class="tchip">${p}</span>`).join('')}</div>`}
     </div>
   </div>`;
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  TABS
-// ══════════════════════════════
-function tab(name,btn){
-  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('tab-'+name).classList.add('on');
+// ═══════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tpanel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+  document.getElementById('tab-' + name).classList.add('on');
   btn.classList.add('on');
-  if(name==='stats') renderStats();
-  if(name==='report'){ refreshReport(); }
-  if(name==='mancanti'){
-    if(!document.getElementById('m-da').value){
-      const t=new Date(), a7=new Date(t); a7.setDate(t.getDate()-6);
-      document.getElementById('m-da').value=fmt(a7);
-      document.getElementById('m-a').value=fmt(t);
-    }
-    renderMancanti();
-  }
+  if (name === 'stats')    renderStats();
+  if (name === 'mancanti') initMancanti();
+  if (name === 'report')   refreshReport();
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  STATISTICHE
-// ══════════════════════════════
-let CH={};
-function dk(id){ if(CH[id]){CH[id].destroy();delete CH[id];} }
+// ═══════════════════════════════════════
+function destroyChart(key) {
+  if (CHARTS[key]) { CHARTS[key].destroy(); delete CHARTS[key]; }
+}
 
-function renderStats(){
-  if(!VIEW.length) return;
+function renderStats() {
+  if (!VIEW.length) return;
 
-  // Timeline
-  const byDay={};
-  VIEW.forEach(d=>{
-    const k=toDate(d.dataOra).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
-    byDay[k]=(byDay[k]||0)+1;
+  // 1. Timeline
+  const byDay = {};
+  VIEW.forEach(d => {
+    const k = toDate(d.dataOra).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    byDay[k] = (byDay[k]||0)+1;
   });
-  const dk2=Object.keys(byDay);
-  dk('tl');
-  CH.tl=new Chart(document.getElementById('ch-timeline'),{type:'bar',
-    data:{labels:dk2,datasets:[{label:'Diari',data:dk2.map(k=>byDay[k]),backgroundColor:'#E8731A',borderRadius:4}]},
+  const dkeys = Object.keys(byDay);
+  destroyChart('tl');
+  CHARTS.tl = new Chart(document.getElementById('cvTimeline'), {
+    type:'bar',
+    data:{labels:dkeys, datasets:[{label:'Diari',data:dkeys.map(k=>byDay[k]),backgroundColor:'#E8731A',borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{font:{size:9}}}}}});
-
-  // Bandiere
-  const bc={verde:0,gialla:0,rossa:0};
-  VIEW.forEach(d=>{const b=d.meteo?.bandiera;if(b)bc[b]=(bc[b]||0)+1;});
-  dk('bd');
-  CH.bd=new Chart(document.getElementById('ch-band'),{type:'doughnut',
-    data:{labels:['Verde','Gialla','Rossa'],
-      datasets:[{data:[bc.verde,bc.gialla,bc.rossa],
-        backgroundColor:['#1A8A4A','#F59E0B','#C0392B'],borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
-
-  // Mare
-  const mc={};
-  VIEW.forEach(d=>{const m=d.meteo?.stateMare;if(m)mc[m]=(mc[m]||0)+1;});
-  const mk=Object.keys(mc).sort();
-  dk('mr');
-  CH.mr=new Chart(document.getElementById('ch-mare'),{type:'bar',
-    data:{labels:mk,datasets:[{label:'Giorni',data:mk.map(k=>mc[k]),backgroundColor:'#1B3A6B',borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
-
-  // Interventi tipo
-  const ic={};
-  VIEW.forEach(d=>(d.interventi||[]).forEach(i=>{const t=i.tipo||'Altro';ic[t]=(ic[t]||0)+1;}));
-  const ik=Object.keys(ic).sort((a,b)=>ic[b]-ic[a]);
-  dk('it');
-  if(ik.length){
-    CH.it=new Chart(document.getElementById('ch-int'),{type:'bar',
-      data:{labels:ik,datasets:[{label:'N',data:ik.map(k=>ic[k]),backgroundColor:'#E8731A',borderRadius:4}]},
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
-  }
-
-  // Mancanze
-  const mancC={};
-  VIEW.forEach(d=>getManc(d.checklist).forEach(m=>{mancC[m]=(mancC[m]||0)+1;}));
-  const mancK=Object.keys(mancC).sort((a,b)=>mancC[b]-mancC[a]);
-  dk('mn');
-  const mwrap=document.getElementById('ch-mwrap');
-  if(mancK.length){
-    mwrap.innerHTML='<canvas id="ch-manc"></canvas>';
-    CH.mn=new Chart(document.getElementById('ch-manc'),{type:'bar',
-      data:{labels:mancK,datasets:[{label:'Segnalazioni',data:mancK.map(k=>mancC[k]),backgroundColor:'#C0392B',borderRadius:4}]},
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
-  } else {
-    mwrap.innerHTML='<div style="text-align:center;padding:2rem;color:var(--green);font-weight:600">✅ Nessuna mancanza nel periodo</div>';
-  }
-
-  // Postazioni
-  const pc={},pi={},pf={},pchk={};
-  VIEW.forEach(d=>{
-    const p=d.postazione||'?';
-    pc[p]=(pc[p]||0)+1;
-    pi[p]=(pi[p]||0)+(d.interventi||[]).length;
-    pf[p]=(pf[p]||0)+(d.foto||[]).length;
-    if(!pchk[p])pchk[p]=[];
-    pchk[p].push(chkPct(d.checklist));
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{font:{size:9}}}}}
   });
-  const pk=Object.keys(pc).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
-  dk('pp');
-  CH.pp=new Chart(document.getElementById('ch-post'),{type:'bar',
-    data:{labels:pk,datasets:[
-      {label:'Diari',data:pk.map(k=>pc[k]),backgroundColor:'#0B2545',borderRadius:3},
-      {label:'Interventi',data:pk.map(k=>pi[k]||0),backgroundColor:'#E8731A',borderRadius:3}
+
+  // 2. Bandiere
+  const bc = {verde:0,gialla:0,rossa:0};
+  VIEW.forEach(d => { const b=d.meteo?.bandiera; if(b) bc[b]=(bc[b]||0)+1; });
+  destroyChart('bd');
+  CHARTS.bd = new Chart(document.getElementById('cvBand'), {
+    type:'doughnut',
+    data:{labels:['Verde','Gialla','Rossa'],
+      datasets:[{data:[bc.verde,bc.gialla,bc.rossa],backgroundColor:['#1A8A4A','#F59E0B','#C0392B'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+  });
+
+  // 3. Mare
+  const mc = {};
+  VIEW.forEach(d => { const m=d.meteo?.stateMare; if(m) mc[m]=(mc[m]||0)+1; });
+  const mkeys = Object.keys(mc).sort();
+  destroyChart('mr');
+  CHARTS.mr = new Chart(document.getElementById('cvMare'), {
+    type:'bar',
+    data:{labels:mkeys, datasets:[{label:'Giorni',data:mkeys.map(k=>mc[k]),backgroundColor:'#1B3A6B',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}
+  });
+
+  // 4. Interventi tipo
+  const ic = {};
+  VIEW.forEach(d => (d.interventi||[]).forEach(i => {
+    const t = i.tipo||'Altro'; ic[t]=(ic[t]||0)+1;
+  }));
+  const ikeys = Object.keys(ic).sort((a,b) => ic[b]-ic[a]);
+  destroyChart('it');
+  if (ikeys.length) {
+    CHARTS.it = new Chart(document.getElementById('cvInt'), {
+      type:'bar',
+      data:{labels:ikeys, datasets:[{label:'N',data:ikeys.map(k=>ic[k]),backgroundColor:'#E8731A',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}
+    });
+  }
+
+  // 5. Mancanze
+  const mancC = {};
+  VIEW.forEach(d => allMancanze(d).forEach(m => { mancC[m]=(mancC[m]||0)+1; }));
+  const mancKeys = Object.keys(mancC).sort((a,b) => mancC[b]-mancC[a]);
+  destroyChart('mn');
+  const mwrap = document.getElementById('cvMancWrap');
+  if (mancKeys.length) {
+    mwrap.innerHTML = '<canvas id="cvManc"></canvas>';
+    CHARTS.mn = new Chart(document.getElementById('cvManc'), {
+      type:'bar',
+      data:{labels:mancKeys, datasets:[{label:'Segnalazioni',data:mancKeys.map(k=>mancC[k]),backgroundColor:'#C0392B',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}
+    });
+  } else {
+    mwrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-weight:600">✅ Nessuna mancanza nel periodo</div>';
+  }
+
+  // 6. Per postazione
+  const pc={}, pi={}, pch={};
+  VIEW.forEach(d => {
+    const p = d.postazione||'?';
+    pc[p]  = (pc[p]||0)+1;
+    pi[p]  = (pi[p]||0)+(d.interventi||[]).length;
+    if (!pch[p]) pch[p]=[];
+    pch[p].push(chkPct(d.checklist));
+  });
+  const pkeys = Object.keys(pc).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
+  destroyChart('pp');
+  CHARTS.pp = new Chart(document.getElementById('cvPost'), {
+    type:'bar',
+    data:{labels:pkeys, datasets:[
+      {label:'Diari',data:pkeys.map(k=>pc[k]),backgroundColor:'#0B2545',borderRadius:3},
+      {label:'Interventi',data:pkeys.map(k=>pi[k]||0),backgroundColor:'#E8731A',borderRadius:3}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'top',labels:{font:{size:11}}}},
-      scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+      scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}
+  });
 
-  // Tabella postazioni
-  const stb=document.getElementById('stn-tbody');
-  stb.innerHTML='';
-  pk.forEach(p=>{
-    const avg=pchk[p]?Math.round(pchk[p].reduce((s,v)=>s+v,0)/pchk[p].length):0;
-    const sn=STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="padding:5px 10px"><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${sn}</span></td>
+  // 7. Tabella postazioni
+  const stb = document.getElementById('stn-tbody');
+  stb.innerHTML = '';
+  pkeys.forEach(p => {
+    const avg = pch[p] ? Math.round(pch[p].reduce((s,v)=>s+v,0)/pch[p].length) : 0;
+    const sn  = STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
+    const tr  = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border)';
+    tr.innerHTML = `
+      <td style="padding:5px 10px"><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${sn}</span></td>
       <td style="padding:5px 10px;text-align:center">${pc[p]}</td>
       <td style="padding:5px 10px;text-align:center">${pi[p]||0}</td>
-      <td style="padding:5px 10px;text-align:center">${pf[p]||0}</td>
+      <td style="padding:5px 10px;text-align:center">${VIEW.filter(d=>d.postazione===p).reduce((s,d)=>s+(d.foto||[]).length,0)}</td>
       <td style="padding:5px 10px;text-align:center">${bChk(avg)}</td>`;
-    tr.style.borderBottom='1px solid var(--border)';
     stb.appendChild(tr);
   });
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
 //  MANCANTI STORICO
-// ══════════════════════════════
-async function renderMancanti(){
-  const da=document.getElementById('m-da').value;
-  const a=document.getElementById('m-a').value;
-  if(!da||!a) return;
+// ═══════════════════════════════════════
+function initMancanti() {
+  if (!document.getElementById('m-da').value) {
+    const t=new Date(), a7=new Date(t); a7.setDate(t.getDate()-6);
+    document.getElementById('m-da').value = fmt(a7);
+    document.getElementById('m-a').value  = fmt(t);
+  }
+  renderMancanti();
+}
+
+function renderMancanti() {
+  const da = document.getElementById('m-da').value;
+  const a  = document.getElementById('m-a').value;
+  if (!da||!a) return;
 
   const daD=new Date(da), aD=new Date(a+'T23:59:59');
   const dates=[];
   const cur=new Date(daD);
   while(cur<=aD){dates.push(new Date(cur));cur.setDate(cur.getDate()+1);}
 
-  // Usa ALL (già caricati) filtrati per range
-  const docs=ALL.filter(d=>{const dt=toDate(d.dataOra);return dt>=daD&&dt<=aD;});
-
+  const docs = ALL.filter(d=>{const dt=toDate(d.dataOra);return dt>=daD&&dt<=aD;});
   const comp={};
-  docs.forEach(d=>{
-    const dk3=toDate(d.dataOra).toISOString().slice(0,10);
-    const h=toDate(d.dataOra).getHours();
-    const p=d.postazione; if(!p) return;
-    if(h>=9&&h<14)  comp[`${dk3}|${p}|m`]=true;
-    if(h>=14&&h<19) comp[`${dk3}|${p}|p`]=true;
-  });
-
-  // Stats
-  let tot=dates.length*ALL_P.length*2, miss=0, daysOk=0;
-  dates.forEach(d=>{
-    const dk4=d.toISOString().slice(0,10);
-    let ok=true;
-    ALL_P.forEach(p=>{
-      if(!comp[`${dk4}|${p}|m`]){miss++;ok=false;}
-      if(!comp[`${dk4}|${p}|p`]){miss++;ok=false;}
-    });
-    if(ok) daysOk++;
-  });
-  const pct2=Math.round((1-miss/tot)*100);
-
-  document.getElementById('m-stats').innerHTML=`
-    <div class="scard"><div class="sval" style="color:${pct2<80?'var(--red)':'var(--green)'}">${pct2}%</div><div class="slbl">Compilazione media</div></div>
-    <div class="scard"><div class="sval" style="color:var(--red)">${miss}</div><div class="slbl">Turni non compilati</div></div>
-    <div class="scard"><div class="sval" style="color:var(--green)">${daysOk}</div><div class="slbl">Giorni 100% completi</div></div>
-    <div class="scard"><div class="sval">${dates.length}</div><div class="slbl">Giorni analizzati</div></div>`;
-
-  // Griglia
-  const tbl=document.getElementById('mtable');
-  let h2=`<thead><tr><th>Data</th>${ALL_P.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
-  let body='<tbody>';
-  dates.forEach(d=>{
-    const dk5=d.toISOString().slice(0,10);
-    const lbl=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
-    let row=`<tr><td>${lbl}</td>`;
-    ALL_P.forEach(p=>{
-      const m=comp[`${dk5}|${p}|m`], pp=comp[`${dk5}|${p}|p`];
-      if(m&&pp)    row+=`<td class="cb" title="${p}">MP</td>`;
-      else if(m)   row+=`<td class="cm" title="${p}">M</td>`;
-      else if(pp)  row+=`<td class="cp" title="${p}">P</td>`;
-      else         row+=`<td class="cn" title="${p}">✗</td>`;
-    });
-    row+='</tr>';
-    body+=row;
-  });
-  body+='</tbody>';
-  tbl.innerHTML=h2+body;
-}
-
-// ══════════════════════════════
-//  EXPORT CSV
-// ══════════════════════════════
-function exportCSV(){
-  const rows=[['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Mancanze','Note']];
-  VIEW.forEach(d=>{
-    const dt=toDate(d.dataOra);
-    rows.push([
-      dt.toLocaleDateString('it-IT'),
-      dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-      d.postazione||'',d.bagnino||'',
-      d.meteo?.stateMare||'',d.meteo?.bandiera||'',
-      (d.interventi||[]).length,chkPct(d.checklist),
-      (d.foto||[]).length,getManc(d.checklist).join(' / '),
-      (d.note||'').replace(/,/g,' ')
-    ]);
-  });
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const a2=document.createElement('a');
-  a2.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
-  a2.download=`diario_omnia_${fmt(new Date())}.csv`;
-  a2.click();
-}
-
-
-// ══════════════════════════════════════════════
-//  REPORT
-// ══════════════════════════════════════════════
-let rPeriod = 'oggi';
-
-function setRperiod(p, btn) {
-  rPeriod = p;
-  document.querySelectorAll('.rperiod-btn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('rCustomRange').classList.toggle('show', p === 'custom');
-  refreshReport();
-}
-
-function getRangeDocs() {
-  const today = new Date();
-  let da, a;
-  if (rPeriod === 'oggi') {
-    da = new Date(today); da.setHours(0,0,0,0);
-    a  = new Date(today); a.setHours(23,59,59,999);
-  } else if (rPeriod === 'settimana') {
-    da = new Date(today); da.setDate(today.getDate() - 6); da.setHours(0,0,0,0);
-    a  = new Date(today); a.setHours(23,59,59,999);
-  } else {
-    const dav = document.getElementById('r-da').value;
-    const av  = document.getElementById('r-a').value;
-    if (!dav || !av) return { docs:[], da:today, a:today };
-    da = new Date(dav); a = new Date(av+'T23:59:59');
-  }
-  const docs = ALL.filter(d => {
-    const dt = toDate(d.dataOra);
-    return dt >= da && dt <= a;
-  });
-  return { docs, da, a };
-}
-
-function refreshReport() {
-  const { docs, da, a } = getRangeDocs();
-  const label = rPeriod === 'oggi' ? 'Oggi'
-    : rPeriod === 'settimana' ? 'Ultimi 7 giorni'
-    : `${fmt(da)} → ${fmt(a)}`;
-  document.getElementById('rpreview-label').textContent = `Riepilogo — ${label}`;
-
-  const totInt   = docs.reduce((s,d)=>s+(d.interventi||[]).length,0);
-  const totFoto  = docs.reduce((s,d)=>s+(d.foto||[]).length,0);
-  const totMiss  = docs.reduce((s,d)=>s+getManc(d.checklist).length,0);
-  const compiled = new Set(docs.map(d=>d.postazione)).size;
-
-  document.getElementById('rpreview-stats').innerHTML = `
-    <div class="rstat"><div class="rstat-v">${docs.length}</div><div class="rstat-l">Diari</div></div>
-    <div class="rstat"><div class="rstat-v">${totInt}</div><div class="rstat-l">Interventi</div></div>
-    <div class="rstat"><div class="rstat-v" style="color:var(--red)">${totMiss}</div><div class="rstat-l">Mancanze</div></div>
-    <div class="rstat"><div class="rstat-v">${compiled}/26</div><div class="rstat-l">Postazioni attive</div></div>`;
-}
-
-// ─────────────────────────────────────────────
-//  EXCEL EXPORT
-// ─────────────────────────────────────────────
-function downloadXLS() {
-  const btn = document.getElementById('btnXls');
-  btn.disabled = true; btn.textContent = '⏳ Generazione...';
-
-  const { docs, da, a } = getRangeDocs();
-  const periodLabel = `${fmt(da)}_${fmt(a)}`;
-  const wb = XLSX.utils.book_new();
-
-  // ── Sheet 1: Riepilogo ──
-  const totInt  = docs.reduce((s,d)=>s+(d.interventi||[]).length,0);
-  const totFoto = docs.reduce((s,d)=>s+(d.foto||[]).length,0);
-  const totMiss = docs.reduce((s,d)=>s+getManc(d.checklist).length,0);
-  const totChk  = docs.filter(d=>chkPct(d.checklist)===100).length;
-  const riepilogo = [
-    ['RIEPILOGO OMNIA — '+periodLabel],[''],
-    ['Diari compilati', docs.length],
-    ['Interventi totali', totInt],
-    ['Foto caricate', totFoto],
-    ['Checklist complete', totChk],
-    ['Mancanze segnalate', totMiss],
-    ['Postazioni attive', new Set(docs.map(d=>d.postazione)).size + '/26'],
-  ];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(riepilogo), 'Riepilogo');
-
-  // ── Sheet 2: Diari ──
-  const diariRows = [['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Mancanze','Note']];
-  docs.forEach(d => {
-    const dt = toDate(d.dataOra);
-    diariRows.push([
-      dt.toLocaleDateString('it-IT'),
-      dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-      d.postazione||'', d.bagnino||'',
-      d.meteo?.stateMare||'', d.meteo?.bandiera||'',
-      (d.interventi||[]).length, chkPct(d.checklist),
-      (d.foto||[]).length, getManc(d.checklist).join(' | '),
-      (d.note||'').replace(/
-/g,' ')
-    ]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diariRows), 'Diari');
-
-  // ── Sheet 3: Mancanze ──
-  const mancRows = [['Data','Ora','Postazione','Bagnino','Voce mancante','Tipo']];
-  docs.forEach(d => {
-    const dt = toDate(d.dataOra);
-    const dstr = dt.toLocaleDateString('it-IT');
-    const tstr = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-    // Checklist generica
-    getManc(d.checklist).forEach(m => {
-      mancRows.push([dstr, tstr, d.postazione||'', d.bagnino||'', m, 'Dotazione postazione']);
-    });
-    // Per lido
-    const lc = d.lidiChecklist || {};
-    const lidi = LIDI_MAP[d.postazione] || [];
-    lidi.forEach(lido => {
-      const state = lc[lido] || {};
-      Object.entries(LIDO_ITEM_LABELS).forEach(([k,v]) => {
-        if (state[k] === false) {
-          mancRows.push([dstr, tstr, d.postazione||'', d.bagnino||'', `${lido}: ${v}`, 'Dotazione lido']);
-        }
-      });
-    });
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mancRows), 'Mancanze');
-
-  // ── Sheet 4: Turni non compilati ──
-  const dates = [];
-  const cur = new Date(da); cur.setHours(0,0,0,0);
-  const end = new Date(a);  end.setHours(23,59,59,999);
-  while (cur <= end) { dates.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
-
-  const comp = {};
-  docs.forEach(d => {
-    const dk = toDate(d.dataOra).toISOString().slice(0,10);
-    const h  = toDate(d.dataOra).getHours();
-    const p  = d.postazione; if(!p) return;
-    if(h>=9&&h<14)  comp[`${dk}|${p}|m`]=true;
-    if(h>=14&&h<19) comp[`${dk}|${p}|p`]=true;
-  });
-
-  const turniRows = [['Data','Postazione','Mattina (09-14)','Pomeriggio (14-19)']];
-  dates.forEach(d => {
-    const dk = d.toISOString().slice(0,10);
-    const dstr = d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    ALL_P.forEach(p => {
-      const m = comp[`${dk}|${p}|m`];
-      const pp = comp[`${dk}|${p}|p`];
-      if (!m || !pp) {
-        turniRows.push([dstr, p, m?'✓':'MANCANTE', pp?'✓':'MANCANTE']);
-      }
-    });
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(turniRows), 'Turni non compilati');
-
-  // ── Sheet 5: Statistiche per postazione ──
-  const pc={},pi={},pf={},pm={};
-  docs.forEach(d=>{
-    const p=d.postazione||'?';
-    pc[p]=(pc[p]||0)+1;
-    pi[p]=(pi[p]||0)+(d.interventi||[]).length;
-    pf[p]=(pf[p]||0)+(d.foto||[]).length;
-    const mancTot = getManc(d.checklist).length +
-      (LIDI_MAP[p]||[]).reduce((s,l)=>{
-        const lc=d.lidiChecklist||{};
-        return s+Object.entries(lc[l]||{}).filter(([,v])=>v===false).length;
-      },0);
-    pm[p]=(pm[p]||0)+mancTot;
-  });
-  const pk=Object.keys(pc).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
-  const statRows=[['Postazione','Nome lido/area','Diari','Interventi','Foto','Mancanze totali','Checklist media %']];
-  pk.forEach(p=>{
-    const stn=STATIONS.find(s=>`P.${s.n}`===p);
-    const chkAvg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc[p]||1));
-    statRows.push([p, stn?.name||'', pc[p]||0, pi[p]||0, pf[p]||0, pm[p]||0, chkAvg]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(statRows), 'Statistiche postazioni');
-
-  // Download
-  XLSX.writeFile(wb, `report_omnia_${periodLabel}.xlsx`);
-  btn.disabled=false; btn.textContent='⬇ Scarica .xlsx';
-}
-
-// ─────────────────────────────────────────────
-//  PDF EXPORT
-// ─────────────────────────────────────────────
-function downloadPDF() {
-  const btn = document.getElementById('btnPdf');
-  btn.disabled=true; btn.textContent='⏳ Generazione...';
-
-  const { docs, da, a } = getRangeDocs();
-  const periodLabel = rPeriod==='oggi' ? 'Oggi'
-    : rPeriod==='settimana' ? 'Ultimi 7 giorni'
-    : `${fmt(da)} — ${fmt(a)}`;
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-
-  const NAVY   = [11,37,69];
-  const ORANGE = [232,115,26];
-  const WHITE  = [255,255,255];
-  const RED    = [192,57,43];
-  const GREEN  = [26,138,74];
-  const LGRAY  = [244,241,235];
-
-  let y = 0;
-
-  function header() {
-    doc.setFillColor(...NAVY);
-    doc.rect(0,0,210,22,'F');
-    doc.setTextColor(...WHITE);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(16);
-    doc.text('OMNIA ADRIATIC LIFEGUARD SERVICE', 105, 10, {align:'center'});
-    doc.setFontSize(10);
-    doc.text('Diario Giornaliero — Report', 105, 17, {align:'center'});
-    y = 28;
-  }
-
-  function sectionTitle(title) {
-    doc.setFillColor(...ORANGE);
-    doc.rect(14, y, 182, 7, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.text(title.toUpperCase(), 17, y+5);
-    y += 11;
-    doc.setTextColor(0,0,0);
-  }
-
-  function checkPage(needed=20) {
-    if (y + needed > 275) { doc.addPage(); header(); }
-  }
-
-  // ── Page 1: Copertina + Riepilogo ──
-  header();
-  doc.setFillColor(...LGRAY);
-  doc.rect(14, y, 182, 22, 'F');
-  doc.setTextColor(...NAVY);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(13);
-  doc.text('Report Operativo', 105, y+9, {align:'center'});
-  doc.setFont('helvetica','normal');
-  doc.setFontSize(10);
-  doc.text(periodLabel, 105, y+16, {align:'center'});
-  y += 28;
-
-  // Stat boxes
-  const totInt  = docs.reduce((s,d)=>s+(d.interventi||[]).length,0);
-  const totFoto = docs.reduce((s,d)=>s+(d.foto||[]).length,0);
-  const totMiss = docs.reduce((s,d)=>s+getManc(d.checklist).length,0);
-  const stats = [
-    {v:docs.length, l:'Diari compilati', c:NAVY},
-    {v:totInt,      l:'Interventi',      c:NAVY},
-    {v:totMiss,     l:'Mancanze',        c:totMiss>0?RED:GREEN},
-    {v:new Set(docs.map(d=>d.postazione)).size+'/26', l:'Postazioni attive', c:NAVY},
-  ];
-  stats.forEach((s,i) => {
-    const x = 14 + i*46;
-    doc.setFillColor(...WHITE);
-    doc.setDrawColor(220,220,220);
-    doc.roundedRect(x, y, 44, 20, 2, 2, 'FD');
-    doc.setTextColor(...s.c);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(18);
-    doc.text(String(s.v), x+22, y+12, {align:'center'});
-    doc.setTextColor(100,100,100);
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(7);
-    doc.text(s.l.toUpperCase(), x+22, y+18, {align:'center'});
-  });
-  y += 28;
-
-  // ── Sezione: Turni non compilati ──
-  sectionTitle('Turni non compilati');
-  const dates2=[];
-  const cur2=new Date(da); cur2.setHours(0,0,0,0);
-  const end2=new Date(a);  end2.setHours(23,59,59,999);
-  while(cur2<=end2){dates2.push(new Date(cur2));cur2.setDate(cur2.getDate()+1);}
-
-  const comp2={};
   docs.forEach(d=>{
     const dk=toDate(d.dataOra).toISOString().slice(0,10);
     const h=toDate(d.dataOra).getHours();
     const p=d.postazione; if(!p) return;
-    if(h>=9&&h<14)  comp2[`${dk}|${p}|m`]=true;
-    if(h>=14&&h<19) comp2[`${dk}|${p}|p`]=true;
+    if(h>=9&&h<14)  comp[`${dk}|${p}|m`]=true;
+    if(h>=14&&h<19) comp[`${dk}|${p}|p`]=true;
   });
 
-  const turniBody=[];
-  dates2.forEach(d=>{
+  let tot=dates.length*ALL_P.length*2, miss=0, daysOk=0;
+  dates.forEach(d=>{
     const dk=d.toISOString().slice(0,10);
-    const dstr=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const missM=ALL_P.filter(p=>!comp2[`${dk}|${p}|m`]);
-    const missP=ALL_P.filter(p=>!comp2[`${dk}|${p}|p`]);
-    if(missM.length||missP.length) {
-      turniBody.push([dstr, missM.length?missM.join(', '):'✓ Tutte', missP.length?missP.join(', '):'✓ Tutte']);
-    }
-  });
-
-  if(turniBody.length===0){
-    doc.setTextColor(...GREEN);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.text('✓ Tutti i turni sono stati compilati nel periodo.', 17, y);
-    y+=8;
-    doc.setTextColor(0,0,0);
-  } else {
-    doc.autoTable({
-      head:[['Data','Mattina mancanti (09-14)','Pomeriggio mancanti (14-19)']],
-      body:turniBody,
-      startY:y,
-      margin:{left:14,right:14},
-      headStyles:{fillColor:NAVY, textColor:WHITE, fontSize:8, fontStyle:'bold'},
-      bodyStyles:{fontSize:7.5},
-      alternateRowStyles:{fillColor:[248,246,242]},
-      didDrawPage: () => { y=doc.lastAutoTable.finalY+8; }
+    let ok=true;
+    ALL_P.forEach(p=>{
+      if(!comp[`${dk}|${p}|m`]){miss++;ok=false;}
+      if(!comp[`${dk}|${p}|p`]){miss++;ok=false;}
     });
-    y=doc.lastAutoTable.finalY+12;
+    if(ok) daysOk++;
+  });
+  const pct=Math.round((1-miss/tot)*100);
+
+  document.getElementById('m-stats').innerHTML=`
+    <div class="scard"><div class="sval" style="color:${pct<80?'var(--red)':'var(--green)'}">${pct}%</div><div class="slbl">Compilazione</div></div>
+    <div class="scard"><div class="sval" style="color:var(--red)">${miss}</div><div class="slbl">Turni mancanti</div></div>
+    <div class="scard"><div class="sval" style="color:var(--green)">${daysOk}</div><div class="slbl">Giorni completi</div></div>
+    <div class="scard"><div class="sval">${dates.length}</div><div class="slbl">Giorni analizzati</div></div>`;
+
+  const tbl=document.getElementById('mtable');
+  let thead=`<thead><tr><th>Data</th>${ALL_P.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
+  let tbody='<tbody>';
+  dates.forEach(d=>{
+    const dk=d.toISOString().slice(0,10);
+    const lbl=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    let row=`<tr><td>${lbl}</td>`;
+    ALL_P.forEach(p=>{
+      const m2=comp[`${dk}|${p}|m`], pp=comp[`${dk}|${p}|p`];
+      if(m2&&pp)  row+=`<td class="cb">MP</td>`;
+      else if(m2) row+=`<td class="cm">M</td>`;
+      else if(pp) row+=`<td class="cp">P</td>`;
+      else        row+=`<td class="cn">✗</td>`;
+    });
+    row+='</tr>';
+    tbody+=row;
+  });
+  tbody+='</tbody>';
+  tbl.innerHTML=thead+tbody;
+}
+
+// ═══════════════════════════════════════
+//  REPORT
+// ═══════════════════════════════════════
+function setRperiod(p, btn) {
+  rPeriod = p;
+  document.querySelectorAll('.rperiod-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('rcustom').classList.toggle('show', p==='custom');
+  refreshReport();
+}
+
+function getReportDocs() {
+  const today=new Date();
+  let da, a;
+  if (rPeriod==='oggi') {
+    da=new Date(today); da.setHours(0,0,0,0);
+    a =new Date(today); a.setHours(23,59,59,999);
+  } else if (rPeriod==='settimana') {
+    da=new Date(today); da.setDate(today.getDate()-6); da.setHours(0,0,0,0);
+    a =new Date(today); a.setHours(23,59,59,999);
+  } else {
+    const dv=document.getElementById('r-da').value;
+    const av=document.getElementById('r-a').value;
+    if(!dv||!av) return {docs:[],da:today,a:today};
+    da=new Date(dv); a=new Date(av+'T23:59:59');
   }
+  return {docs:ALL.filter(d=>{const dt=toDate(d.dataOra);return dt>=da&&dt<=a;}),da,a};
+}
 
-  // ── Sezione: Mancanze dotazioni ──
-  checkPage(30);
-  sectionTitle('Mancanze dotazioni');
+function refreshReport() {
+  const {docs,da,a}=getReportDocs();
+  const label=rPeriod==='oggi'?'Oggi':rPeriod==='settimana'?'Ultimi 7 giorni':`${fmt(da)} → ${fmt(a)}`;
+  document.getElementById('rprev-label').textContent=`Riepilogo — ${label}`;
+  const totMiss=docs.reduce((s,d)=>s+allMancanze(d).length,0);
+  document.getElementById('rprev-stats').innerHTML=`
+    <div class="rstat"><div class="rstat-v">${docs.length}</div><div class="rstat-l">Diari</div></div>
+    <div class="rstat"><div class="rstat-v">${docs.reduce((s,d)=>s+(d.interventi||[]).length,0)}</div><div class="rstat-l">Interventi</div></div>
+    <div class="rstat"><div class="rstat-v" style="color:${totMiss>0?'var(--red)':'var(--green)'}">${totMiss}</div><div class="rstat-l">Mancanze</div></div>
+    <div class="rstat"><div class="rstat-v">${new Set(docs.map(d=>d.postazione)).size}/26</div><div class="rstat-l">Postazioni</div></div>`;
+}
 
-  const mancBody=[];
+function downloadXLS() {
+  const btn=document.getElementById('btnXls');
+  btn.disabled=true; btn.textContent='⏳...';
+  const {docs,da,a}=getReportDocs();
+  const lbl=`${fmt(da)}_${fmt(a)}`;
+  const wb=XLSX.utils.book_new();
+
+  // Sheet 1: Riepilogo
+  const totMiss=docs.reduce((s,d)=>s+allMancanze(d).length,0);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+    ['REPORT OMNIA — '+lbl],[''],
+    ['Diari compilati',docs.length],
+    ['Interventi',docs.reduce((s,d)=>s+(d.interventi||[]).length,0)],
+    ['Foto',docs.reduce((s,d)=>s+(d.foto||[]).length,0)],
+    ['Mancanze segnalate',totMiss],
+    ['Postazioni attive',new Set(docs.map(d=>d.postazione)).size+'/26'],
+  ]), 'Riepilogo');
+
+  // Sheet 2: Diari
+  const diariRows=[['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Mancanze','Note']];
   docs.forEach(d=>{
     const dt=toDate(d.dataOra);
-    const dstr=dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
-    getManc(d.checklist).forEach(m=>{
-      mancBody.push([dstr, d.postazione||'', d.bagnino||'', m, 'Postazione']);
-    });
+    diariRows.push([dt.toLocaleDateString('it-IT'),dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+      d.postazione||'',d.bagnino||'',d.meteo?.stateMare||'',d.meteo?.bandiera||'',
+      (d.interventi||[]).length,chkPct(d.checklist),(d.foto||[]).length,
+      allMancanze(d).join(' | '),(d.note||'').replace(/\n/g,' ')]);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diariRows), 'Diari');
+
+  // Sheet 3: Mancanze
+  const mRows=[['Data','Ora','Postazione','Bagnino','Voce mancante','Tipo']];
+  docs.forEach(d=>{
+    const dt=toDate(d.dataOra);
+    const ds=dt.toLocaleDateString('it-IT'), ts=dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    getManc(d.checklist).forEach(m=>mRows.push([ds,ts,d.postazione||'',d.bagnino||'',m,'Postazione']));
     (LIDI_MAP[d.postazione]||[]).forEach(lido=>{
       const lc=d.lidiChecklist||{};
       Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
-        if((lc[lido]||{})[k]===false)
-          mancBody.push([dstr, d.postazione||'', d.bagnino||'', `${lido}: ${v}`, 'Lido']);
+        if((lc[lido]||{})[k]===false) mRows.push([ds,ts,d.postazione||'',d.bagnino||'',`${lido}: ${v}`,'Lido']);
       });
     });
   });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mRows), 'Mancanze');
 
-  if(mancBody.length===0){
-    doc.setTextColor(...GREEN);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.text('✓ Nessuna mancanza segnalata nel periodo.', 17, y);
-    y+=8; doc.setTextColor(0,0,0);
-  } else {
-    doc.autoTable({
-      head:[['Data','Postazione','Bagnino','Voce mancante','Tipo']],
-      body:mancBody,
-      startY:y,
-      margin:{left:14,right:14},
-      headStyles:{fillColor:RED, textColor:WHITE, fontSize:8, fontStyle:'bold'},
-      bodyStyles:{fontSize:7.5},
-      alternateRowStyles:{fillColor:[254,242,242]},
-      didDrawPage: () => { y=doc.lastAutoTable.finalY+8; }
+  // Sheet 4: Turni non compilati
+  const dates=[];
+  const cur=new Date(da); cur.setHours(0,0,0,0);
+  while(cur<=a){dates.push(new Date(cur));cur.setDate(cur.getDate()+1);}
+  const comp={};
+  docs.forEach(d=>{
+    const dk=toDate(d.dataOra).toISOString().slice(0,10);
+    const h=toDate(d.dataOra).getHours(),p=d.postazione; if(!p) return;
+    if(h>=9&&h<14)  comp[`${dk}|${p}|m`]=true;
+    if(h>=14&&h<19) comp[`${dk}|${p}|p`]=true;
+  });
+  const tRows=[['Data','Postazione','Mattina (09-14)','Pomeriggio (14-19)']];
+  dates.forEach(d=>{
+    const dk=d.toISOString().slice(0,10);
+    const ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+    ALL_P.forEach(p=>{
+      const m2=comp[`${dk}|${p}|m`],pp=comp[`${dk}|${p}|p`];
+      if(!m2||!pp) tRows.push([ds,p,m2?'✓':'MANCANTE',pp?'✓':'MANCANTE']);
     });
-    y=doc.lastAutoTable.finalY+12;
-  }
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tRows), 'Turni non compilati');
 
-  // ── Sezione: Statistiche per postazione ──
-  checkPage(30);
-  sectionTitle('Statistiche per postazione');
-
+  // Sheet 5: Statistiche postazioni
   const pc2={},pi2={},pm2={};
   docs.forEach(d=>{
     const p=d.postazione||'?';
     pc2[p]=(pc2[p]||0)+1;
     pi2[p]=(pi2[p]||0)+(d.interventi||[]).length;
-    const mTot=getManc(d.checklist).length+
-      (LIDI_MAP[p]||[]).reduce((s,l)=>{
-        const lc=d.lidiChecklist||{};
-        return s+Object.entries(lc[l]||{}).filter(([,v])=>v===false).length;
-      },0);
-    pm2[p]=(pm2[p]||0)+mTot;
+    pm2[p]=(pm2[p]||0)+allMancanze(d).length;
   });
-  const pk2=Object.keys(pc2).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
-  const statBody=pk2.map(p=>{
-    const chkAvg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc2[p]||1));
-    return [p, pc2[p]||0, pi2[p]||0, pm2[p]||0, chkAvg+'%'];
+  const pk=Object.keys(pc2).sort((a2,b)=>parseInt(a2.replace('P.',''))-parseInt(b.replace('P.','')));
+  const sRows=[['Postazione','Nome','Diari','Interventi','Mancanze','Checklist media %']];
+  pk.forEach(p=>{
+    const sn=STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
+    const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc2[p]||1));
+    sRows.push([p,sn,pc2[p]||0,pi2[p]||0,pm2[p]||0,avg]);
   });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sRows), 'Statistiche postazioni');
 
-  doc.autoTable({
-    head:[['Postazione','Diari','Interventi','Mancanze','Checklist media']],
-    body:statBody,
-    startY:y,
-    margin:{left:14,right:14},
-    headStyles:{fillColor:NAVY, textColor:WHITE, fontSize:8, fontStyle:'bold'},
-    bodyStyles:{fontSize:7.5},
-    alternateRowStyles:{fillColor:[244,241,235]},
-    columnStyles:{0:{fontStyle:'bold'}},
-  });
+  XLSX.writeFile(wb, `report_omnia_${lbl}.xlsx`);
+  btn.disabled=false; btn.textContent='⬇ Scarica .xlsx';
+}
 
-  // Footer su ogni pagina
-  const pages=doc.internal.getNumberOfPages();
-  for(let i=1;i<=pages;i++){
-    doc.setPage(i);
-    doc.setFillColor(...NAVY);
-    doc.rect(0,285,210,12,'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(7);
-    doc.setFont('helvetica','normal');
-    doc.text('Omnia Servizi al Turismo S.r.l.s. — P.I. 01900050673 — Adriatic Lifeguard Service',105,292,{align:'center'});
-    doc.text(`Pagina ${i} di ${pages}`,196,292,{align:'right'});
-    doc.text(new Date().toLocaleDateString('it-IT'),14,292);
+function downloadPDF() {
+  const btn=document.getElementById('btnPdf');
+  btn.disabled=true; btn.textContent='⏳...';
+  const {docs,da,a}=getReportDocs();
+  const periodLabel=rPeriod==='oggi'?'Oggi':rPeriod==='settimana'?'Ultimi 7 giorni':`${fmt(da)} — ${fmt(a)}`;
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const NAVY=[11,37,69],ORANGE=[232,115,26],WHITE=[255,255,255],RED=[192,57,43],GREEN=[26,138,74];
+  let y=0;
+
+  function pdfHeader() {
+    pdf.setFillColor(...NAVY);
+    pdf.rect(0,0,210,22,'F');
+    pdf.setTextColor(...WHITE);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(15); pdf.text('OMNIA ADRIATIC LIFEGUARD SERVICE',105,10,{align:'center'});
+    pdf.setFontSize(9);  pdf.text('Diario Giornaliero — Report Operativo',105,17,{align:'center'});
+    y=28;
   }
 
-  doc.save(`report_omnia_${fmt(da)}_${fmt(a)}.pdf`);
+  function secTitle(t) {
+    if(y+12>275){pdf.addPage();pdfHeader();}
+    pdf.setFillColor(...ORANGE);
+    pdf.rect(14,y,182,7,'F');
+    pdf.setTextColor(...WHITE);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(9);
+    pdf.text(t.toUpperCase(),17,y+5);
+    y+=11; pdf.setTextColor(0,0,0);
+  }
+
+  // Cover
+  pdfHeader();
+  pdf.setFillColor(244,241,235);
+  pdf.rect(14,y,182,20,'F');
+  pdf.setTextColor(...NAVY);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(13); pdf.text('Report Operativo',105,y+8,{align:'center'});
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(10); pdf.text(periodLabel,105,y+15,{align:'center'});
+  y+=26;
+
+  // Stat boxes
+  const totMiss=docs.reduce((s,d)=>s+allMancanze(d).length,0);
+  const stats=[
+    {v:docs.length,l:'Diari',c:NAVY},
+    {v:docs.reduce((s,d)=>s+(d.interventi||[]).length,0),l:'Interventi',c:NAVY},
+    {v:totMiss,l:'Mancanze',c:totMiss>0?RED:GREEN},
+    {v:new Set(docs.map(d=>d.postazione)).size+'/26',l:'Postazioni',c:NAVY}
+  ];
+  stats.forEach((s,i)=>{
+    const x=14+i*46;
+    pdf.setFillColor(255,255,255);
+    pdf.setDrawColor(220,220,220);
+    pdf.roundedRect(x,y,44,20,2,2,'FD');
+    pdf.setTextColor(...s.c);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(18); pdf.text(String(s.v),x+22,y+12,{align:'center'});
+    pdf.setTextColor(100,100,100);
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(7);  pdf.text(s.l.toUpperCase(),x+22,y+18,{align:'center'});
+  });
+  y+=28;
+
+  // Turni non compilati
+  secTitle('Turni non compilati');
+  const dates2=[];
+  const cur2=new Date(da); cur2.setHours(0,0,0,0);
+  while(cur2<=a){dates2.push(new Date(cur2));cur2.setDate(cur2.getDate()+1);}
+  const comp2={};
+  docs.forEach(d=>{
+    const dk=toDate(d.dataOra).toISOString().slice(0,10),h=toDate(d.dataOra).getHours(),p=d.postazione;if(!p)return;
+    if(h>=9&&h<14) comp2[`${dk}|${p}|m`]=true;
+    if(h>=14&&h<19)comp2[`${dk}|${p}|p`]=true;
+  });
+  const tBody=[];
+  dates2.forEach(d=>{
+    const dk=d.toISOString().slice(0,10),ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const mm=ALL_P.filter(p=>!comp2[`${dk}|${p}|m`]),pp=ALL_P.filter(p=>!comp2[`${dk}|${p}|p`]);
+    if(mm.length||pp.length) tBody.push([ds,mm.length?mm.join(', '):'✓ Tutte',pp.length?pp.join(', '):'✓ Tutte']);
+  });
+  if(!tBody.length){
+    pdf.setTextColor(...GREEN);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
+    pdf.text('✓ Tutti i turni sono stati compilati.',17,y);y+=8;pdf.setTextColor(0,0,0);
+  } else {
+    pdf.autoTable({head:[['Data','Mattina mancanti (09-14)','Pomeriggio mancanti (14-19)']],body:tBody,startY:y,
+      margin:{left:14,right:14},headStyles:{fillColor:NAVY,textColor:WHITE,fontSize:8,fontStyle:'bold'},
+      bodyStyles:{fontSize:7.5},alternateRowStyles:{fillColor:[248,246,242]}});
+    y=pdf.lastAutoTable.finalY+10;
+  }
+
+  // Mancanze
+  secTitle('Mancanze dotazioni');
+  const mBody=[];
+  docs.forEach(d=>{
+    const dt=toDate(d.dataOra),ds=dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+    getManc(d.checklist).forEach(m=>mBody.push([ds,d.postazione||'',d.bagnino||'',m,'Postazione']));
+    (LIDI_MAP[d.postazione]||[]).forEach(lido=>{
+      const lc=d.lidiChecklist||{};
+      Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
+        if((lc[lido]||{})[k]===false) mBody.push([ds,d.postazione||'',d.bagnino||'',`${lido}: ${v}`,'Lido']);
+      });
+    });
+  });
+  if(!mBody.length){
+    pdf.setTextColor(...GREEN);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
+    pdf.text('✓ Nessuna mancanza segnalata.',17,y);y+=8;pdf.setTextColor(0,0,0);
+  } else {
+    pdf.autoTable({head:[['Data','Postazione','Bagnino','Voce mancante','Tipo']],body:mBody,startY:y,
+      margin:{left:14,right:14},headStyles:{fillColor:RED,textColor:WHITE,fontSize:8,fontStyle:'bold'},
+      bodyStyles:{fontSize:7.5},alternateRowStyles:{fillColor:[254,242,242]}});
+    y=pdf.lastAutoTable.finalY+10;
+  }
+
+  // Statistiche postazioni
+  secTitle('Statistiche per postazione');
+  const pc3={},pi3={},pm3={};
+  docs.forEach(d=>{
+    const p=d.postazione||'?';
+    pc3[p]=(pc3[p]||0)+1;pi3[p]=(pi3[p]||0)+(d.interventi||[]).length;pm3[p]=(pm3[p]||0)+allMancanze(d).length;
+  });
+  const pk2=Object.keys(pc3).sort((a2,b)=>parseInt(a2.replace('P.',''))-parseInt(b.replace('P.','')));
+  pdf.autoTable({
+    head:[['Postazione','Diari','Interventi','Mancanze','Checklist media']],
+    body:pk2.map(p=>{
+      const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc3[p]||1));
+      return [p,pc3[p],pi3[p]||0,pm3[p]||0,avg+'%'];
+    }),
+    startY:y,margin:{left:14,right:14},
+    headStyles:{fillColor:NAVY,textColor:WHITE,fontSize:8,fontStyle:'bold'},
+    bodyStyles:{fontSize:7.5,fontStyle:'normal'},
+    columnStyles:{0:{fontStyle:'bold'}},
+    alternateRowStyles:{fillColor:[244,241,235]}
+  });
+
+  // Footer
+  const pages=pdf.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    pdf.setPage(i);
+    pdf.setFillColor(...NAVY);pdf.rect(0,285,210,12,'F');
+    pdf.setTextColor(...WHITE);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+    pdf.text('Omnia Servizi al Turismo S.r.l.s. — P.I. 01900050673 — adriaticlifeguardservice.it',105,292,{align:'center'});
+    pdf.text(`Pagina ${i} di ${pages}`,196,292,{align:'right'});
+    pdf.text(new Date().toLocaleDateString('it-IT'),14,292);
+  }
+
+  pdf.save(`report_omnia_${fmt(da)}_${fmt(a)}.pdf`);
   btn.disabled=false; btn.textContent='⬇ Scarica .pdf';
 }
 
-// ══════════════════════════════
+// ═══════════════════════════════════════
+//  CSV RAPIDO
+// ═══════════════════════════════════════
+function exportCSV() {
+  const rows=[['Data','Ora','Postazione','Bagnino','Mare','Bandiera','Interventi','Checklist%','Foto','Mancanze','Note']];
+  VIEW.forEach(d=>{
+    const dt=toDate(d.dataOra);
+    rows.push([dt.toLocaleDateString('it-IT'),dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+      d.postazione||'',d.bagnino||'',d.meteo?.stateMare||'',d.meteo?.bandiera||'',
+      (d.interventi||[]).length,chkPct(d.checklist),(d.foto||[]).length,
+      allMancanze(d).join(' | '),(d.note||'').replace(/,/g,' ')]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const el=document.createElement('a');
+  el.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
+  el.download=`diario_omnia_${fmt(new Date())}.csv`;
+  el.click();
+}
+
+// ═══════════════════════════════════════
 //  HELPERS
-// ══════════════════════════════
-function toDate(v){ return v?.toDate ? v.toDate() : (v ? new Date(v) : new Date(0)); }
+// ═══════════════════════════════════════
+function toDate(v){ return v?.toDate?v.toDate():(v?new Date(v):new Date(0)); }
 function fmt(d){ return d.toISOString().slice(0,10); }
 function chkPct(c){ if(!c) return 0; const v=Object.values(c); return v.length?Math.round(v.filter(Boolean).length/v.length*100):0; }
-function getManc(c){ if(!c) return []; return Object.entries(c).filter(([,v])=>v===false).map(([k])=>CHK[k]||k); }
+function getManc(c){ if(!c) return []; return Object.entries(c).filter(([,v])=>v===false).map(([k])=>CHK_LABELS[k]||k); }
+function lidoManc(doc){
+  const lc=doc.lidiChecklist||{};
+  const lidi=LIDI_MAP[doc.postazione]||[];
+  const miss=[];
+  lidi.forEach(lido=>{
+    Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
+      if((lc[lido]||{})[k]===false) miss.push(`${lido}: ${v}`);
+    });
+  });
+  return miss;
+}
+function allMancanze(doc){ return [...getManc(doc.checklist),...lidoManc(doc)]; }
 function bBand(b){
   if(b==='verde')  return '<span class="bv bv-g">🟢 Verde</span>';
   if(b==='gialla') return '<span class="bv bv-y">🟡 Gialla</span>';
@@ -1522,7 +1251,7 @@ function bBand(b){
   return '<span style="color:#ccc">—</span>';
 }
 function bChk(p){
-  if(p===100) return `<span class="bv bv-ok">✓ 100%</span>`;
+  if(p===100) return '<span class="bv bv-ok">✓ 100%</span>';
   if(p>=80)   return `<span class="bv bv-b">${p}%</span>`;
   return `<span class="bv bv-w">⚠ ${p}%</span>`;
 }
