@@ -195,6 +195,25 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
   .cgrid{grid-template-columns:1fr}
   .cc.full{grid-column:span 1}
 }
+
+/* ── SETTINGS ── */
+.set-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:1.25rem;margin-bottom:1rem}
+.set-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
+.set-title::before{content:'';width:3px;height:13px;background:var(--orange);border-radius:2px}
+.set-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.set-field label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:4px}
+.set-field input{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);background:var(--gray-bg);outline:none}
+.set-field input:focus{border-color:var(--navy2);background:#fff}
+.set-phones{margin-bottom:.75rem}
+.phone-chip{display:inline-flex;align-items:center;gap:6px;background:var(--gray-bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:13px;margin:3px}
+.phone-chip button{background:none;border:none;font-size:15px;cursor:pointer;color:var(--gray);line-height:1;padding:0}
+.btn-save{padding:.6rem 1.5rem;background:var(--green);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn-test{padding:.6rem 1.5rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-left:.5rem}
+.set-status{font-size:12px;margin-top:.5rem;font-weight:600}
+.set-status.ok{color:var(--green)}.set-status.err{color:var(--red)}
+.setup-steps{background:#FFF7ED;border:1px solid var(--orange);border-radius:var(--r2);padding:.875rem 1rem;margin-bottom:1rem;font-size:13px;line-height:1.7}
+.setup-steps strong{color:var(--orange)}
+
 </style>
 </head>
 <body>
@@ -250,6 +269,7 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
     <button class="tbtn"    onclick="switchTab('stats',this)">📊 Statistiche</button>
     <button class="tbtn"    onclick="switchTab('mancanti',this)">🚨 Mancanti</button>
     <button class="tbtn"    onclick="switchTab('report',this)">📄 Report</button>
+    <button class="tbtn"    onclick="switchTab('settings',this)">⚙️ Impostazioni</button>
   </div>
 
   <!-- TAB: DIARI -->
@@ -359,10 +379,140 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
     </div>
   </div>
 
+
+  <!-- TAB: IMPOSTAZIONI -->
+  <div class="tpanel" id="tab-settings">
+
+    <div class="setup-steps">
+      <strong>🤖 Bot Telegram già configurato</strong><br>
+      Il bot <strong>@OmniaDiarioBot</strong> è attivo.<br>
+      Per aggiungere altri destinatari, mandagli <code style="background:#fff3e0;padding:1px 5px;border-radius:3px">/start</code>
+      da Telegram e inserisci il loro Chat ID qui sotto.
+    </div>
+
+    <div class="set-card">
+      <div class="set-title">Destinatari Telegram</div>
+      <div style="margin-bottom:.75rem">
+        <label style="font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px">Il tuo Chat ID (già configurato)</label>
+        <div style="background:var(--gray-bg);border-radius:var(--r2);padding:.55rem .875rem;font-size:14px;font-weight:600;color:var(--navy);font-family:monospace">6856028703</div>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Chat ID aggiuntivi (altri responsabili)</label>
+        <div class="set-phones" id="extraPhones"></div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="extra-input" placeholder="Chat ID (es. 123456789)" style="width:220px;padding:.45rem .75rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:14px;background:var(--gray-bg);color:var(--navy);outline:none">
+          <button onclick="addExtraPhone()" style="padding:.45rem .875rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;cursor:pointer">+ Aggiungi</button>
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:.5rem">
+        <button class="btn-save" onclick="saveCfg()">💾 Salva</button>
+        <button class="btn-test" onclick="testTelegram()">📤 Invia messaggio di test</button>
+      </div>
+      <div class="set-status" id="cfgStatus"></div>
+    </div>
+
+    <div class="set-card">
+      <div class="set-title">Riepilogo notifiche attive</div>
+      <div style="font-size:13px;line-height:2">
+        <div>🔔 <strong>Push mancanze diario</strong> — inviata a chi ha l'app Omnia Segnalazioni aperta con ruolo operatore</div>
+        <div>⏰ <strong>Promemoria mattina</strong> — ogni giorno alle 10:00 via Telegram (postazioni mancanti 09-14)</div>
+        <div>⏰ <strong>Promemoria pomeriggio</strong> — ogni giorno alle 15:00 via Telegram (postazioni mancanti 14-19)</div>
+        <div style="margin-top:.5rem;color:var(--gray);font-size:12px">⚠️ I promemoria vengono inviati solo se almeno una postazione non ha compilato</div>
+      </div>
+    </div>
+
+  </div><!-- /tab-settings -->
+
 </main>
 </div>
 
 <script>
+
+// ═══════════════════════════════════════
+//  IMPOSTAZIONI WHATSAPP
+// ═══════════════════════════════════════
+let extraPhones = [];
+
+const MY_CHAT_ID = '6856028703';
+const TG_TOKEN   = '8638329653:AAHnaN7R0nfnn8SuJOGLLQo0mq9WqrWSO6s';
+
+async function loadCfg() {
+  try {
+    const snap = await db.collection('config').doc('telegram_diario').get();
+    if (!snap.exists) {
+      // Prima volta: salva il chat ID di Marco automaticamente
+      await db.collection('config').doc('telegram_diario').set({
+        chat_ids: [MY_CHAT_ID],
+        updated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return;
+    }
+    const d = snap.data();
+    if (d.chat_ids) {
+      extraPhones = d.chat_ids.filter(id => id !== MY_CHAT_ID);
+      renderExtraPhones();
+    }
+  } catch(e) { console.log('Config non trovata:', e.message); }
+}
+
+function renderExtraPhones() {
+  const el = document.getElementById('extraPhones');
+  el.innerHTML = extraPhones.map((p,i) =>
+    `<span class="phone-chip">${p}<button onclick="removeExtraPhone(${i})">×</button></span>`
+  ).join('');
+}
+
+function addExtraPhone() {
+  const val = document.getElementById('extra-input').value.trim();
+  if (!val || isNaN(val)) { return; }
+  if (!extraPhones.includes(val)) { extraPhones.push(val); renderExtraPhones(); }
+  document.getElementById('extra-input').value = '';
+}
+
+function removeExtraPhone(i) {
+  extraPhones.splice(i,1); renderExtraPhones();
+}
+
+async function saveCfg() {
+  const status = document.getElementById('cfgStatus');
+  try {
+    const allIds = [MY_CHAT_ID, ...extraPhones];
+    await db.collection('config').doc('telegram_diario').set({
+      chat_ids: allIds,
+      updated: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    status.className='set-status ok'; status.textContent='✅ Configurazione salvata!';
+    setTimeout(()=>status.textContent='',3000);
+  } catch(e) {
+    status.className='set-status err'; status.textContent='❌ Errore: '+e.message;
+  }
+}
+
+async function testTelegram() {
+  const status = document.getElementById('cfgStatus');
+  status.className='set-status'; status.textContent='📤 Invio in corso...';
+  try {
+    const resp = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        chat_id: MY_CHAT_ID,
+        text: '✅ *OMNIA Diario* — Test notifica attiva\! Sistema funzionante\.',
+        parse_mode: 'MarkdownV2'
+      })
+    });
+    const data = await resp.json();
+    if(data.ok){
+      status.className='set-status ok'; status.textContent='✅ Messaggio di test ricevuto su Telegram!';
+    } else {
+      status.className='set-status err'; status.textContent='❌ '+data.description;
+    }
+  } catch(e) {
+    status.className='set-status err'; status.textContent='❌ '+e.message;
+  }
+  setTimeout(()=>status.textContent='',5000);
+}
+
 // ═══════════════════════════════════════
 //  FIREBASE
 // ═══════════════════════════════════════
@@ -415,7 +565,7 @@ const LIDI_MAP = {
   'P.24':['Riva del Sol','Luna Rossa'],
   'P.25':['Onda Blu','Tropical','Oasis'],
   'P.26':['Lido38'],
-  'P.27':['VVF','Lido Sahara'],
+  'P.27':['VVF','Lido Sahara','BlueBay'],
   'P.28':['Casa del Mar','Vista Mare','Di Matteo'],
   'P.29':['Maldimare','Embarcadero'],
   'P.30':['Bora Bora','Roses'],
@@ -733,6 +883,7 @@ function switchTab(name, btn) {
   if (name === 'stats')    renderStats();
   if (name === 'mancanti') initMancanti();
   if (name === 'report')   refreshReport();
+  if (name === 'settings') loadCfg();
 }
 
 // ═══════════════════════════════════════
