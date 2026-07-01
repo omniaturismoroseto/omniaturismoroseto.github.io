@@ -497,8 +497,8 @@ async function testTelegram() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         chat_id: MY_CHAT_ID,
-        text: '✅ *OMNIA Diario* — Test notifica attiva\! Sistema funzionante\.',
-        parse_mode: 'MarkdownV2'
+        text: '✅ OMNIA Diario — Test notifica attiva. Sistema funzionante.',
+        parse_mode: 'Markdown'
       })
     });
     const data = await resp.json();
