@@ -391,6 +391,54 @@ select {
   padding: 0.5rem 0;
 }
 
+
+/* ── GIORNATA INTERA TOGGLE ── */
+.gi-toggle-wrap {
+  display: flex; align-items: center; gap: 12px;
+  background: #EEF3FB;
+  border: 1.5px solid var(--navy-mid);
+  border-radius: var(--radius-sm);
+  padding: .625rem .875rem;
+  margin-top: .75rem;
+  cursor: pointer;
+  user-select: none;
+}
+.gi-toggle-wrap.active {
+  background: #0B2545;
+  border-color: #0B2545;
+}
+.gi-toggle {
+  width: 42px; height: 24px;
+  background: rgba(11,37,69,0.2);
+  border-radius: 12px;
+  position: relative;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.gi-toggle-wrap.active .gi-toggle { background: var(--orange); }
+.gi-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.gi-toggle-wrap.active .gi-toggle::after { transform: translateX(18px); }
+.gi-label {
+  font-size: 14px; font-weight: 600;
+  color: var(--navy);
+  flex: 1;
+}
+.gi-toggle-wrap.active .gi-label { color: #fff; }
+.gi-sub {
+  font-size: 11.5px; color: var(--gray);
+  display: block; margin-top: 2px; font-weight: 400;
+}
+.gi-toggle-wrap.active .gi-sub { color: rgba(255,255,255,0.7); }
+
 </style>
 </head>
 
@@ -720,6 +768,16 @@ const storage = firebase.storage();
   });
 })();
 
+
+// ── GIORNATA INTERA ──
+let giornataintera = false;
+
+function toggleGI() {
+  giornataintera = !giornataintera;
+  const el = document.getElementById('giToggle');
+  el.classList.toggle('active', giornataintera);
+}
+
 // ── CHECKLIST ──
 (function initChecklist() {
   const items = document.querySelectorAll('.chk-item');
@@ -954,6 +1012,7 @@ async function submitForm() {
       },
       checklist: collectChecklist(),
       lidiChecklist: collectLidiState(),
+      giornataintera: giornataintera,
       interventi: collectInterventi(),
       note:  document.getElementById('note').value.trim(),
       foto:  fotoUrls,
@@ -996,6 +1055,8 @@ function resetForm() {
 
   resetChecklist();
   resetLidiSection();
+  giornataintera = false;
+  document.getElementById('giToggle').classList.remove('active');
   setNow();
 }
 

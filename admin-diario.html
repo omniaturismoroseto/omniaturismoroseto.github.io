@@ -692,7 +692,7 @@ function render() {
     tr.innerHTML = `
       <td><span class="arr">›</span></td>
       <td><strong>${dstr}</strong><br><span style="color:var(--gray);font-size:11px">${tstr}</span></td>
-      <td><strong>${doc.postazione || '—'}</strong></td>
+      <td><strong>${doc.postazione || '—'}</strong>${doc.giornataintera ? ' <span style="font-size:10px;background:#EEF3FB;color:var(--navy2);padding:1px 6px;border-radius:10px;font-weight:700">INT</span>' : ''}</td>
       <td>${doc.bagnino || '—'}</td>
       <td style="text-transform:capitalize">${doc.meteo?.stateMare || '—'}</td>
       <td>${bBand(band)}</td>
@@ -777,7 +777,7 @@ function buildDetail(doc) {
 
   return `<div class="dinner"><div class="dgrid">
     <div class="dc"><div class="dct">Identificazione</div>
-      <div class="dr"><span class="dk">Data/ora</span><span class="dv">${dts}</span></div>
+      <div class="dr"><span class="dk">Data/ora</span><span class="dv">${dts}${doc.giornataintera ? ' · <strong>Giornata intera</strong>' : ''}</span></div>
       <div class="dr"><span class="dk">Postazione</span><span class="dv">${doc.postazione||'—'}</span></div>
       <div class="dr"><span class="dk">Bagnino</span><span class="dv">${doc.bagnino||'—'}</span></div>
     </div>
@@ -842,6 +842,7 @@ function buildTurni() {
   const todayDocs = ALL.filter(d => toDate(d.dataOra).toDateString()===today);
   const matOk = new Set(), pomOk = new Set();
   todayDocs.forEach(d => {
+    if (d.giornataintera) { matOk.add(d.postazione); pomOk.add(d.postazione); return; }
     const h = toDate(d.dataOra).getHours();
     if (h>=9  && h<14) matOk.add(d.postazione);
     if (h>=14 && h<19) pomOk.add(d.postazione);
@@ -1034,8 +1035,9 @@ function renderMancanti() {
   const comp={};
   docs.forEach(d=>{
     const dk=toDate(d.dataOra).toISOString().slice(0,10);
-    const h=toDate(d.dataOra).getHours();
     const p=d.postazione; if(!p) return;
+    if(d.giornataintera){ comp[`${dk}|${p}|m`]=true; comp[`${dk}|${p}|p`]=true; return; }
+    const h=toDate(d.dataOra).getHours();
     if(h>=9&&h<14)  comp[`${dk}|${p}|m`]=true;
     if(h>=14&&h<19) comp[`${dk}|${p}|p`]=true;
   });
