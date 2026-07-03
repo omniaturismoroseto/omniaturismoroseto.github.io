@@ -495,21 +495,25 @@ async function testTelegram() {
   const status = document.getElementById('cfgStatus');
   status.className='set-status'; status.textContent='📤 Invio in corso...';
   try {
-    const resp = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        chat_id: MY_CHAT_ID,
-        text: '✅ OMNIA Diario — Test notifica attiva. Sistema funzionante.',
-        parse_mode: 'Markdown'
-      })
-    });
-    const data = await resp.json();
-    if(data.ok){
-      status.className='set-status ok'; status.textContent='✅ Messaggio di test ricevuto su Telegram!';
-    } else {
-      status.className='set-status err'; status.textContent='❌ '+data.description;
+    // Leggi tutti i destinatari da Firestore
+    const snap = await db.collection('config').doc('telegram_diario').get();
+    const allIds = snap.exists ? (snap.data().chat_ids || [MY_CHAT_ID]) : [MY_CHAT_ID];
+    let ok = 0, err = 0;
+    for (const chatId of allIds) {
+      const resp = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: '✅ OMNIA Diario — Test notifica attiva. Sistema funzionante.',
+          parse_mode: 'Markdown'
+        })
+      });
+      const data = await resp.json();
+      if(data.ok) ok++; else err++;
     }
+    status.className='set-status ok';
+    status.textContent=`✅ Test inviato a ${ok} destinatario${ok>1?'i':''}${err>0?' ('+err+' errori)':''}`;
   } catch(e) {
     status.className='set-status err'; status.textContent='❌ '+e.message;
   }
