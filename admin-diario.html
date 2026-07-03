@@ -621,7 +621,7 @@ async function load() {
   document.getElementById('tbody').innerHTML =
     '<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento dati...</div></td></tr>';
   try {
-    const snap = await db.collection('diariogiornaliero').limit(500).get();
+    const snap = await db.collection('diariogiornaliero').limit(1000).get();
     ALL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     ALL.sort((a, b) => toDate(b.dataOra) - toDate(a.dataOra));
     applyFilters();
@@ -821,11 +821,14 @@ function buildMalert() {
     const dt  = toDate(d.dataOra);
     const ora = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
     const chips = allMancanze(d).map(m => `<span class="mchip">${m}</span>`).join('');
+    const lidiCoperti = (LIDI_MAP[d.postazione]||[]).join(', ');
     return `<div class="mrow"><div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
         <span class="mpost">${d.postazione}</span>
         <span class="mmeta">${d.bagnino||'—'} · ore ${ora}</span>
-      </div><div class="mchips">${chips}</div>
+      </div>
+      ${lidiCoperti ? `<div style="font-size:11px;color:var(--gray);margin-bottom:4px">🏖 ${lidiCoperti}</div>` : ''}
+      <div class="mchips">${chips}</div>
     </div></div>`;
   }).join('');
   el.innerHTML = `<div class="malert-hd">
@@ -868,7 +871,10 @@ function turnoCard(label, ora, okSet) {
       ${miss.length===0
         ? '<span style="font-size:13px;color:var(--green);font-weight:600">✅ Tutte le postazioni hanno compilato</span>'
         : `<div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Mancanti</div>
-           <div class="tchips">${miss.map(p=>`<span class="tchip">${p}</span>`).join('')}</div>`}
+           <div class="tchips">${miss.map(p=>{
+               const lidi=(LIDI_MAP[p]||[]).join(', ');
+               return `<span class="tchip" title="${lidi}">${p}<span style="font-weight:400;opacity:.8;font-size:10.5px;display:block;line-height:1.3">${lidi}</span></span>`;
+             }).join('')}</div>`}
     </div>
   </div>`;
 }
