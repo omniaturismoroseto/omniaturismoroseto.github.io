@@ -222,6 +222,9 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
   <span class="hbadge">Admin</span>
   <h1>Diario Giornaliero — Pannello</h1>
   <span id="hcount"></span>
+  <button onclick="load()" style="margin-left:.75rem;padding:4px 12px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:20px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px" title="Aggiorna dati">
+    🔄 Aggiorna
+  </button>
 </header>
 
 <div class="layout">
@@ -603,6 +606,9 @@ let rPeriod = 'oggi';
 // ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
+// Auto-refresh ogni 2 minuti
+setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
+
 (function init() {
   const sel = document.getElementById('f-post');
   STATIONS.forEach(s => {
@@ -618,8 +624,11 @@ let rPeriod = 'oggi';
 //  FIRESTORE LOAD
 // ═══════════════════════════════════════
 async function load() {
-  document.getElementById('tbody').innerHTML =
-    '<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento dati...</div></td></tr>';
+  const wasEmpty = ALL.length === 0;
+  if (wasEmpty) {
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="10"><div class="smsg"><div class="ic">⏳</div>Caricamento dati...</div></td></tr>';
+  }
   try {
     const snap = await db.collection('diariogiornaliero').limit(1000).get();
     ALL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
