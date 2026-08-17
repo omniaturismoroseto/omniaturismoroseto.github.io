@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Diario Giornaliero — Omnia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<style>
+:root {
+  --navy:        #0B2545;
+  --navy-mid:    #1B3A6B;
+  --orange:      #E8731A;
+  --orange-pale: #FFF3E8;
+  --sand:        #F4F1EB;
+  --white:       #FFFFFF;
+  --gray-text:   #6B7280;
+  --gray-bg:     #F0EEE9;
+  --border:      rgba(11,37,69,0.13);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--sand);
+  color: var(--navy);
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+/* ── HEADER ── */
+header {
+  background: #000;
+  padding: 0.75rem 1.25rem 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.hd-logo-row { margin-bottom: 0.5rem; }
+.hd-logo { height: 52px; width: auto; display: block; }
+.hd-row { display: flex; align-items: center; gap: 10px; }
+.hd-badge {
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  flex-shrink: 0;
+}
+header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: #fff; letter-spacing: 0.03em;
+}
+.hd-sub { display: none; }
+
+/* ── MAIN ── */
+main { padding: 1rem; max-width: 640px; margin: 0 auto; }
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.125rem 1.125rem 1.25rem;
+  margin-bottom: 0.875rem;
+  border: 1px solid var(--border);
+}
+
+.sec-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.875rem;
+  display: flex; align-items: center; gap: 7px;
+}
+.sec-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--orange);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ── FORM BASE ── */
+.field { margin-bottom: 0.875rem; }
+.field:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 12px; font-weight: 600;
+  color: var(--gray-text);
+  margin-bottom: 5px;
+  letter-spacing: 0.03em;
+}
+
+select,
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: var(--navy);
+  background: var(--gray-bg);
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  appearance: none; -webkit-appearance: none;
+}
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: var(--navy-mid);
+  background: var(--white);
+}
+textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 2.2rem;
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+/* ── CHIP SELECTOR ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  background: var(--gray-bg);
+  color: var(--navy);
+  user-select: none;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+  white-space: nowrap;
+}
+.chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.chip.on.warn { background: #C0392B; border-color: #C0392B; }
+.chip.on.ok   { background: #1A8A4A; border-color: #1A8A4A; }
+
+/* ── GARBINO ALERT ── */
+.garbino {
+  display: none;
+  background: #FFF3E8;
+  border: 1.5px solid var(--orange);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 13px; font-weight: 600;
+  color: #7C2D12;
+  margin-top: 0.75rem;
+  line-height: 1.45;
+}
+.garbino.show { display: block; }
+
+/* ── INTERVENTI ── */
+.int-box {
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+}
+.int-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.75rem;
+}
+.int-label {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--orange);
+}
+.btn-del {
+  background: none; border: none;
+  font-size: 20px; color: var(--gray-text);
+  cursor: pointer; line-height: 1;
+  padding: 0 4px;
+}
+
+.btn-add-int {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: none;
+  border: 1.5px dashed rgba(11,37,69,0.2);
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--navy-mid);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.14s;
+}
+.btn-add-int:active { background: var(--gray-bg); }
+
+/* ── FOTO ── */
+.upload-zone {
+  border: 2px dashed rgba(11,37,69,0.2);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--gray-bg);
+  transition: border-color 0.14s;
+}
+.upload-zone:active { border-color: var(--navy); }
+.upload-icon { font-size: 30px; margin-bottom: 5px; }
+.upload-hint { font-size: 13px; color: var(--gray-text); }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-rm {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(0,0,0,0.55);
+  color: #fff; border: none; border-radius: 50%;
+  width: 22px; height: 22px;
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.upload-prog {
+  display: none;
+  font-size: 13px; color: var(--gray-text);
+  text-align: center; margin-top: 6px;
+}
+
+/* ── SUBMIT ── */
+.btn-submit {
+  width: 100%;
+  padding: 1rem;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 19px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.1s;
+  margin-top: 0.25rem;
+}
+.btn-submit:active { transform: scale(0.98); background: var(--navy-mid); }
+.btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── STATUS ── */
+.banner {
+  display: none;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 0.875rem; text-align: center;
+}
+.banner.ok { display:block; background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7; }
+.banner.err { display:block; background:#FEF2F2; color:#991B1B; border:1px solid #FCA5A5; }
+
+/* ── CHECKLIST ── */
+.chk-group { margin-bottom: 1rem; }
+.chk-group:last-child { margin-bottom: 0; }
+.chk-group-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--navy-mid);
+  margin-bottom: 0.5rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.chk-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(11,37,69,0.06);
+  cursor: pointer;
+  user-select: none;
+}
+.chk-item:last-child { border-bottom: none; }
+.chk-box {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(11,37,69,0.25);
+  background: var(--gray-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: background 0.14s, border-color 0.14s;
+  margin-top: 1px;
+}
+.chk-item.checked .chk-box {
+  background: #1A8A4A; border-color: #1A8A4A; color: #fff;
+}
+.chk-item.checked .chk-text { text-decoration: line-through; color: var(--gray-text); }
+.chk-text { font-size: 14px; line-height: 1.4; }
+.chk-sub { font-size: 11.5px; color: var(--gray-text); display: block; margin-top: 1px; }
+.chk-warn .chk-box { border-color: #C0392B; }
+.chk-counter {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  margin-top: 6px;
+}
+.chk-counter-label { font-size: 12px; color: var(--gray-text); flex: 1; }
+.chk-counter-val { font-size: 15px; font-weight: 600; color: var(--navy); min-width: 24px; text-align: center; }
+.chk-alert {
+  display: none;
+  background: #FEF2F2; border: 1px solid #FCA5A5;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12.5px; font-weight: 600; color: #991B1B;
+  margin-top: 8px;
+}
+.chk-alert.show { display: block; }
+
+/* ── SEZIONE STORICO ── */
+
+/* ── PER-LIDO CHECKLIST ── */
+.lido-group {
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 0.625rem;
+  overflow: hidden;
+}
+.lido-group:last-child { margin-bottom: 0; }
+.lido-title {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 0.875rem;
+  background: var(--navy-mid);
+  cursor: pointer;
+  user-select: none;
+}
+.lido-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fff;
+}
+.lido-score {
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.7);
+}
+.lido-score.ok { color: #6EE7B7; }
+.lido-score.warn { color: #FCD34D; }
+.lido-items { padding: 0.25rem 0; }
+.lido-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid rgba(11,37,69,0.08);
+  cursor: pointer; user-select: none;
+}
+.lido-item:last-child { border-bottom: none; }
+.lido-box {
+  flex-shrink: 0; width: 20px; height: 20px;
+  border-radius: 5px; border: 1.5px solid rgba(11,37,69,0.25);
+  background: #fff; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; margin-top: 1px;
+  transition: background 0.14s, border-color 0.14s;
+}
+.lido-item.checked .lido-box { background: #1A8A4A; border-color: #1A8A4A; color: #fff; }
+.lido-item.checked .lido-text { text-decoration: line-through; color: var(--gray-text); }
+.lido-text { font-size: 13.5px; line-height: 1.4; }
+.lido-sub { font-size: 11px; color: var(--gray-text); display: block; margin-top: 1px; }
+.no-post-msg {
+  font-size: 13px; color: var(--gray-text); font-style: italic;
+  padding: 0.5rem 0;
+}
+
+
+/* ── GIORNATA INTERA TOGGLE ── */
+.gi-toggle-wrap {
+  display: flex; align-items: center; gap: 12px;
+  background: #EEF3FB;
+  border: 1.5px solid var(--navy-mid);
+  border-radius: var(--radius-sm);
+  padding: .625rem .875rem;
+  margin-top: .75rem;
+  cursor: pointer;
+  user-select: none;
+}
+.gi-toggle-wrap.active {
+  background: #0B2545;
+  border-color: #0B2545;
+}
+.gi-toggle {
+  width: 42px; height: 24px;
+  background: rgba(11,37,69,0.2);
+  border-radius: 12px;
+  position: relative;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.gi-toggle-wrap.active .gi-toggle { background: var(--orange); }
+.gi-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.gi-toggle-wrap.active .gi-toggle::after { transform: translateX(18px); }
+.gi-label {
+  font-size: 14px; font-weight: 600;
+  color: var(--navy);
+  flex: 1;
+}
+.gi-toggle-wrap.active .gi-label { color: #fff; }
+.gi-sub {
+  font-size: 11.5px; color: var(--gray);
+  display: block; margin-top: 2px; font-weight: 400;
+}
+.gi-toggle-wrap.active .gi-sub { color: rgba(255,255,255,0.7); }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="hd-logo-row">
+    <img src="data:image/png;base64,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" alt="Omnia Adriatic Lifeguard Service" class="hd-logo">
+  </div>
+  <div class="hd-row">
+    <span class="hd-badge">Staff</span>
+    <h1>Diario Giornaliero</h1>
+  </div>
+</header>
+
+<main>
+
+  <!-- STATUS BANNER -->
+  <div id="banner" class="banner"></div>
+
+  <!-- ① POSTAZIONE + DATA -->
+  <div class="card">
+    <div class="sec-title">Identificazione</div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Postazione</label>
+        <select id="postazione" onchange="buildLidiSection(this.value)">
+          <option value="">— Seleziona —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Data e ora</label>
+        <input type="datetime-local" id="dataOra">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Bagnino responsabile</label>
+      <input type="text" id="bagnino" placeholder="Nome e cognome">
+    </div>
+
+    <div class="gi-toggle-wrap" id="giToggle" onclick="toggleGI()">
+      <div class="gi-toggle"></div>
+      <div class="gi-label">
+        Giornata intera (09:00–19:00)
+        <span class="gi-sub">Spunta se copri entrambi i turni — non serve compilare due volte</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ② CHECKLIST POSTAZIONE -->
+  <div class="card">
+    <div class="sec-title">Checklist Postazione</div>
+
+    <div id="chkCounter" class="chk-counter">
+      <span class="chk-counter-label">Elementi verificati</span>
+      <span class="chk-counter-val" id="chkDone">0</span>
+      <span style="font-size:12px;color:var(--gray-text)">/</span>
+      <span class="chk-counter-val" id="chkTotal">0</span>
+    </div>
+    <div id="chkAlert" class="chk-alert">
+      ⚠️ Attenzione: non tutti gli elementi sono stati verificati.
+    </div>
+
+    <!-- NEL CASSONE -->
+    <div class="chk-group" style="margin-top:.875rem">
+      <div class="chk-group-title">Nel cassone</div>
+      <div class="chk-item chk-warn" data-id="kit_medico">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Kit medico presente e sigillato
+          <span class="chk-sub">Aprire SOLO in emergenza — Pocket Mask, Pallone Ambu, Canule, Guanti, Mascherina, Occhiali protettivi</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="giubbino">
+        <div class="chk-box"></div>
+        <div class="chk-text">Giubbino di salvataggio</div>
+      </div>
+      <div class="chk-item" data-id="rullo">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Rullo presente
+          <span class="chk-sub">Controlla che non sia intrecciato</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="caschetto">
+        <div class="chk-box"></div>
+        <div class="chk-text">Caschetto</div>
+      </div>
+    </div>
+
+    <!-- NEL PATTINO -->
+    <div class="chk-group">
+      <div class="chk-group-title">Nel pattino</div>
+      <div class="chk-item" data-id="scalmi_remi">
+        <div class="chk-box"></div>
+        <div class="chk-text">Scalmi e remi</div>
+      </div>
+      <div class="chk-item" data-id="mezzo_marinaio">
+        <div class="chk-box"></div>
+        <div class="chk-text">Mezzo marinaio</div>
+      </div>
+      <div class="chk-item" data-id="ancora">
+        <div class="chk-box"></div>
+        <div class="chk-text">Ancora</div>
+      </div>
+      <div class="chk-item" data-id="salvagente_pattino">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Salvagente
+          <span class="chk-sub">Scegli quello migliore</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TU DEVI AVERE -->
+    <div class="chk-group">
+      <div class="chk-group-title">Tu devi avere</div>
+      <div class="chk-item" data-id="canotta_rossa">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Canotta rossa indossata
+          <span class="chk-sub">Da indossare sempre, anche sul pattino</span>
+        </div>
+      </div>
+      <div class="chk-item" data-id="fischietto">
+        <div class="chk-box"></div>
+        <div class="chk-text">Fischietto tipo Fox o superiore</div>
+      </div>
+      <div class="chk-item" data-id="pinne_maschera">
+        <div class="chk-box"></div>
+        <div class="chk-text">Pinne, maschera e boccaglio</div>
+      </div>
+      <div class="chk-item" data-id="binocolo">
+        <div class="chk-box"></div>
+        <div class="chk-text">Binocolo</div>
+      </div>
+      <div class="chk-item chk-warn" data-id="documenti">
+        <div class="chk-box"></div>
+        <div class="chk-text">
+          Brevetto, BLSD e visita medica
+          <span class="chk-sub">Documenti al seguito o verificati</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLLI GENERALI PER LIDO -->
+    <div class="chk-group">
+      <div class="chk-group-title">Controlli generali per lido</div>
+      <div id="lidi-container">
+        <div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ③ METEO / MARE (was ②) -->
+  <div class="card">
+    <div class="sec-title">Meteo e Condizioni del Mare</div>
+
+    <div class="field">
+      <label>Stato del mare</label>
+      <div class="chips" id="mare">
+        <span class="chip" data-v="calmo">Calmo</span>
+        <span class="chip" data-v="poco_mosso">Poco mosso</span>
+        <span class="chip" data-v="mosso">Mosso</span>
+        <span class="chip on warn" data-v="agitato">Agitato</span>
+        <span class="chip on warn" data-v="molto_agitato">Molto agitato</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:.75rem">
+      <label>Cielo</label>
+      <div class="chips" id="cielo">
+        <span class="chip on" data-v="sereno">☀️ Sereno</span>
+        <span class="chip" data-v="nuvoloso">⛅ Nuvoloso</span>
+        <span class="chip" data-v="coperto">☁️ Coperto</span>
+        <span class="chip" data-v="pioggia">🌧 Pioggia</span>
+        <span class="chip" data-v="temporale">⛈ Temporale</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:.75rem">
+      <label>Bandiera esposta</label>
+      <div class="chips" id="bandiera">
+        <span class="chip on ok" data-v="verde">🟢 Verde</span>
+        <span class="chip" data-v="gialla">🟡 Gialla</span>
+        <span class="chip" data-v="rossa">🔴 Rossa</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:.75rem">
+      <label>Intensità vento</label>
+      <div class="chips" id="ventoInt">
+        <span class="chip" data-v="assente">Assente</span>
+        <span class="chip" data-v="debole">Debole</span>
+        <span class="chip" data-v="moderato">Moderato</span>
+        <span class="chip" data-v="forte">Forte</span>
+        <span class="chip" data-v="molto_forte">Molto forte</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ PRESENZE -->
+  <div class="card">
+    <div class="sec-title">Persone in Acqua</div>
+
+    <div class="field">
+      <label>Stima presenze in acqua</label>
+      <div class="chips" id="affluenza">
+        <span class="chip" data-v="bassa">Bassa</span>
+        <span class="chip on" data-v="media">Media</span>
+        <span class="chip" data-v="alta">Alta</span>
+        <span class="chip" data-v="molto_alta">Molto alta</span>
+      </div>
+      <div style="margin-top:8px; padding:8px 12px; background:var(--gray-bg); border-radius:var(--radius-sm); border:1px solid var(--border);">
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--navy-mid);">Riferimento persone in acqua</span>
+        <div style="margin-top:5px; display:grid; grid-template-columns:1fr 1fr; gap:3px 12px;">
+          <span style="font-size:12px; color:var(--gray-text);">🟢 <b>Bassa</b> — fino a 30 pers.</span>
+          <span style="font-size:12px; color:var(--gray-text);">🟡 <b>Media</b> — 30–100 pers.</span>
+          <span style="font-size:12px; color:var(--gray-text);">🟠 <b>Alta</b> — 100–500 pers.</span>
+          <span style="font-size:12px; color:var(--gray-text);">🔴 <b>Molto alta</b> — oltre 500 pers.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ INTERVENTI -->
+  <div class="card">
+    <div class="sec-title">Interventi e Soccorsi</div>
+
+    <div id="interventiList"></div>
+
+    <button class="btn-add-int" onclick="addIntervento()">
+      ＋ Aggiungi intervento
+    </button>
+  </div>
+
+  <!-- ⑤ NOTE -->
+  <div class="card">
+    <div class="sec-title">Note Libere</div>
+    <div class="field">
+      <textarea id="note" placeholder="Annotazioni, situazioni particolari, comunicazioni per la sede..."></textarea>
+    </div>
+  </div>
+
+  <!-- ⑥ FOTO -->
+  <div class="card">
+    <div class="sec-title">Foto</div>
+    <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
+      <input type="file" id="photoInput" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotos(event)">
+      <div class="upload-icon">📷</div>
+      <div class="upload-hint">Tocca per aggiungere foto o video (max 10)</div>
+    </div>
+    <div id="photoGrid" class="photo-grid"></div>
+    <div id="uploadProg" class="upload-prog"></div>
+  </div>
+
+  <!-- SUBMIT -->
+  <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+    Invia Diario
+  </button>
+
+  <!-- STORICO -->
+    <div id="storList"></div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  FIREBASE CONFIG
+//  Sostituisci i valori con quelli del tuo progetto:
+//  Firebase Console → Impostazioni progetto → App web
+// ══════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
+  authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
+  projectId:         "app-segnalazioni-omnia-roseto",
+  storageBucket:     "app-segnalazioni-omnia-roseto.firebasestorage.app",
+  messagingSenderId: "699028105579",
+  appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+
+// ── INIT ──
+(function init() {
+  // Popola postazioni come da app
+  const STATIONS = [
+  {num:10,name:"Spiaggia Libera tra Orsa Minore e Scirocco"},
+  {num:11,name:"Spiaggia Libera tra Ahamar e Papenoo"},
+  {num:12,name:"Lido La Vela"},
+  {num:13,name:"Bagni Marini"},
+  {num:14,name:"Bolla Mare"},
+  {num:15,name:"La Paranzella"},
+  {num:16,name:"Celommi"},
+  {num:17,name:"Marisella"},
+  {num:18,name:"Sirenetta"},
+  {num:19,name:"Lauretta"},
+  {num:20,name:"Lido Azzurra"},
+  {num:21,name:"Aurora"},
+  {num:22,name:"Bellavista"},
+  {num:23,name:"Lido Aragosta"},
+  {num:24,name:"Riva del Sol"},
+  {num:25,name:"Tropical"},
+  {num:26,name:"Lido38"},
+  {num:27,name:"Spiaggia Libera tra VVF e Lido Sahara"},
+  {num:28,name:"Casa del Mar"},
+  {num:29,name:"Maldimare"},
+  {num:30,name:"Bora Bora"},
+  {num:31,name:"Spiaggia Libera tra Lo Squalo e Bagni Bruno"},
+  {num:32,name:"Camping Nino"},
+  {num:33,name:"Camping Surabaia"},
+  {num:34,name:"Tartaruga"},
+  {num:35,name:"Cabana Park"}
+];
+  const sel = document.getElementById('postazione');
+  STATIONS.forEach(s => {
+    const o = document.createElement('option');
+    o.value = `P.${s.num}`;
+    o.textContent = `P.${s.num} — ${s.name}`;
+    sel.appendChild(o);
+  });
+
+  // Data/ora corrente
+  setNow();
+
+  // Chip groups single-select
+  ['mare', 'cielo', 'bandiera', 'affluenza', 'ventoInt'].forEach(id => {
+    chipGroup(id, false);
+  });
+})();
+
+
+// ── GIORNATA INTERA ──
+let giornataintera = false;
+
+function toggleGI() {
+  giornataintera = !giornataintera;
+  const el = document.getElementById('giToggle');
+  el.classList.toggle('active', giornataintera);
+}
+
+// ── CHECKLIST ──
+(function initChecklist() {
+  const items = document.querySelectorAll('.chk-item');
+  document.getElementById('chkTotal').textContent = items.length;
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('checked');
+      const box = item.querySelector('.chk-box');
+      box.textContent = item.classList.contains('checked') ? '✓' : '';
+      updateChkCounter();
+    });
+  });
+})();
+
+function updateChkCounter() {
+  const total  = document.querySelectorAll('.chk-item').length + document.querySelectorAll('.lido-item').length;
+  const done   = document.querySelectorAll('.chk-item.checked').length + document.querySelectorAll('.lido-item.checked').length;
+  document.getElementById('chkDone').textContent  = done;
+  document.getElementById('chkTotal').textContent = total;
+  document.getElementById('chkAlert').classList.toggle('show', done < total);
+}
+
+function collectChecklist() {
+  const result = {};
+  document.querySelectorAll('.chk-item').forEach(item => {
+    result[item.dataset.id] = item.classList.contains('checked');
+  });
+  return result;
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.chk-item').forEach(item => {
+    item.classList.remove('checked');
+    item.querySelector('.chk-box').textContent = '';
+  });
+  document.getElementById('chkAlert').classList.remove('show');
+  document.getElementById('chkDone').textContent = '0';
+}
+
+function setNow() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('dataOra').value = now.toISOString().slice(0,16);
+}
+
+// ── CHIP GROUP ──
+function chipGroup(id, multi) {
+  document.getElementById(id).querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (!multi) {
+        // Deactivate all, re-apply non-semantic classes
+        document.getElementById(id).querySelectorAll('.chip').forEach(c => {
+          c.classList.remove('on');
+        });
+      }
+      chip.classList.toggle('on');
+    });
+  });
+}
+
+function getChips(id) {
+  return Array.from(document.getElementById(id).querySelectorAll('.chip.on')).map(c => c.dataset.v);
+}
+
+// ── INTERVENTI ──
+let intCount = 0;
+const tipiIntervento = [
+  'Soccorso in acqua','Primo soccorso a terra','Disperso / scomparso',
+  'Puntura medusa','Trauma / caduta','Oggetto pericoloso','Altro'
+];
+
+function addIntervento() {
+  intCount++;
+  const id = 'int_' + intCount;
+  const n  = intCount;
+
+  const div = document.createElement('div');
+  div.className = 'int-box';
+  div.id = id;
+  div.innerHTML = `
+    <div class="int-header">
+      <span class="int-label">Intervento #${n}</span>
+      <button class="btn-del" onclick="document.getElementById('${id}').remove()" aria-label="Elimina">×</button>
+    </div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="i-tipo">
+        ${tipiIntervento.map(t=>`<option>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label>Ora</label>
+      <input type="datetime-local" class="i-ora">
+    </div>
+    <div class="field">
+      <label>Descrizione ed esito</label>
+      <textarea class="i-desc" placeholder="Descrivi l'intervento, le azioni intraprese e l'esito..."></textarea>
+    </div>
+    <div class="field">
+      <label>Allertato</label>
+      <div class="chips i-allerta">
+        <span class="chip" data-v="118">🚑 118</span>
+        <span class="chip" data-v="gdf">⚓ Guardia di Finanza</span>
+        <span class="chip" data-v="vvff">🚒 Vigili del Fuoco</span>
+        <span class="chip" data-v="guardia_medica">🏥 Guardia Medica</span>
+        <span class="chip" data-v="nessuno">Nessuno</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('interventiList').appendChild(div);
+
+  // Ora dell'intervento = adesso
+  const ora = div.querySelector('.i-ora');
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  ora.value = now.toISOString().slice(0,16);
+
+  // Chip multi-select per allerta
+  div.querySelectorAll('.i-allerta .chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('on'));
+  });
+}
+
+function collectInterventi() {
+  return Array.from(document.querySelectorAll('.int-box')).map(box => ({
+    tipo: box.querySelector('.i-tipo').value,
+    ora:  box.querySelector('.i-ora').value,
+    descrizione: box.querySelector('.i-desc').value.trim(),
+    allertato: Array.from(box.querySelectorAll('.i-allerta .chip.on')).map(c=>c.dataset.v)
+  }));
+}
+
+// ── FOTO ──
+let files = [];
+
+function handlePhotos(e) {
+  Array.from(e.target.files).forEach(f => {
+    if (files.filter(Boolean).length >= 10) return;
+    if (f.size > 50 * 1024 * 1024) { showBanner('err', `⚠️ File troppo grande (max 50MB).`); return; }
+    const idx = files.length;
+    files.push(f);
+    const reader = new FileReader();
+    reader.onload = ev => addThumb(ev.target.result, idx);
+    reader.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function addThumb(src, idx) {
+  const grid = document.getElementById('photoGrid');
+  const div = document.createElement('div');
+  div.className = 'photo-thumb';
+  div.id = 'th_' + idx;
+  div.innerHTML = `<img src="${src}" alt="foto"><button class="photo-rm" onclick="removeThumb(${idx})">×</button>`;
+  grid.appendChild(div);
+}
+
+function removeThumb(idx) {
+  files[idx] = null;
+  const el = document.getElementById('th_' + idx);
+  if (el) el.remove();
+}
+
+// ── SUBMIT ──
+async function submitForm() {
+  const btn    = document.getElementById('submitBtn');
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+
+  const postazione = document.getElementById('postazione').value;
+  const dataOra    = document.getElementById('dataOra').value;
+  const bagnino    = document.getElementById('bagnino').value.trim();
+
+  if (!postazione || !dataOra || !bagnino) {
+    showBanner('err', '⚠️ Compila i campi obbligatori: postazione, data/ora e bagnino responsabile.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Invio in corso…';
+
+  try {
+    // Upload foto
+    const fotoUrls = [];
+    const validFiles = files.filter(Boolean);
+    const prog = document.getElementById('uploadProg');
+
+    if (validFiles.length > 0) {
+      prog.style.display = 'block';
+      for (let i = 0; i < validFiles.length; i++) {
+        try {
+          const ts  = Date.now();
+          const ext = validFiles[i].name.split('.').pop() || 'bin';
+          const ref = storage.ref(`diario/${postazione}/${ts}_${i}.${ext}`);
+          const meta = { contentType: validFiles[i].type || 'application/octet-stream' };
+          const task = ref.put(validFiles[i], meta);
+          await new Promise((resolve, reject) => {
+            task.on('state_changed',
+              snap => {
+                const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
+                prog.textContent = `📤 File ${i+1}/${validFiles.length} — ${pct}%`;
+              },
+              err => reject(err),
+              () => resolve()
+            );
+          });
+          fotoUrls.push(await ref.getDownloadURL());
+        } catch(uploadErr) {
+          console.error('Upload error:', uploadErr);
+          showBanner('err', `⚠️ File ${i+1} non caricato: ${uploadErr.code || uploadErr.message}`);
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+      prog.style.display = 'none';
+    }
+
+    // Salva su Firestore
+    await db.collection('diariogiornaliero').add({
+      postazione,
+      dataOra:   new Date(dataOra),
+      bagnino,
+      meteo: {
+        stateMare:  getChips('mare')[0] || null,
+        cielo:      getChips('cielo')[0] || null,
+        bandiera:   getChips('bandiera')[0] || null,
+        ventoInt:   getChips('ventoInt')[0] || null,
+      },
+      presenze: {
+        affluenza: getChips('affluenza')[0] || null,
+      },
+      checklist: collectChecklist(),
+      lidiChecklist: collectLidiState(),
+      giornataintera: giornataintera,
+      interventi: collectInterventi(),
+      note:  document.getElementById('note').value.trim(),
+      foto:  fotoUrls,
+      ts:    firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    showBanner('ok', '✅ Diario inviato correttamente!');
+    resetForm();
+
+  } catch (err) {
+    console.error(err);
+    showBanner('err', `❌ Errore: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Invia Diario';
+  }
+}
+
+function showBanner(type, msg) {
+  const b = document.getElementById('banner');
+  b.className = 'banner ' + type;
+  b.textContent = msg;
+  b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => b.className = 'banner', 6000);
+}
+
+function resetForm() {
+  ['postazione','bagnino','note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('interventiList').innerHTML = '';
+  document.getElementById('photoGrid').innerHTML = '';
+  files = []; intCount = 0;
+
+  // Reset chip visual states (mantieni solo i default)
+  ['mare','cielo','bandiera','affluenza','ventoInt'].forEach(id => {
+    document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  });
+
+  resetChecklist();
+  resetLidiSection();
+  giornataintera = false;
+  document.getElementById('giToggle').classList.remove('active');
+  setNow();
+}
+
+// ── STORICO ──
+
+// ══════════════════════════════════════
+//  MAPPA LIDI PER POSTAZIONE
+// ══════════════════════════════════════
+const LIDI_MAP = {
+  'P.10': ['Orsa Minore','Scirocco'],
+  'P.11': ['Ahamar','Papenoo'],
+  'P.12': ['Lido La Vela','Mirage'],
+  'P.13': ['Bagni Marini','Nettuno'],
+  'P.14': ['Bolla Mare','Lido Luigi'],
+  'P.15': ['La Paranzella','Costa Est'],
+  'P.16': ['Celommi','Lucciola'],
+  'P.17': ['Marisella','Mirella'],
+  'P.18': ['Sirenetta','Mediterraneo','Ohana'],
+  'P.19': ['Lauretta','Atlantic'],
+  'P.20': ['Lido Azzurra','Circolo Velico'],
+  'P.21': ['Aurora','Moro','Oltremare'],
+  'P.22': ['Bellavista','Ziasò'],
+  'P.23': ['Lido Aragosta'],
+  'P.24': ['Riva del Sol','Luna Rossa'],
+  'P.25': ['Onda Blu','Tropical','Oasis'],
+  'P.26': ['Lido38'],
+  'P.27': ['VVF','Lido Sahara','BlueBay'],
+  'P.28': ['Casa del Mar','Vista Mare','Di Matteo'],
+  'P.29': ['Maldimare','Embarcadero'],
+  'P.30': ['Bora Bora','Roses'],
+  'P.31': ['Lo Squalo','Bagni Bruno'],
+  'P.32': ['Camping Nino','Stella Maris'],
+  'P.33': ['Camping Surabaia'],
+  'P.34': ['Tartaruga','Narcisi'],
+  'P.35': ['Cabana Park','Altamira','Baia de Cuba']
+};
+
+const LIDO_ITEMS = [
+  {id:'salvagente', label:'N.2 salvagente agli estremi', sub:'Sagola in ordine'},
+  {id:'bandiere',   label:'Bandiere verde, gialla e rossa presenti', sub:'Se palo con una corda → bandiera gialla nel cassone'},
+  {id:'acque',      label:'Limiti acque sicure in mare', sub:''},
+  {id:'boa',        label:'Boa dei 300m dietro gli scogli', sub:''},
+];
+
+// lidiState: { 'Orsa Minore': { salvagente: false, bandiere: false, ... }, ... }
+let lidiState = {};
+
+function buildLidiSection(postazione) {
+  const container = document.getElementById('lidi-container');
+  const lidi = LIDI_MAP[postazione];
+
+  if (!lidi) {
+    container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
+    lidiState = {};
+    return;
+  }
+
+  // Init state
+  lidiState = {};
+  lidi.forEach(lido => {
+    lidiState[lido] = {};
+    LIDO_ITEMS.forEach(item => lidiState[lido][item.id] = false);
+  });
+
+  container.innerHTML = lidi.map(lido => buildLidoCard(lido)).join('');
+
+  // Attach click handlers
+  container.querySelectorAll('.lido-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const lido = el.dataset.lido;
+      const iid  = el.dataset.item;
+      const checked = el.classList.toggle('checked');
+      const box = el.querySelector('.lido-box');
+      box.textContent = checked ? '✓' : '';
+      lidiState[lido][iid] = checked;
+      updateLidoScore(lido);
+      updateChkCounter();
+    });
+  });
+}
+
+function buildLidoCard(lido) {
+  const items = LIDO_ITEMS.map(item => `
+    <div class="lido-item" data-lido="${lido}" data-item="${item.id}">
+      <div class="lido-box"></div>
+      <div class="lido-text">${item.label}
+        ${item.sub ? `<span class="lido-sub">${item.sub}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `<div class="lido-group" id="lido-${lido.replace(/[^a-zA-Z0-9]/g,'_')}">
+    <div class="lido-title">
+      <span class="lido-name">🏖 ${lido}</span>
+      <span class="lido-score warn" id="score-${lido.replace(/[^a-zA-Z0-9]/g,'_')}">0/${LIDO_ITEMS.length}</span>
+    </div>
+    <div class="lido-items">${items}</div>
+  </div>`;
+}
+
+function updateLidoScore(lido) {
+  const state = lidiState[lido];
+  if (!state) return;
+  const tot = LIDO_ITEMS.length;
+  const done = Object.values(state).filter(Boolean).length;
+  const scoreEl = document.getElementById('score-' + lido.replace(/[^a-zA-Z0-9]/g,'_'));
+  if (scoreEl) {
+    scoreEl.textContent = `${done}/${tot}`;
+    scoreEl.className = 'lido-score ' + (done === tot ? 'ok' : 'warn');
+  }
+}
+
+function collectLidiState() {
+  return lidiState;
+}
+
+function resetLidiSection() {
+  lidiState = {};
+  const container = document.getElementById('lidi-container');
+  container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
+}
+
+</script>
+
+</body>
+</html>
