@@ -155,6 +155,7 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
 .cm{background:#FEF9C3;color:#854D0E;font-weight:600}
 .cp{background:#DBEAFE;color:#1E40AF;font-weight:600}
 .cn{background:#FEE2E2;color:#991B1B;font-weight:700}
+.cx{background:#F4F1EB;color:#C9C4BA}
 
 /* REPORT TAB */
 .rperiods{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
@@ -312,7 +313,8 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
     </div>
     <div class="stitle">Per postazione</div>
     <div class="cgrid">
-      <div class="cc full"><div class="ctitle">Diari e interventi per postazione</div><div class="cwrap tall"><canvas id="cvPost"></canvas></div></div>
+      <div class="cc full" id="cardPost"><div class="ctitle">Diari e interventi per postazione — Stagione (fino al 06/09/2026)</div><div class="cwrap tall"><canvas id="cvPost"></canvas></div></div>
+      <div class="cc full" id="cardPostPS"><div class="ctitle">Diari e interventi per postazione — Post-stagione (dal 07/09/2026)</div><div class="cwrap tall"><canvas id="cvPostPS"></canvas></div></div>
     </div>
     <div class="cc" style="margin-bottom:1rem">
       <div class="ctitle">Dettaglio per postazione</div>
@@ -522,7 +524,11 @@ const db = firebase.firestore();
 // ═══════════════════════════════════════
 //  DATI STATICI
 // ═══════════════════════════════════════
-const STATIONS = [
+// Le sigle P.10-P.24 sono state riusate: prima del 07/09/2026 indicano le
+// postazioni di stagione, dal 07/09/2026 quelle post-stagione (una ogni 300 m).
+const POST_SEASON_START = new Date('2026-09-07T00:00:00');
+
+const STATIONS_PRE = [
   {n:10,name:"Spiaggia Libera Orsa Minore-Scirocco"},
   {n:11,name:"Spiaggia Libera Ahamar-Papenoo"},
   {n:12,name:"Lido La Vela"},{n:13,name:"Bagni Marini"},
@@ -538,44 +544,84 @@ const STATIONS = [
   {n:32,name:"Camping Nino"},{n:33,name:"Camping Surabaia"},
   {n:34,name:"Tartaruga"},{n:35,name:"Cabana Park"}
 ];
+const ALL_P_PRE = STATIONS_PRE.map(s => `P.${s.n}`);
+
+const STATIONS = [
+  {n:10,name:"Pontile"},
+  {n:11,name:"Ahmar"},
+  {n:12,name:"Bolla"},
+  {n:13,name:"Celommi"},
+  {n:14,name:"Ohana"},
+  {n:15,name:"Azzurra"},
+  {n:16,name:"Oltremare"},
+  {n:17,name:"Aragosta"},
+  {n:18,name:"Oasis"},
+  {n:19,name:"Di Matteo"},
+  {n:20,name:"Embarcadero"},
+  {n:21,name:"Astice"},
+  {n:22,name:"Campeggi"},
+  {n:23,name:"Surabaya"},
+  {n:24,name:"Altamira"}
+];
 const ALL_P = STATIONS.map(s => `P.${s.n}`);
 
 const LIDI_MAP = {
   'P.10':['Orsa Minore','Scirocco'],
-  'P.11':['Ahamar','Papenoo'],
-  'P.12':['Lido La Vela','Mirage'],
-  'P.13':['Bagni Marini','Nettuno'],
-  'P.14':['Bolla Mare','Lido Luigi'],
-  'P.15':['La Paranzella','Costa Est'],
-  'P.16':['Celommi','Lucciola'],
-  'P.17':['Marisella','Mirella'],
-  'P.18':['Sirenetta','Mediterraneo','Ohana'],
-  'P.19':['Lauretta','Atlantic'],
-  'P.20':['Lido Azzurra','Circolo Velico'],
-  'P.21':['Aurora','Moro','Oltremare'],
-  'P.22':['Bellavista','Ziasò'],
-  'P.23':['Lido Aragosta'],
-  'P.24':['Riva del Sol','Luna Rossa'],
-  'P.25':['Onda Blu','Tropical','Oasis'],
-  'P.26':['Lido38'],
-  'P.27':['VVF','Lido Sahara','BlueBay'],
-  'P.28':['Casa del Mar','Vista Mare','Di Matteo'],
-  'P.29':['Maldimare','Embarcadero'],
-  'P.30':['Bora Bora','Roses'],
-  'P.31':['Lo Squalo','Bagni Bruno'],
-  'P.32':['Camping Nino','Stella Maris'],
-  'P.33':['Camping Surabaia'],
-  'P.34':['Tartaruga','Narcisi'],
-  'P.35':['Cabana Park','Altamira','Baia de Cuba']
+  'P.11':['Ahamar','Papenoo','Lido La Vela'],
+  'P.12':['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'],
+  'P.13':['Costa Est','Lucciola','Celommi','Mirella'],
+  'P.14':['Marisella','Ohana','Sirenetta','Mediterraneo'],
+  'P.15':['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'],
+  'P.16':['Moro','Aurora','Oltremare','Bellavista','Ziasò'],
+  'P.17':['Lido Aragosta','Luna Rossa','Riva del Sol'],
+  'P.18':['Onda Blu','Tropical','Oasis','Lido38'],
+  'P.19':['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'],
+  'P.20':['Maldimare','Embarcadero','Roses','Bora Bora'],
+  'P.21':['Lo Squalo','Bagni Bruno'],
+  'P.22':['Camping Nino','Stella Maris'],
+  'P.23':['Camping Surabaia'],
+  'P.24':['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba']
+};
+
+const PATTINI_MAP = {
+  'P.10':['Pontile'],
+  'P.11':['Papenoo','Lido La Vela'],
+  'P.12':['Bolla Mare','La Paranzella'],
+  'P.13':['Celommi'],
+  'P.14':['Marisella','Sirenetta'],
+  'P.15':['Lauretta','Lido Azzurra'],
+  'P.16':['Aurora','Bellavista'],
+  'P.17':['Lido Aragosta'],
+  'P.18':['Onda Blu','Tropical','Lido38'],
+  'P.19':['Di Matteo'],
+  'P.20':['Embarcadero','Bora Bora'],
+  'P.21':['Astice'],
+  'P.22':['Campeggi'],
+  'P.23':['Camping Surabaia'],
+  'P.24':['Tartaruga','Narcisi']
 };
 
 const CHK_LABELS = {
   kit_medico:'Kit medico',giubbino:'Giubbino',rullo:'Rullo',caschetto:'Caschetto',
-  scalmi_remi:'Scalmi e remi',mezzo_marinaio:'Mezzo marinaio',ancora:'Ancora',
-  salvagente_pattino:'Salvagente pattino',canotta_rossa:'Canotta rossa',
+  canotta_rossa:'Canotta rossa',
   fischietto:'Fischietto',pinne_maschera:'Pinne/maschera',binocolo:'Binocolo',
   documenti:'Brevetto/BLSD/Visita',salvagente_concessione:'Salvagente concessione',
   bandiere_ok:'Bandiere',limite_acque:'Limiti acque',boa_300m:'Boa 300m'
+};
+
+// Voci del pattino: nei diari fino al 06/09/2026 stavano nella checklist piatta,
+// dal 07/09/2026 sono ripetute per ogni pattino (doc.pattiniChecklist).
+const CHK_LABELS_LEGACY = {
+  scalmi_remi:'Scalmi e remi (pattino)',mezzo_marinaio:'Mezzo marinaio (pattino)',
+  ancora:'Ancora (pattino)',salvagente_pattino:'Salvagente pattino'
+};
+const ALL_CHK_LABELS = Object.assign({}, CHK_LABELS, CHK_LABELS_LEGACY);
+
+const PATTINO_ITEM_LABELS = {
+  scalmi_remi:'Scalmi e remi',
+  mezzo_marinaio:'Mezzo marinaio',
+  ancora:'Ancora',
+  salvagente_pattino:'Salvagente'
 };
 
 const LIDO_ITEM_LABELS = {
@@ -683,7 +729,7 @@ function render() {
     const tstr  = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
     const nInt  = (doc.interventi || []).length;
     const nFoto = (doc.foto || []).length;
-    const pct   = chkPct(doc.checklist);
+    const pct   = chkPct(doc);
     const band  = doc.meteo?.bandiera || '';
     const manc  = allMancanze(doc);
 
@@ -731,7 +777,12 @@ function buildDetail(doc) {
   const m   = doc.meteo || {};
   const p   = doc.presenze || {};
 
-  const chkHtml = Object.entries(CHK_LABELS).map(([k, v]) => {
+  // le voci pattino dei diari vecchi restano visibili nel loro dettaglio
+  const chkLabels = Object.assign({}, CHK_LABELS);
+  Object.keys(CHK_LABELS_LEGACY).forEach(k => {
+    if (doc.checklist && k in doc.checklist) chkLabels[k] = CHK_LABELS_LEGACY[k];
+  });
+  const chkHtml = Object.entries(chkLabels).map(([k, v]) => {
     const ok = doc.checklist?.[k];
     return `<div class="ckline"><span>${ok ? '✅' : '❌'}</span>
       <span style="color:${ok ? 'var(--navy)' : 'var(--gray)'}">${v}</span></div>`;
@@ -752,7 +803,7 @@ function buildDetail(doc) {
 
   // Lidi per lido
   let lidiHtml = '';
-  const lidi = LIDI_MAP[doc.postazione];
+  const lidi = docLidi(doc);
   const lc   = doc.lidiChecklist || {};
   if (lidi && lidi.length) {
     const groups = lidi.map(lido => {
@@ -774,11 +825,36 @@ function buildDetail(doc) {
       <div class="dct">Controlli per lido</div>${groups}</div>`;
   }
 
+  // Checklist per pattino
+  let pattHtml = '';
+  const pattini = docPattini(doc);
+  const pcc = doc.pattiniChecklist || {};
+  if (pattini.length && Object.keys(pcc).length) {
+    const pgroups = pattini.map(patt => {
+      const state = pcc[patt] || {};
+      const tot  = Object.keys(PATTINO_ITEM_LABELS).length;
+      const done = Object.values(state).filter(Boolean).length;
+      const items = Object.entries(PATTINO_ITEM_LABELS).map(([k, v]) => {
+        const ok = state[k];
+        return `<div class="lido-d-line"><span>${ok ? '✅' : '❌'}</span>
+          <span style="color:${ok ? 'var(--navy)' : 'var(--gray)'}">${v}</span></div>`;
+      }).join('');
+      return `<div class="lido-d-group">
+        <div class="lido-d-hd"><span>🛶 ${patt}</span>
+          <span style="color:${done===tot?'#6EE7B7':'#FCD34D'}">${done}/${tot}</span></div>
+        <div class="lido-d-body">${items}</div>
+      </div>`;
+    }).join('');
+    pattHtml = `<div class="dc s3" style="margin-top:.875rem">
+      <div class="dct">Controlli per pattino</div>${pgroups}</div>`;
+  }
+
   return `<div class="dinner"><div class="dgrid">
     <div class="dc"><div class="dct">Identificazione</div>
       <div class="dr"><span class="dk">Data/ora</span><span class="dv">${dts}${doc.giornataintera ? ' · <strong>Giornata intera</strong>' : ''}</span></div>
       <div class="dr"><span class="dk">Postazione</span><span class="dv">${doc.postazione||'—'}</span></div>
       <div class="dr"><span class="dk">Bagnino</span><span class="dv">${doc.bagnino||'—'}</span></div>
+      <div class="dr"><span class="dk">Pattino</span><span class="dv">${docPattini(doc).join(' · ')||'—'}</span></div>
     </div>
     <div class="dc"><div class="dct">Meteo</div>
       <div class="dr"><span class="dk">Mare</span><span class="dv">${m.stateMare||'—'}</span></div>
@@ -794,6 +870,7 @@ function buildDetail(doc) {
     <div class="dc s2"><div class="dct">Interventi e Soccorsi</div>${intHtml}</div>
     <div class="dc"><div class="dct">Foto (${(doc.foto||[]).length})</div>${fotoHtml}</div>
     ${lidiHtml}
+    ${pattHtml}
   </div></div>`;
 }
 
@@ -804,7 +881,7 @@ function updateCards() {
   document.getElementById('s-tot').textContent  = VIEW.length;
   document.getElementById('s-int').textContent  = VIEW.reduce((s,d) => s+(d.interventi||[]).length, 0);
   document.getElementById('s-foto').textContent = VIEW.reduce((s,d) => s+(d.foto||[]).length, 0);
-  document.getElementById('s-chk').textContent  = VIEW.filter(d => chkPct(d.checklist)===100).length;
+  document.getElementById('s-chk').textContent  = VIEW.filter(d => chkPct(d)===100).length;
 }
 
 // ═══════════════════════════════════════
@@ -974,43 +1051,63 @@ function renderStats() {
     mwrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-weight:600">✅ Nessuna mancanza nel periodo</div>';
   }
 
-  // 6. Per postazione
-  const pc={}, pi={}, pch={};
-  VIEW.forEach(d => {
+  // 6-7. Per postazione — stagione e post-stagione tenute separate,
+  //       perche' le stesse sigle P.10-P.24 indicano postazioni diverse
+  const preDocs  = VIEW.filter(d => !isPostStagione(d));
+  const postDocs = VIEW.filter(d =>  isPostStagione(d));
+
+  chartPostazioni('pp',   'cvPost',   'cardPost',   preDocs);
+  chartPostazioni('ppPS', 'cvPostPS', 'cardPostPS', postDocs);
+
+  const stb = document.getElementById('stn-tbody');
+  stb.innerHTML = '';
+  [[preDocs, false], [postDocs, true]].forEach(([docs, isPost]) => {
+    aggregaPostazioni(docs).forEach(r => {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--border)';
+      tr.innerHTML = `
+        <td style="padding:5px 10px"><strong>${r.p}</strong>
+          <span style="font-size:10px;background:${isPost?'#FEF3C7':'#EEF3FB'};color:var(--navy2);padding:1px 6px;border-radius:10px;font-weight:700">${isPost?'POST':'STAG'}</span>
+          <span style="color:var(--gray);font-size:11px">${stationName(r.p, isPost)}</span></td>
+        <td style="padding:5px 10px;text-align:center">${r.diari}</td>
+        <td style="padding:5px 10px;text-align:center">${r.interventi}</td>
+        <td style="padding:5px 10px;text-align:center">${r.foto}</td>
+        <td style="padding:5px 10px;text-align:center">${bChk(r.avg)}</td>`;
+      stb.appendChild(tr);
+    });
+  });
+}
+
+function aggregaPostazioni(docs) {
+  const pc={}, pi={}, pf={}, pch={};
+  docs.forEach(d => {
     const p = d.postazione||'?';
     pc[p]  = (pc[p]||0)+1;
     pi[p]  = (pi[p]||0)+(d.interventi||[]).length;
-    if (!pch[p]) pch[p]=[];
-    pch[p].push(chkPct(d.checklist));
+    pf[p]  = (pf[p]||0)+(d.foto||[]).length;
+    (pch[p] = pch[p]||[]).push(chkPct(d));
   });
-  const pkeys = Object.keys(pc).sort((a,b)=>parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')));
-  destroyChart('pp');
-  CHARTS.pp = new Chart(document.getElementById('cvPost'), {
+  return Object.keys(pc).sort(cmpP).map(p => ({
+    p, diari:pc[p], interventi:pi[p]||0, foto:pf[p]||0,
+    avg: Math.round(pch[p].reduce((s,v)=>s+v,0)/pch[p].length)
+  }));
+}
+
+function chartPostazioni(key, canvasId, cardId, docs) {
+  destroyChart(key);
+  const rows = aggregaPostazioni(docs);
+  const card = document.getElementById(cardId);
+  card.style.display = rows.length ? '' : 'none';
+  if (!rows.length) return;
+  CHARTS[key] = new Chart(document.getElementById(canvasId), {
     type:'bar',
-    data:{labels:pkeys, datasets:[
-      {label:'Diari',data:pkeys.map(k=>pc[k]),backgroundColor:'#0B2545',borderRadius:3},
-      {label:'Interventi',data:pkeys.map(k=>pi[k]||0),backgroundColor:'#E8731A',borderRadius:3}
+    data:{labels:rows.map(r=>r.p), datasets:[
+      {label:'Diari',data:rows.map(r=>r.diari),backgroundColor:'#0B2545',borderRadius:3},
+      {label:'Interventi',data:rows.map(r=>r.interventi),backgroundColor:'#E8731A',borderRadius:3}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'top',labels:{font:{size:11}}}},
       scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}
-  });
-
-  // 7. Tabella postazioni
-  const stb = document.getElementById('stn-tbody');
-  stb.innerHTML = '';
-  pkeys.forEach(p => {
-    const avg = pch[p] ? Math.round(pch[p].reduce((s,v)=>s+v,0)/pch[p].length) : 0;
-    const sn  = STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
-    const tr  = document.createElement('tr');
-    tr.style.borderBottom = '1px solid var(--border)';
-    tr.innerHTML = `
-      <td style="padding:5px 10px"><strong>${p}</strong> <span style="color:var(--gray);font-size:11px">${sn}</span></td>
-      <td style="padding:5px 10px;text-align:center">${pc[p]}</td>
-      <td style="padding:5px 10px;text-align:center">${pi[p]||0}</td>
-      <td style="padding:5px 10px;text-align:center">${VIEW.filter(d=>d.postazione===p).reduce((s,d)=>s+(d.foto||[]).length,0)}</td>
-      <td style="padding:5px 10px;text-align:center">${bChk(avg)}</td>`;
-    stb.appendChild(tr);
   });
 }
 
@@ -1047,16 +1144,22 @@ function renderMancanti() {
     if(h>=14&&h<19) comp[`${dk}|${p}|p`]=true;
   });
 
-  let tot=dates.length*ALL_P.length*2, miss=0, daysOk=0;
+  const colSet=new Set();
+  dates.forEach(d=>stationsForDate(d).forEach(p=>colSet.add(p)));
+  const cols=[...colSet].sort(cmpP);
+
+  let tot=0, miss=0, daysOk=0;
   dates.forEach(d=>{
     const dk=d.toISOString().slice(0,10);
     let ok=true;
-    ALL_P.forEach(p=>{
+    stationsForDate(d).forEach(p=>{
+      tot+=2;
       if(!comp[`${dk}|${p}|m`]){miss++;ok=false;}
       if(!comp[`${dk}|${p}|p`]){miss++;ok=false;}
     });
     if(ok) daysOk++;
   });
+  if(!tot) tot=1;
   const pct=Math.round((1-miss/tot)*100);
 
   document.getElementById('m-stats').innerHTML=`
@@ -1066,13 +1169,15 @@ function renderMancanti() {
     <div class="scard"><div class="sval">${dates.length}</div><div class="slbl">Giorni analizzati</div></div>`;
 
   const tbl=document.getElementById('mtable');
-  let thead=`<thead><tr><th>Data</th>${ALL_P.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
+  let thead=`<thead><tr><th>Data</th>${cols.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
   let tbody='<tbody>';
   dates.forEach(d=>{
     const dk=d.toISOString().slice(0,10);
     const lbl=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
     let row=`<tr><td>${lbl}</td>`;
-    ALL_P.forEach(p=>{
+    const attive=stationsForDate(d);
+    cols.forEach(p=>{
+      if(!attive.includes(p)){ row+=`<td class="cx">·</td>`; return; }
       const m2=comp[`${dk}|${p}|m`], pp=comp[`${dk}|${p}|p`];
       if(m2&&pp)  row+=`<td class="cb">MP</td>`;
       else if(m2) row+=`<td class="cm">M</td>`;
@@ -1124,7 +1229,7 @@ function refreshReport() {
     <div class="rstat"><div class="rstat-v">${docs.length}</div><div class="rstat-l">Diari</div></div>
     <div class="rstat"><div class="rstat-v">${docs.reduce((s,d)=>s+(d.interventi||[]).length,0)}</div><div class="rstat-l">Interventi</div></div>
     <div class="rstat"><div class="rstat-v" style="color:${totMiss>0?'var(--red)':'var(--green)'}">${totMiss}</div><div class="rstat-l">Mancanze</div></div>
-    <div class="rstat"><div class="rstat-v">${new Set(docs.map(d=>d.postazione)).size}/26</div><div class="rstat-l">Postazioni</div></div>`;
+    <div class="rstat"><div class="rstat-v">${new Set(docs.map(d=>d.postazione)).size}/${ALL_P.length}</div><div class="rstat-l">Postazioni</div></div>`;
 }
 
 function downloadXLS() {
@@ -1142,7 +1247,7 @@ function downloadXLS() {
     ['Interventi',docs.reduce((s,d)=>s+(d.interventi||[]).length,0)],
     ['Foto',docs.reduce((s,d)=>s+(d.foto||[]).length,0)],
     ['Mancanze segnalate',totMiss],
-    ['Postazioni attive',new Set(docs.map(d=>d.postazione)).size+'/26'],
+    ['Postazioni attive',new Set(docs.map(d=>d.postazione)).size+'/'+ALL_P.length],
   ]), 'Riepilogo');
 
   // Sheet 2: Diari
@@ -1151,7 +1256,7 @@ function downloadXLS() {
     const dt=toDate(d.dataOra);
     diariRows.push([dt.toLocaleDateString('it-IT'),dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
       d.postazione||'',d.bagnino||'',d.meteo?.stateMare||'',d.meteo?.bandiera||'',
-      (d.interventi||[]).length,chkPct(d.checklist),(d.foto||[]).length,
+      (d.interventi||[]).length,chkPct(d),(d.foto||[]).length,
       allMancanze(d).join(' | '),(d.note||'').replace(/\n/g,' ')]);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diariRows), 'Diari');
@@ -1161,13 +1266,7 @@ function downloadXLS() {
   docs.forEach(d=>{
     const dt=toDate(d.dataOra);
     const ds=dt.toLocaleDateString('it-IT'), ts=dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-    getManc(d.checklist).forEach(m=>mRows.push([ds,ts,d.postazione||'',d.bagnino||'',m,'Postazione']));
-    (LIDI_MAP[d.postazione]||[]).forEach(lido=>{
-      const lc=d.lidiChecklist||{};
-      Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
-        if((lc[lido]||{})[k]===false) mRows.push([ds,ts,d.postazione||'',d.bagnino||'',`${lido}: ${v}`,'Lido']);
-      });
-    });
+    mancanzeDett(d).forEach(m=>mRows.push([ds,ts,d.postazione||'',d.bagnino||'',m.v,m.t]));
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mRows), 'Mancanze');
 
@@ -1186,9 +1285,10 @@ function downloadXLS() {
   dates.forEach(d=>{
     const dk=d.toISOString().slice(0,10);
     const ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    ALL_P.forEach(p=>{
+    stationsForDate(d).forEach(p=>{
       const m2=comp[`${dk}|${p}|m`],pp=comp[`${dk}|${p}|p`];
-      if(!m2||!pp) tRows.push([ds,p,(LIDI_MAP[p]||[]).join(', '),m2?'✓':'MANCANTE',pp?'✓':'MANCANTE']);
+      const isPost=d>=POST_SEASON_START;
+      if(!m2||!pp) tRows.push([ds,p,isPost?(LIDI_MAP[p]||[]).join(', '):'',m2?'✓':'MANCANTE',pp?'✓':'MANCANTE']);
     });
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tRows), 'Turni non compilati');
@@ -1204,8 +1304,8 @@ function downloadXLS() {
   const pk=Object.keys(pc2).sort((a2,b)=>parseInt(a2.replace('P.',''))-parseInt(b.replace('P.','')));
   const sRows=[['Postazione','Nome','Diari','Interventi','Mancanze','Checklist media %']];
   pk.forEach(p=>{
-    const sn=STATIONS.find(s=>`P.${s.n}`===p)?.name||'';
-    const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc2[p]||1));
+    const sn=stationNameForDocs(p,docs);
+    const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d),0)/(pc2[p]||1));
     sRows.push([p,sn,pc2[p]||0,pi2[p]||0,pm2[p]||0,avg]);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sRows), 'Statistiche postazioni');
@@ -1262,7 +1362,7 @@ function downloadPDF() {
     {v:docs.length,l:'Diari',c:NAVY},
     {v:docs.reduce((s,d)=>s+(d.interventi||[]).length,0),l:'Interventi',c:NAVY},
     {v:totMiss,l:'Mancanze',c:totMiss>0?RED:GREEN},
-    {v:new Set(docs.map(d=>d.postazione)).size+'/26',l:'Postazioni',c:NAVY}
+    {v:new Set(docs.map(d=>d.postazione)).size+'/'+ALL_P.length,l:'Postazioni',c:NAVY}
   ];
   stats.forEach((s,i)=>{
     const x=14+i*46;
@@ -1292,10 +1392,12 @@ function downloadPDF() {
   const tBody=[];
   dates2.forEach(d=>{
     const dk=d.toISOString().slice(0,10),ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const mm=ALL_P.filter(p=>!comp2[`${dk}|${p}|m`]),pp=ALL_P.filter(p=>!comp2[`${dk}|${p}|p`]);
+    const attive=stationsForDate(d), isPost=d>=POST_SEASON_START;
+    const nomeP=q=>isPost?`${q} (${(LIDI_MAP[q]||[]).join(', ')})`:q;
+    const mm=attive.filter(p=>!comp2[`${dk}|${p}|m`]),pp=attive.filter(p=>!comp2[`${dk}|${p}|p`]);
     if(mm.length||pp.length){
-      const mmStr=mm.length?mm.map(p=>`${p} (${(LIDI_MAP[p]||[]).join(', ')})`).join('\n'):'✓ Tutte';
-      const ppStr=pp.length?pp.map(p=>`${p} (${(LIDI_MAP[p]||[]).join(', ')})`).join('\n'):'✓ Tutte';
+      const mmStr=mm.length?mm.map(nomeP).join('\n'):'✓ Tutte';
+      const ppStr=pp.length?pp.map(nomeP).join('\n'):'✓ Tutte';
       tBody.push([ds,mmStr,ppStr]);
     }
   });
@@ -1314,13 +1416,7 @@ function downloadPDF() {
   const mBody=[];
   docs.forEach(d=>{
     const dt=toDate(d.dataOra),ds=dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
-    getManc(d.checklist).forEach(m=>mBody.push([ds,d.postazione||'',d.bagnino||'',m,'Postazione']));
-    (LIDI_MAP[d.postazione]||[]).forEach(lido=>{
-      const lc=d.lidiChecklist||{};
-      Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
-        if((lc[lido]||{})[k]===false) mBody.push([ds,d.postazione||'',d.bagnino||'',`${lido}: ${v}`,'Lido']);
-      });
-    });
+    mancanzeDett(d).forEach(m=>mBody.push([ds,d.postazione||'',d.bagnino||'',m.v,m.t]));
   });
   if(!mBody.length){
     pdf.setTextColor(...GREEN);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
@@ -1343,7 +1439,7 @@ function downloadPDF() {
   pdf.autoTable({
     head:[['Postazione','Diari','Interventi','Mancanze','Checklist media']],
     body:pk2.map(p=>{
-      const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d.checklist),0)/(pc3[p]||1));
+      const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d),0)/(pc3[p]||1));
       return [p,pc3[p],pi3[p]||0,pm3[p]||0,avg+'%'];
     }),
     startY:y,margin:{left:14,right:14},
@@ -1377,7 +1473,7 @@ function exportCSV() {
     const dt=toDate(d.dataOra);
     rows.push([dt.toLocaleDateString('it-IT'),dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
       d.postazione||'',d.bagnino||'',d.meteo?.stateMare||'',d.meteo?.bandiera||'',
-      (d.interventi||[]).length,chkPct(d.checklist),(d.foto||[]).length,
+      (d.interventi||[]).length,chkPct(d),(d.foto||[]).length,
       allMancanze(d).join(' | '),(d.note||'').replace(/,/g,' ')]);
   });
   const csv=rows.map(r=>r.join(',')).join('\n');
@@ -1392,11 +1488,50 @@ function exportCSV() {
 // ═══════════════════════════════════════
 function toDate(v){ return v?.toDate?v.toDate():(v?new Date(v):new Date(0)); }
 function fmt(d){ return d.toISOString().slice(0,10); }
-function chkPct(c){ if(!c) return 0; const v=Object.values(c); return v.length?Math.round(v.filter(Boolean).length/v.length*100):0; }
-function getManc(c){ if(!c) return []; return Object.entries(c).filter(([,v])=>v===false).map(([k])=>CHK_LABELS[k]||k); }
+function isPostStagione(d){ return toDate(d.dataOra) >= POST_SEASON_START; }
+function cmpP(a,b){ return parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')); }
+function stationName(p,isPost){
+  const list = isPost ? STATIONS : STATIONS_PRE;
+  return list.find(s=>`P.${s.n}`===p)?.name || '';
+}
+function stationNameForDocs(p,docs){
+  return stationName(p, docs.some(d=>d.postazione===p && isPostStagione(d)));
+}
+function stationsForDate(d){ return d >= POST_SEASON_START ? ALL_P : ALL_P_PRE; }
+// lidi/pattini di un diario: prima dai dati salvati, poi dalla mappa attuale
+function docLidi(doc){
+  const lc=doc.lidiChecklist||{};
+  return Object.keys(lc).length?Object.keys(lc):(LIDI_MAP[doc.postazione]||[]);
+}
+function docPattini(doc){
+  const pc=doc.pattiniChecklist||{};
+  return Object.keys(pc).length?Object.keys(pc):(isPostStagione(doc)?(PATTINI_MAP[doc.postazione]||[]):[]);
+}
+function chkPct(doc){
+  if(!doc) return 0;
+  const v=[...Object.values(doc.checklist||{})];
+  Object.values(doc.pattiniChecklist||{}).forEach(o=>v.push(...Object.values(o||{})));
+  return v.length?Math.round(v.filter(Boolean).length/v.length*100):0;
+}
+function getManc(c){ if(!c) return []; return Object.entries(c).filter(([,v])=>v===false).map(([k])=>ALL_CHK_LABELS[k]||k); }
+function pattManc(doc){
+  const pc=doc.pattiniChecklist||{};
+  const miss=[];
+  docPattini(doc).forEach(patt=>{
+    Object.entries(PATTINO_ITEM_LABELS).forEach(([k,v])=>{
+      if((pc[patt]||{})[k]===false) miss.push(`Pattino ${patt}: ${v}`);
+    });
+  });
+  return miss;
+}
+function mancanzeDett(doc){
+  return [...getManc(doc.checklist).map(v=>({v,t:'Postazione'})),
+          ...lidoManc(doc).map(v=>({v,t:'Lido'})),
+          ...pattManc(doc).map(v=>({v,t:'Pattino'}))];
+}
 function lidoManc(doc){
   const lc=doc.lidiChecklist||{};
-  const lidi=LIDI_MAP[doc.postazione]||[];
+  const lidi=docLidi(doc);
   const miss=[];
   lidi.forEach(lido=>{
     Object.entries(LIDO_ITEM_LABELS).forEach(([k,v])=>{
@@ -1405,7 +1540,7 @@ function lidoManc(doc){
   });
   return miss;
 }
-function allMancanze(doc){ return [...getManc(doc.checklist),...lidoManc(doc)]; }
+function allMancanze(doc){ return [...getManc(doc.checklist),...lidoManc(doc),...pattManc(doc)]; }
 function bBand(b){
   if(b==='verde')  return '<span class="bv bv-g">🟢 Verde</span>';
   if(b==='gialla') return '<span class="bv bv-y">🟡 Gialla</span>';

@@ -514,7 +514,7 @@ select {
     <div class="row2">
       <div class="field">
         <label>Postazione</label>
-        <select id="postazione" onchange="buildLidiSection(this.value)">
+        <select id="postazione" onchange="onPostazioneChange(this.value)">
           <option value="">— Seleziona —</option>
         </select>
       </div>
@@ -583,24 +583,8 @@ select {
     <!-- NEL PATTINO -->
     <div class="chk-group">
       <div class="chk-group-title">Nel pattino</div>
-      <div class="chk-item" data-id="scalmi_remi">
-        <div class="chk-box"></div>
-        <div class="chk-text">Scalmi e remi</div>
-      </div>
-      <div class="chk-item" data-id="mezzo_marinaio">
-        <div class="chk-box"></div>
-        <div class="chk-text">Mezzo marinaio</div>
-      </div>
-      <div class="chk-item" data-id="ancora">
-        <div class="chk-box"></div>
-        <div class="chk-text">Ancora</div>
-      </div>
-      <div class="chk-item" data-id="salvagente_pattino">
-        <div class="chk-box"></div>
-        <div class="chk-text">
-          Salvagente
-          <span class="chk-sub">Scegli quello migliore</span>
-        </div>
+      <div id="pattini-container">
+        <div class="no-post-msg">Seleziona prima la postazione per visualizzare i pattini di competenza.</div>
       </div>
     </div>
 
@@ -781,32 +765,21 @@ const storage = firebase.storage();
 (function init() {
   // Popola postazioni come da app
   const STATIONS = [
-  {num:10,name:"Spiaggia Libera tra Orsa Minore e Scirocco"},
-  {num:11,name:"Spiaggia Libera tra Ahamar e Papenoo"},
-  {num:12,name:"Lido La Vela"},
-  {num:13,name:"Bagni Marini"},
-  {num:14,name:"Bolla Mare"},
-  {num:15,name:"La Paranzella"},
-  {num:16,name:"Celommi"},
-  {num:17,name:"Marisella"},
-  {num:18,name:"Sirenetta"},
-  {num:19,name:"Lauretta"},
-  {num:20,name:"Lido Azzurra"},
-  {num:21,name:"Aurora"},
-  {num:22,name:"Bellavista"},
-  {num:23,name:"Lido Aragosta"},
-  {num:24,name:"Riva del Sol"},
-  {num:25,name:"Tropical"},
-  {num:26,name:"Lido38"},
-  {num:27,name:"Spiaggia Libera tra VVF e Lido Sahara"},
-  {num:28,name:"Casa del Mar"},
-  {num:29,name:"Maldimare"},
-  {num:30,name:"Bora Bora"},
-  {num:31,name:"Spiaggia Libera tra Lo Squalo e Bagni Bruno"},
-  {num:32,name:"Camping Nino"},
-  {num:33,name:"Camping Surabaia"},
-  {num:34,name:"Tartaruga"},
-  {num:35,name:"Cabana Park"}
+  {num:10,name:"Pontile"},
+  {num:11,name:"Ahmar"},
+  {num:12,name:"Bolla"},
+  {num:13,name:"Celommi"},
+  {num:14,name:"Ohana"},
+  {num:15,name:"Azzurra"},
+  {num:16,name:"Oltremare"},
+  {num:17,name:"Aragosta"},
+  {num:18,name:"Oasis"},
+  {num:19,name:"Di Matteo"},
+  {num:20,name:"Embarcadero"},
+  {num:21,name:"Astice"},
+  {num:22,name:"Campeggi"},
+  {num:23,name:"Surabaya"},
+  {num:24,name:"Altamira"}
 ];
   const sel = document.getElementById('postazione');
   STATIONS.forEach(s => {
@@ -1081,6 +1054,7 @@ async function submitForm() {
       },
       checklist: collectChecklist(),
       lidiChecklist: collectLidiState(),
+      pattiniChecklist: collectPattiniState(),
       giornataintera: giornataintera,
       interventi: collectInterventi(),
       note:  document.getElementById('note').value.trim(),
@@ -1125,6 +1099,7 @@ function resetForm() {
 
   resetChecklist();
   resetLidiSection();
+  resetPattiniSection();
   giornataintera = false;
   document.getElementById('giToggle').classList.remove('active');
   setNow();
@@ -1194,6 +1169,9 @@ function renderStoricoCard(d) {
   Object.values(d.lidiChecklist || {}).forEach(lido => {
     Object.values(lido || {}).forEach(v => { lidoTot++; if (v) lidoDone++; });
   });
+  Object.values(d.pattiniChecklist || {}).forEach(patt => {
+    Object.values(patt || {}).forEach(v => { lidoTot++; if (v) lidoDone++; });
+  });
   const done = chkVals.filter(Boolean).length + lidoDone;
   const tot  = chkVals.length + lidoTot;
 
@@ -1225,31 +1203,39 @@ function renderStoricoCard(d) {
 // ══════════════════════════════════════
 const LIDI_MAP = {
   'P.10': ['Orsa Minore','Scirocco'],
-  'P.11': ['Ahamar','Papenoo'],
-  'P.12': ['Lido La Vela','Mirage'],
-  'P.13': ['Bagni Marini','Nettuno'],
-  'P.14': ['Bolla Mare','Lido Luigi'],
-  'P.15': ['La Paranzella','Costa Est'],
-  'P.16': ['Celommi','Lucciola'],
-  'P.17': ['Marisella','Mirella'],
-  'P.18': ['Sirenetta','Mediterraneo','Ohana'],
-  'P.19': ['Lauretta','Atlantic'],
-  'P.20': ['Lido Azzurra','Circolo Velico'],
-  'P.21': ['Aurora','Moro','Oltremare'],
-  'P.22': ['Bellavista','Ziasò'],
-  'P.23': ['Lido Aragosta'],
-  'P.24': ['Riva del Sol','Luna Rossa'],
-  'P.25': ['Onda Blu','Tropical','Oasis'],
-  'P.26': ['Lido38'],
-  'P.27': ['VVF','Lido Sahara','BlueBay'],
-  'P.28': ['Casa del Mar','Vista Mare','Di Matteo'],
-  'P.29': ['Maldimare','Embarcadero'],
-  'P.30': ['Bora Bora','Roses'],
-  'P.31': ['Lo Squalo','Bagni Bruno'],
-  'P.32': ['Camping Nino','Stella Maris'],
-  'P.33': ['Camping Surabaia'],
-  'P.34': ['Tartaruga','Narcisi'],
-  'P.35': ['Cabana Park','Altamira','Baia de Cuba']
+  'P.11': ['Ahamar','Papenoo','Lido La Vela'],
+  'P.12': ['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'],
+  'P.13': ['Costa Est','Lucciola','Celommi','Mirella'],
+  'P.14': ['Marisella','Ohana','Sirenetta','Mediterraneo'],
+  'P.15': ['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'],
+  'P.16': ['Moro','Aurora','Oltremare','Bellavista','Ziasò'],
+  'P.17': ['Lido Aragosta','Luna Rossa','Riva del Sol'],
+  'P.18': ['Onda Blu','Tropical','Oasis','Lido38'],
+  'P.19': ['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'],
+  'P.20': ['Maldimare','Embarcadero','Roses','Bora Bora'],
+  'P.21': ['Lo Squalo','Bagni Bruno'],
+  'P.22': ['Camping Nino','Stella Maris'],
+  'P.23': ['Camping Surabaia'],
+  'P.24': ['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba']
+};
+
+// Dove si trova il pattino (array vuoto = pattino in postazione, sede non specificata)
+const PATTINI_MAP = {
+  'P.10': ['Pontile'],
+  'P.11': ['Papenoo','Lido La Vela'],
+  'P.12': ['Bolla Mare','La Paranzella'],
+  'P.13': ['Celommi'],
+  'P.14': ['Marisella','Sirenetta'],
+  'P.15': ['Lauretta','Lido Azzurra'],
+  'P.16': ['Aurora','Bellavista'],
+  'P.17': ['Lido Aragosta'],
+  'P.18': ['Onda Blu','Tropical','Lido38'],
+  'P.19': ['Di Matteo'],
+  'P.20': ['Embarcadero','Bora Bora'],
+  'P.21': ['Astice'],
+  'P.22': ['Campeggi'],
+  'P.23': ['Camping Surabaia'],
+  'P.24': ['Tartaruga','Narcisi']
 };
 
 const LIDO_ITEMS = [
@@ -1334,6 +1320,98 @@ function resetLidiSection() {
   lidiState = {};
   const container = document.getElementById('lidi-container');
   container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
+}
+
+// ══════════════════════════════════════
+//  PATTINI (una checklist per ogni pattino della postazione)
+// ══════════════════════════════════════
+const PATTINO_ITEMS = [
+  {id:'scalmi_remi',        label:'Scalmi e remi',  sub:''},
+  {id:'mezzo_marinaio',     label:'Mezzo marinaio', sub:''},
+  {id:'ancora',             label:'Ancora',         sub:''},
+  {id:'salvagente_pattino', label:'Salvagente',     sub:'Scegli quello migliore'},
+];
+
+// pattiniState: { 'Marisella': { scalmi_remi: false, ... }, ... }
+let pattiniState = {};
+
+function onPostazioneChange(postazione) {
+  buildLidiSection(postazione);
+  buildPattiniSection(postazione);
+}
+
+function buildPattiniSection(postazione) {
+  const container = document.getElementById('pattini-container');
+  const pattini = PATTINI_MAP[postazione];
+
+  if (!pattini || !pattini.length) {
+    resetPattiniSection();
+    updateChkCounter();
+    return;
+  }
+
+  pattiniState = {};
+  pattini.forEach(patt => {
+    pattiniState[patt] = {};
+    PATTINO_ITEMS.forEach(item => pattiniState[patt][item.id] = false);
+  });
+
+  container.innerHTML = pattini.map(patt => buildPattinoCard(patt)).join('');
+
+  container.querySelectorAll('.lido-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const patt = el.dataset.pattino;
+      const iid  = el.dataset.item;
+      const checked = el.classList.toggle('checked');
+      el.querySelector('.lido-box').textContent = checked ? '✓' : '';
+      pattiniState[patt][iid] = checked;
+      updatePattinoScore(patt);
+      updateChkCounter();
+    });
+  });
+
+  updateChkCounter();
+}
+
+function buildPattinoCard(patt) {
+  const key = patt.replace(/[^a-zA-Z0-9]/g,'_');
+  const items = PATTINO_ITEMS.map(item => `
+    <div class="lido-item" data-pattino="${patt}" data-item="${item.id}">
+      <div class="lido-box"></div>
+      <div class="lido-text">${item.label}
+        ${item.sub ? `<span class="lido-sub">${item.sub}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `<div class="lido-group" id="patt-${key}">
+    <div class="lido-title">
+      <span class="lido-name">🛶 ${patt}</span>
+      <span class="lido-score warn" id="pscore-${key}">0/${PATTINO_ITEMS.length}</span>
+    </div>
+    <div class="lido-items">${items}</div>
+  </div>`;
+}
+
+function updatePattinoScore(patt) {
+  const state = pattiniState[patt];
+  if (!state) return;
+  const tot  = PATTINO_ITEMS.length;
+  const done = Object.values(state).filter(Boolean).length;
+  const scoreEl = document.getElementById('pscore-' + patt.replace(/[^a-zA-Z0-9]/g,'_'));
+  if (scoreEl) {
+    scoreEl.textContent = `${done}/${tot}`;
+    scoreEl.className = 'lido-score ' + (done === tot ? 'ok' : 'warn');
+  }
+}
+
+function collectPattiniState() {
+  return pattiniState;
+}
+
+function resetPattiniSection() {
+  pattiniState = {};
+  const container = document.getElementById('pattini-container');
+  if (container) container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i pattini di competenza.</div>';
 }
 
 </script>
