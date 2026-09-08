@@ -292,6 +292,10 @@ select {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border);
 }
+.periodo-info {
+  font-size: 11px; color: var(--gray-text); margin-top: 4px;
+}
+.periodo-info.warn { color: #C0392B; font-weight: 600; }
 .chk-item {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 7px 0;
@@ -517,6 +521,7 @@ select {
         <select id="postazione" onchange="onPostazioneChange(this.value)">
           <option value="">— Seleziona —</option>
         </select>
+        <div id="periodoInfo" class="periodo-info"></div>
       </div>
       <div class="field">
         <label>Data e ora</label>
@@ -761,36 +766,107 @@ firebase.initializeApp(firebaseConfig);
 const db      = firebase.firestore();
 const storage = firebase.storage();
 
+// ══════════════════════════════════════
+//  POSTAZIONI PER PERIODO
+//  Ogni periodo vale dal giorno 'dal' fino al giorno 'al' compreso.
+//  Per cambiare le postazioni si aggiunge un blocco in fondo con le date
+//  giuste: tendina, lidi, pattini e statistiche si adeguano da soli il
+//  giorno stesso, senza altre modifiche.
+//  ATTENZIONE: lo stesso blocco sta in admin-diario.html e in
+//  "Funzioni del diario/omnia-diario-functions/functions/index.js".
+//  Se lo cambi qui, allinealo anche là.
+// ══════════════════════════════════════
+const PERIODI = [
+  { id:'stagione', nome:'Stagione', dal:'2026-06-01', al:'2026-09-06', postazioni:[
+    {n:10, nome:'Spiaggia Libera Orsa Minore-Scirocco', lidi:['Orsa Minore','Scirocco'], pattini:[]},
+    {n:11, nome:'Spiaggia Libera Ahamar-Papenoo', lidi:['Ahamar','Papenoo'], pattini:[]},
+    {n:12, nome:'Lido La Vela', lidi:['Lido La Vela','Mirage'], pattini:[]},
+    {n:13, nome:'Bagni Marini', lidi:['Bagni Marini','Nettuno'], pattini:[]},
+    {n:14, nome:'Bolla Mare', lidi:['Bolla Mare','Lido Luigi'], pattini:[]},
+    {n:15, nome:'La Paranzella', lidi:['La Paranzella','Costa Est'], pattini:[]},
+    {n:16, nome:'Celommi', lidi:['Celommi','Lucciola'], pattini:[]},
+    {n:17, nome:'Marisella', lidi:['Marisella','Mirella'], pattini:[]},
+    {n:18, nome:'Sirenetta', lidi:['Sirenetta','Mediterraneo','Ohana'], pattini:[]},
+    {n:19, nome:'Lauretta', lidi:['Lauretta','Atlantic'], pattini:[]},
+    {n:20, nome:'Lido Azzurra', lidi:['Lido Azzurra','Circolo Velico'], pattini:[]},
+    {n:21, nome:'Aurora', lidi:['Aurora','Moro','Oltremare'], pattini:[]},
+    {n:22, nome:'Bellavista', lidi:['Bellavista','Ziasò'], pattini:[]},
+    {n:23, nome:'Lido Aragosta', lidi:['Lido Aragosta'], pattini:[]},
+    {n:24, nome:'Riva del Sol', lidi:['Riva del Sol','Luna Rossa'], pattini:[]},
+    {n:25, nome:'Tropical', lidi:['Onda Blu','Tropical','Oasis'], pattini:[]},
+    {n:26, nome:'Lido38', lidi:['Lido38'], pattini:[]},
+    {n:27, nome:'Spiaggia Libera VVF-Lido Sahara', lidi:['VVF','Lido Sahara','BlueBay'], pattini:[]},
+    {n:28, nome:'Casa del Mar', lidi:['Casa del Mar','Vista Mare','Di Matteo'], pattini:[]},
+    {n:29, nome:'Maldimare', lidi:['Maldimare','Embarcadero'], pattini:[]},
+    {n:30, nome:'Bora Bora', lidi:['Bora Bora','Roses'], pattini:[]},
+    {n:31, nome:'Spiaggia Libera Lo Squalo-Bagni Bruno', lidi:['Lo Squalo','Bagni Bruno'], pattini:[]},
+    {n:32, nome:'Camping Nino', lidi:['Camping Nino','Stella Maris'], pattini:[]},
+    {n:33, nome:'Camping Surabaia', lidi:['Camping Surabaia'], pattini:[]},
+    {n:34, nome:'Tartaruga', lidi:['Tartaruga','Narcisi'], pattini:[]},
+    {n:35, nome:'Cabana Park', lidi:['Cabana Park','Altamira','Baia de Cuba'], pattini:[]}
+  ]},
+  { id:'sett-0713', nome:'Post-stagione 7-13 settembre', dal:'2026-09-07', al:'2026-09-13', postazioni:[
+    {n:10, nome:'Pontile', lidi:['Orsa Minore','Scirocco'], pattini:['Pontile']},
+    {n:11, nome:'Ahmar', lidi:['Ahamar','Papenoo','Lido La Vela'], pattini:['Papenoo','Lido La Vela']},
+    {n:12, nome:'Bolla', lidi:['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'], pattini:['Bolla Mare','La Paranzella']},
+    {n:13, nome:'Celommi', lidi:['Costa Est','Lucciola','Celommi','Mirella'], pattini:['Celommi']},
+    {n:14, nome:'Ohana', lidi:['Marisella','Ohana','Sirenetta','Mediterraneo'], pattini:['Marisella','Sirenetta']},
+    {n:15, nome:'Azzurra', lidi:['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'], pattini:['Lauretta','Lido Azzurra']},
+    {n:16, nome:'Oltremare', lidi:['Moro','Aurora','Oltremare','Bellavista','Ziasò'], pattini:['Aurora','Bellavista']},
+    {n:17, nome:'Aragosta', lidi:['Lido Aragosta','Luna Rossa','Riva del Sol'], pattini:['Lido Aragosta']},
+    {n:18, nome:'Oasis', lidi:['Onda Blu','Tropical','Oasis','Lido38'], pattini:['Onda Blu','Tropical','Lido38']},
+    {n:19, nome:'Di Matteo', lidi:['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'], pattini:['Di Matteo']},
+    {n:20, nome:'Embarcadero', lidi:['Maldimare','Embarcadero','Roses','Bora Bora'], pattini:['Embarcadero','Bora Bora']},
+    {n:21, nome:'Astice', lidi:['Lo Squalo','Bagni Bruno'], pattini:['Astice']},
+    {n:22, nome:'Campeggi', lidi:['Camping Nino','Stella Maris'], pattini:['Campeggi']},
+    {n:23, nome:'Surabaya', lidi:['Camping Surabaia'], pattini:['Camping Surabaia']},
+    {n:24, nome:'Altamira', lidi:['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba'], pattini:['Tartaruga','Narcisi']}
+  ]},
+  { id:'sett-1420', nome:'Post-stagione 14-20 settembre', dal:'2026-09-14', al:'2026-09-20', postazioni:[
+    {n:10, nome:'Pontile', lidi:['Orsa Minore','Scirocco','Ahamar','Papenoo','Lido La Vela'], pattini:['Pontile','Papenoo','Lido La Vela']},
+    {n:12, nome:'Bolla', lidi:['Bolla Mare','Lido Luigi','La Paranzella'], pattini:['Bolla Mare','La Paranzella']},
+    {n:13, nome:'Celommi', lidi:['Costa Est','Lucciola','Celommi','Mirella'], pattini:['Celommi']},
+    {n:14, nome:'Ohana', lidi:['Marisella','Ohana','Sirenetta','Mediterraneo'], pattini:['Marisella','Sirenetta']},
+    {n:15, nome:'Azzurra', lidi:['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'], pattini:['Lauretta','Lido Azzurra']},
+    {n:16, nome:'Oltremare', lidi:['Moro','Aurora','Oltremare','Bellavista','Ziasò'], pattini:['Aurora','Bellavista']},
+    {n:17, nome:'Aragosta', lidi:['Lido Aragosta','Luna Rossa','Riva del Sol'], pattini:['Lido Aragosta']},
+    {n:18, nome:'Oasis', lidi:['Onda Blu','Tropical','Oasis','Lido38'], pattini:['Onda Blu','Tropical','Lido38']},
+    {n:19, nome:'Di Matteo', lidi:['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'], pattini:['Di Matteo']},
+    {n:20, nome:'Embarcadero', lidi:['Maldimare','Embarcadero','Roses','Bora Bora'], pattini:['Embarcadero','Bora Bora']},
+    {n:23, nome:'Surabaya', lidi:['Camping Surabaia'], pattini:['Camping Surabaia']}
+  ]}
+];
+
+// Periodo di appartenenza di una data (confronto su AAAA-MM-GG locale)
+function ymd(d) {
+  const dt = d instanceof Date ? d : new Date(d);
+  const p = n => String(n).padStart(2,'0');
+  return `${dt.getFullYear()}-${p(dt.getMonth()+1)}-${p(dt.getDate())}`;
+}
+function periodoPer(d) {
+  const k = ymd(d);
+  let out = PERIODI[0];
+  PERIODI.forEach(p => { if (k >= p.dal) out = p; });
+  return out;
+}
+function periodoScaduto(p, d) { return !!p.al && ymd(d) > p.al; }
+function stazioneDi(sigla, d) {
+  return periodoPer(d).postazioni.find(s => `P.${s.n}` === sigla) || null;
+}
+function fmtGiorno(iso) {
+  const [y,m,g] = iso.split('-');
+  return `${g}/${m}`;
+}
+
+
 // ── INIT ──
 (function init() {
   // Popola postazioni come da app
-  const STATIONS = [
-  {num:10,name:"Pontile"},
-  {num:11,name:"Ahmar"},
-  {num:12,name:"Bolla"},
-  {num:13,name:"Celommi"},
-  {num:14,name:"Ohana"},
-  {num:15,name:"Azzurra"},
-  {num:16,name:"Oltremare"},
-  {num:17,name:"Aragosta"},
-  {num:18,name:"Oasis"},
-  {num:19,name:"Di Matteo"},
-  {num:20,name:"Embarcadero"},
-  {num:21,name:"Astice"},
-  {num:22,name:"Campeggi"},
-  {num:23,name:"Surabaya"},
-  {num:24,name:"Altamira"}
-];
-  const sel = document.getElementById('postazione');
-  STATIONS.forEach(s => {
-    const o = document.createElement('option');
-    o.value = `P.${s.num}`;
-    o.textContent = `P.${s.num} — ${s.name}`;
-    sel.appendChild(o);
-  });
-
-  // Data/ora corrente
+  // Data/ora corrente: la tendina delle postazioni segue la data scelta
   setNow();
+  aggiornaPeriodo();
+  document.getElementById('dataOra').addEventListener('change', aggiornaPeriodo);
+
 
   // Chip groups single-select
   ['mare', 'cielo', 'bandiera', 'affluenza', 'ventoInt'].forEach(id => {
@@ -1103,6 +1179,7 @@ function resetForm() {
   giornataintera = false;
   document.getElementById('giToggle').classList.remove('active');
   setNow();
+  aggiornaPeriodo();
 }
 
 // ── STORICO PER BAGNINO ──
@@ -1198,46 +1275,6 @@ function renderStoricoCard(d) {
 
 // ── STORICO ──
 
-// ══════════════════════════════════════
-//  MAPPA LIDI PER POSTAZIONE
-// ══════════════════════════════════════
-const LIDI_MAP = {
-  'P.10': ['Orsa Minore','Scirocco'],
-  'P.11': ['Ahamar','Papenoo','Lido La Vela'],
-  'P.12': ['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'],
-  'P.13': ['Costa Est','Lucciola','Celommi','Mirella'],
-  'P.14': ['Marisella','Ohana','Sirenetta','Mediterraneo'],
-  'P.15': ['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'],
-  'P.16': ['Moro','Aurora','Oltremare','Bellavista','Ziasò'],
-  'P.17': ['Lido Aragosta','Luna Rossa','Riva del Sol'],
-  'P.18': ['Onda Blu','Tropical','Oasis','Lido38'],
-  'P.19': ['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'],
-  'P.20': ['Maldimare','Embarcadero','Roses','Bora Bora'],
-  'P.21': ['Lo Squalo','Bagni Bruno'],
-  'P.22': ['Camping Nino','Stella Maris'],
-  'P.23': ['Camping Surabaia'],
-  'P.24': ['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba']
-};
-
-// Dove si trova il pattino (array vuoto = pattino in postazione, sede non specificata)
-const PATTINI_MAP = {
-  'P.10': ['Pontile'],
-  'P.11': ['Papenoo','Lido La Vela'],
-  'P.12': ['Bolla Mare','La Paranzella'],
-  'P.13': ['Celommi'],
-  'P.14': ['Marisella','Sirenetta'],
-  'P.15': ['Lauretta','Lido Azzurra'],
-  'P.16': ['Aurora','Bellavista'],
-  'P.17': ['Lido Aragosta'],
-  'P.18': ['Onda Blu','Tropical','Lido38'],
-  'P.19': ['Di Matteo'],
-  'P.20': ['Embarcadero','Bora Bora'],
-  'P.21': ['Astice'],
-  'P.22': ['Campeggi'],
-  'P.23': ['Camping Surabaia'],
-  'P.24': ['Tartaruga','Narcisi']
-};
-
 const LIDO_ITEMS = [
   {id:'salvagente', label:'N.2 salvagente agli estremi', sub:'Sagola in ordine'},
   {id:'bandiere',   label:'Bandiere verde, gialla e rossa presenti', sub:'Se palo con una corda → bandiera gialla nel cassone'},
@@ -1250,9 +1287,10 @@ let lidiState = {};
 
 function buildLidiSection(postazione) {
   const container = document.getElementById('lidi-container');
-  const lidi = LIDI_MAP[postazione];
+  const st = stazioneDi(postazione, dataSelezionata());
+  const lidi = st && st.lidi;
 
-  if (!lidi) {
+  if (!lidi || !lidi.length) {
     container.innerHTML = '<div class="no-post-msg">Seleziona prima la postazione per visualizzare i lidi di competenza.</div>';
     lidiState = {};
     return;
@@ -1335,6 +1373,48 @@ const PATTINO_ITEMS = [
 // pattiniState: { 'Marisella': { scalmi_remi: false, ... }, ... }
 let pattiniState = {};
 
+function dataSelezionata() {
+  const v = document.getElementById('dataOra').value;
+  return v ? new Date(v) : new Date();
+}
+
+// Ricostruisce la tendina quando la data scelta cade in un altro periodo
+function aggiornaPeriodo() {
+  const d  = dataSelezionata();
+  const pr = periodoPer(d);
+  const sel = document.getElementById('postazione');
+
+  if (sel.dataset.periodo !== pr.id) {
+    const prec = sel.value;
+    sel.innerHTML = '<option value="">— Seleziona —</option>';
+    pr.postazioni.forEach(st => {
+      const o = document.createElement('option');
+      o.value = `P.${st.n}`;
+      o.textContent = `P.${st.n} — ${st.nome}`;
+      sel.appendChild(o);
+    });
+    sel.dataset.periodo = pr.id;
+    sel.value = pr.postazioni.some(st => `P.${st.n}` === prec) ? prec : '';
+    // il periodo e' cambiato: lidi e pattini vanno rifatti anche se la
+    // postazione selezionata esiste in entrambi gli elenchi
+    if (sel.value) onPostazioneChange(sel.value);
+    else if (prec) { resetLidiSection(); resetPattiniSection(); updateChkCounter(); }
+  }
+
+  const info = document.getElementById('periodoInfo');
+  if (info) {
+    if (periodoScaduto(pr, d)) {
+      info.className = 'periodo-info warn';
+      info.textContent = `⚠️ Elenco postazioni aggiornato solo fino al ${fmtGiorno(pr.al)} — verifica con l'ufficio`;
+    } else {
+      info.className = 'periodo-info';
+      info.textContent = pr.al ?
+        `Elenco valido dal ${fmtGiorno(pr.dal)} al ${fmtGiorno(pr.al)}` :
+        `Elenco valido dal ${fmtGiorno(pr.dal)}`;
+    }
+  }
+}
+
 function onPostazioneChange(postazione) {
   buildLidiSection(postazione);
   buildPattiniSection(postazione);
@@ -1342,7 +1422,8 @@ function onPostazioneChange(postazione) {
 
 function buildPattiniSection(postazione) {
   const container = document.getElementById('pattini-container');
-  const pattini = PATTINI_MAP[postazione];
+  const st = stazioneDi(postazione, dataSelezionata());
+  const pattini = st && st.pattini;
 
   if (!pattini || !pattini.length) {
     resetPattiniSection();

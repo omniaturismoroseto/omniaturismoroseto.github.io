@@ -312,10 +312,7 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
       <div class="cc full"><div class="ctitle">Mancanze checklist</div><div class="cwrap" id="cvMancWrap"><canvas id="cvManc"></canvas></div></div>
     </div>
     <div class="stitle">Per postazione</div>
-    <div class="cgrid">
-      <div class="cc full" id="cardPost"><div class="ctitle">Diari e interventi per postazione — Stagione (fino al 06/09/2026)</div><div class="cwrap tall"><canvas id="cvPost"></canvas></div></div>
-      <div class="cc full" id="cardPostPS"><div class="ctitle">Diari e interventi per postazione — Post-stagione (dal 07/09/2026)</div><div class="cwrap tall"><canvas id="cvPostPS"></canvas></div></div>
-    </div>
+    <div class="cgrid" id="postGrid"></div>
     <div class="cc" style="margin-bottom:1rem">
       <div class="ctitle">Dettaglio per postazione</div>
       <div style="overflow-x:auto">
@@ -524,82 +521,75 @@ const db = firebase.firestore();
 // ═══════════════════════════════════════
 //  DATI STATICI
 // ═══════════════════════════════════════
-// Le sigle P.10-P.24 sono state riusate: prima del 07/09/2026 indicano le
-// postazioni di stagione, dal 07/09/2026 quelle post-stagione (una ogni 300 m).
-const POST_SEASON_START = new Date('2026-09-07T00:00:00');
-
-const STATIONS_PRE = [
-  {n:10,name:"Spiaggia Libera Orsa Minore-Scirocco"},
-  {n:11,name:"Spiaggia Libera Ahamar-Papenoo"},
-  {n:12,name:"Lido La Vela"},{n:13,name:"Bagni Marini"},
-  {n:14,name:"Bolla Mare"},{n:15,name:"La Paranzella"},
-  {n:16,name:"Celommi"},{n:17,name:"Marisella"},
-  {n:18,name:"Sirenetta"},{n:19,name:"Lauretta"},
-  {n:20,name:"Lido Azzurra"},{n:21,name:"Aurora"},
-  {n:22,name:"Bellavista"},{n:23,name:"Lido Aragosta"},
-  {n:24,name:"Riva del Sol"},{n:25,name:"Tropical"},
-  {n:26,name:"Lido38"},{n:27,name:"Spiaggia Libera VVF-Lido Sahara"},
-  {n:28,name:"Casa del Mar"},{n:29,name:"Maldimare"},
-  {n:30,name:"Bora Bora"},{n:31,name:"Spiaggia Libera Lo Squalo-Bagni Bruno"},
-  {n:32,name:"Camping Nino"},{n:33,name:"Camping Surabaia"},
-  {n:34,name:"Tartaruga"},{n:35,name:"Cabana Park"}
+// ══════════════════════════════════════
+//  POSTAZIONI PER PERIODO
+//  Ogni periodo vale dal giorno 'dal' fino al giorno 'al' compreso.
+//  Per cambiare le postazioni si aggiunge un blocco in fondo con le date
+//  giuste: tendine, grafici e report si adeguano da soli il giorno stesso.
+//  ATTENZIONE: lo stesso blocco sta in diariogiornaliero.html e in
+//  "Funzioni del diario/omnia-diario-functions/functions/index.js".
+//  Se lo cambi qui, allinealo anche la'.
+// ══════════════════════════════════════
+const PERIODI = [
+  { id:'stagione', nome:'Stagione', dal:'2026-06-01', al:'2026-09-06', postazioni:[
+    {n:10, nome:'Spiaggia Libera Orsa Minore-Scirocco', lidi:['Orsa Minore','Scirocco'], pattini:[]},
+    {n:11, nome:'Spiaggia Libera Ahamar-Papenoo', lidi:['Ahamar','Papenoo'], pattini:[]},
+    {n:12, nome:'Lido La Vela', lidi:['Lido La Vela','Mirage'], pattini:[]},
+    {n:13, nome:'Bagni Marini', lidi:['Bagni Marini','Nettuno'], pattini:[]},
+    {n:14, nome:'Bolla Mare', lidi:['Bolla Mare','Lido Luigi'], pattini:[]},
+    {n:15, nome:'La Paranzella', lidi:['La Paranzella','Costa Est'], pattini:[]},
+    {n:16, nome:'Celommi', lidi:['Celommi','Lucciola'], pattini:[]},
+    {n:17, nome:'Marisella', lidi:['Marisella','Mirella'], pattini:[]},
+    {n:18, nome:'Sirenetta', lidi:['Sirenetta','Mediterraneo','Ohana'], pattini:[]},
+    {n:19, nome:'Lauretta', lidi:['Lauretta','Atlantic'], pattini:[]},
+    {n:20, nome:'Lido Azzurra', lidi:['Lido Azzurra','Circolo Velico'], pattini:[]},
+    {n:21, nome:'Aurora', lidi:['Aurora','Moro','Oltremare'], pattini:[]},
+    {n:22, nome:'Bellavista', lidi:['Bellavista','Ziasò'], pattini:[]},
+    {n:23, nome:'Lido Aragosta', lidi:['Lido Aragosta'], pattini:[]},
+    {n:24, nome:'Riva del Sol', lidi:['Riva del Sol','Luna Rossa'], pattini:[]},
+    {n:25, nome:'Tropical', lidi:['Onda Blu','Tropical','Oasis'], pattini:[]},
+    {n:26, nome:'Lido38', lidi:['Lido38'], pattini:[]},
+    {n:27, nome:'Spiaggia Libera VVF-Lido Sahara', lidi:['VVF','Lido Sahara','BlueBay'], pattini:[]},
+    {n:28, nome:'Casa del Mar', lidi:['Casa del Mar','Vista Mare','Di Matteo'], pattini:[]},
+    {n:29, nome:'Maldimare', lidi:['Maldimare','Embarcadero'], pattini:[]},
+    {n:30, nome:'Bora Bora', lidi:['Bora Bora','Roses'], pattini:[]},
+    {n:31, nome:'Spiaggia Libera Lo Squalo-Bagni Bruno', lidi:['Lo Squalo','Bagni Bruno'], pattini:[]},
+    {n:32, nome:'Camping Nino', lidi:['Camping Nino','Stella Maris'], pattini:[]},
+    {n:33, nome:'Camping Surabaia', lidi:['Camping Surabaia'], pattini:[]},
+    {n:34, nome:'Tartaruga', lidi:['Tartaruga','Narcisi'], pattini:[]},
+    {n:35, nome:'Cabana Park', lidi:['Cabana Park','Altamira','Baia de Cuba'], pattini:[]}
+  ]},
+  { id:'sett-0713', nome:'Post-stagione 7-13 settembre', dal:'2026-09-07', al:'2026-09-13', postazioni:[
+    {n:10, nome:'Pontile', lidi:['Orsa Minore','Scirocco'], pattini:['Pontile']},
+    {n:11, nome:'Ahmar', lidi:['Ahamar','Papenoo','Lido La Vela'], pattini:['Papenoo','Lido La Vela']},
+    {n:12, nome:'Bolla', lidi:['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'], pattini:['Bolla Mare','La Paranzella']},
+    {n:13, nome:'Celommi', lidi:['Costa Est','Lucciola','Celommi','Mirella'], pattini:['Celommi']},
+    {n:14, nome:'Ohana', lidi:['Marisella','Ohana','Sirenetta','Mediterraneo'], pattini:['Marisella','Sirenetta']},
+    {n:15, nome:'Azzurra', lidi:['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'], pattini:['Lauretta','Lido Azzurra']},
+    {n:16, nome:'Oltremare', lidi:['Moro','Aurora','Oltremare','Bellavista','Ziasò'], pattini:['Aurora','Bellavista']},
+    {n:17, nome:'Aragosta', lidi:['Lido Aragosta','Luna Rossa','Riva del Sol'], pattini:['Lido Aragosta']},
+    {n:18, nome:'Oasis', lidi:['Onda Blu','Tropical','Oasis','Lido38'], pattini:['Onda Blu','Tropical','Lido38']},
+    {n:19, nome:'Di Matteo', lidi:['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'], pattini:['Di Matteo']},
+    {n:20, nome:'Embarcadero', lidi:['Maldimare','Embarcadero','Roses','Bora Bora'], pattini:['Embarcadero','Bora Bora']},
+    {n:21, nome:'Astice', lidi:['Lo Squalo','Bagni Bruno'], pattini:['Astice']},
+    {n:22, nome:'Campeggi', lidi:['Camping Nino','Stella Maris'], pattini:['Campeggi']},
+    {n:23, nome:'Surabaya', lidi:['Camping Surabaia'], pattini:['Camping Surabaia']},
+    {n:24, nome:'Altamira', lidi:['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba'], pattini:['Tartaruga','Narcisi']}
+  ]},
+  { id:'sett-1420', nome:'Post-stagione 14-20 settembre', dal:'2026-09-14', al:'2026-09-20', postazioni:[
+    {n:10, nome:'Pontile', lidi:['Orsa Minore','Scirocco','Ahamar','Papenoo','Lido La Vela'], pattini:['Pontile','Papenoo','Lido La Vela']},
+    {n:12, nome:'Bolla', lidi:['Bolla Mare','Lido Luigi','La Paranzella'], pattini:['Bolla Mare','La Paranzella']},
+    {n:13, nome:'Celommi', lidi:['Costa Est','Lucciola','Celommi','Mirella'], pattini:['Celommi']},
+    {n:14, nome:'Ohana', lidi:['Marisella','Ohana','Sirenetta','Mediterraneo'], pattini:['Marisella','Sirenetta']},
+    {n:15, nome:'Azzurra', lidi:['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'], pattini:['Lauretta','Lido Azzurra']},
+    {n:16, nome:'Oltremare', lidi:['Moro','Aurora','Oltremare','Bellavista','Ziasò'], pattini:['Aurora','Bellavista']},
+    {n:17, nome:'Aragosta', lidi:['Lido Aragosta','Luna Rossa','Riva del Sol'], pattini:['Lido Aragosta']},
+    {n:18, nome:'Oasis', lidi:['Onda Blu','Tropical','Oasis','Lido38'], pattini:['Onda Blu','Tropical','Lido38']},
+    {n:19, nome:'Di Matteo', lidi:['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'], pattini:['Di Matteo']},
+    {n:20, nome:'Embarcadero', lidi:['Maldimare','Embarcadero','Roses','Bora Bora'], pattini:['Embarcadero','Bora Bora']},
+    {n:23, nome:'Surabaya', lidi:['Camping Surabaia'], pattini:['Camping Surabaia']}
+  ]}
 ];
-const ALL_P_PRE = STATIONS_PRE.map(s => `P.${s.n}`);
-
-const STATIONS = [
-  {n:10,name:"Pontile"},
-  {n:11,name:"Ahmar"},
-  {n:12,name:"Bolla"},
-  {n:13,name:"Celommi"},
-  {n:14,name:"Ohana"},
-  {n:15,name:"Azzurra"},
-  {n:16,name:"Oltremare"},
-  {n:17,name:"Aragosta"},
-  {n:18,name:"Oasis"},
-  {n:19,name:"Di Matteo"},
-  {n:20,name:"Embarcadero"},
-  {n:21,name:"Astice"},
-  {n:22,name:"Campeggi"},
-  {n:23,name:"Surabaya"},
-  {n:24,name:"Altamira"}
-];
-const ALL_P = STATIONS.map(s => `P.${s.n}`);
-
-const LIDI_MAP = {
-  'P.10':['Orsa Minore','Scirocco'],
-  'P.11':['Ahamar','Papenoo','Lido La Vela'],
-  'P.12':['Nettuno','Bolla Mare','Lido Luigi','La Paranzella'],
-  'P.13':['Costa Est','Lucciola','Celommi','Mirella'],
-  'P.14':['Marisella','Ohana','Sirenetta','Mediterraneo'],
-  'P.15':['Lauretta','Atlantic','Lido Azzurra','Circolo Velico'],
-  'P.16':['Moro','Aurora','Oltremare','Bellavista','Ziasò'],
-  'P.17':['Lido Aragosta','Luna Rossa','Riva del Sol'],
-  'P.18':['Onda Blu','Tropical','Oasis','Lido38'],
-  'P.19':['Lido Sahara','BlueBay','Di Matteo','Vista Mare','Casa del Mar'],
-  'P.20':['Maldimare','Embarcadero','Roses','Bora Bora'],
-  'P.21':['Lo Squalo','Bagni Bruno'],
-  'P.22':['Camping Nino','Stella Maris'],
-  'P.23':['Camping Surabaia'],
-  'P.24':['Narcisi','Tartaruga','Altamira','Cabana Park','Baia de Cuba']
-};
-
-const PATTINI_MAP = {
-  'P.10':['Pontile'],
-  'P.11':['Papenoo','Lido La Vela'],
-  'P.12':['Bolla Mare','La Paranzella'],
-  'P.13':['Celommi'],
-  'P.14':['Marisella','Sirenetta'],
-  'P.15':['Lauretta','Lido Azzurra'],
-  'P.16':['Aurora','Bellavista'],
-  'P.17':['Lido Aragosta'],
-  'P.18':['Onda Blu','Tropical','Lido38'],
-  'P.19':['Di Matteo'],
-  'P.20':['Embarcadero','Bora Bora'],
-  'P.21':['Astice'],
-  'P.22':['Campeggi'],
-  'P.23':['Camping Surabaia'],
-  'P.24':['Tartaruga','Narcisi']
-};
 
 const CHK_LABELS = {
   kit_medico:'Kit medico',giubbino:'Giubbino',rullo:'Rullo',caschetto:'Caschetto',
@@ -646,11 +636,15 @@ let rPeriod = 'oggi';
 setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
 
 (function init() {
+  // il filtro elenca tutte le sigle mai usate, col nome dell'ultimo periodo
+  // in cui compaiono (cosi' si possono cercare anche i diari vecchi)
   const sel = document.getElementById('f-post');
-  STATIONS.forEach(s => {
+  const nomi = new Map();
+  PERIODI.forEach(pr => pr.postazioni.forEach(st => nomi.set(`P.${st.n}`, st.nome)));
+  [...nomi.keys()].sort(cmpP).forEach(sigla => {
     const o = document.createElement('option');
-    o.value = `P.${s.n}`;
-    o.textContent = `P.${s.n} — ${s.name}`;
+    o.value = sigla;
+    o.textContent = `${sigla} — ${nomi.get(sigla)}`;
     sel.appendChild(o);
   });
   load();
@@ -897,7 +891,7 @@ function buildMalert() {
     const dt  = toDate(d.dataOra);
     const ora = dt.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
     const chips = allMancanze(d).map(m => `<span class="mchip">${m}</span>`).join('');
-    const lidiCoperti = (LIDI_MAP[d.postazione]||[]).join(', ');
+    const lidiCoperti = docLidi(d).join(', ');
     return `<div class="mrow"><div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
         <span class="mpost">${d.postazione}</span>
@@ -932,14 +926,14 @@ function buildTurni() {
 }
 
 function turnoCard(label, ora, okSet) {
-  const miss = ALL_P.filter(p => !okSet.has(p));
-  const pct  = Math.round(okSet.size/ALL_P.length*100);
+  const miss = stazioniOggi().filter(p => !okSet.has(p));
+  const pct  = Math.round(okSet.size/stazioniOggi().length*100);
   const cls  = pct===100?'ok':pct>=60?'warn':'bad';
   return `<div class="tcard">
     <div class="tcard-hd">
       <div><div class="tcard-label">${label}</div><div class="tcard-ora">${ora}</div></div>
       <div style="text-align:right">
-        <div class="tscore ${cls}">${okSet.size}/${ALL_P.length}</div>
+        <div class="tscore ${cls}">${okSet.size}/${stazioniOggi().length}</div>
         <div style="font-size:11px;color:var(--gray)">${miss.length} mancanti</div>
       </div>
     </div>
@@ -948,7 +942,7 @@ function turnoCard(label, ora, okSet) {
         ? '<span style="font-size:13px;color:var(--green);font-weight:600">✅ Tutte le postazioni hanno compilato</span>'
         : `<div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Mancanti</div>
            <div class="tchips">${miss.map(p=>{
-               const lidi=(LIDI_MAP[p]||[]).join(', ');
+               const lidi=lidiDi(p, new Date()).join(', ');
                return `<span class="tchip" title="${lidi}">${p}<span style="font-weight:400;opacity:.8;font-size:10.5px;display:block;line-height:1.3">${lidi}</span></span>`;
              }).join('')}</div>`}
     </div>
@@ -1051,24 +1045,29 @@ function renderStats() {
     mwrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-weight:600">✅ Nessuna mancanza nel periodo</div>';
   }
 
-  // 6-7. Per postazione — stagione e post-stagione tenute separate,
-  //       perche' le stesse sigle P.10-P.24 indicano postazioni diverse
-  const preDocs  = VIEW.filter(d => !isPostStagione(d));
-  const postDocs = VIEW.filter(d =>  isPostStagione(d));
+  // 6-7. Per postazione — un grafico per ogni periodo presente nel filtro,
+  //      perche' le stesse sigle indicano postazioni diverse da un periodo all'altro
+  const gruppi = PERIODI
+    .map(pr => ({ pr, docs: VIEW.filter(d => periodoDoc(d).id === pr.id) }))
+    .filter(g => g.docs.length);
 
-  chartPostazioni('pp',   'cvPost',   'cardPost',   preDocs);
-  chartPostazioni('ppPS', 'cvPostPS', 'cardPostPS', postDocs);
+  Object.keys(CHARTS).filter(k => k.startsWith('pp-')).forEach(destroyChart);
+  const grid = document.getElementById('postGrid');
+  grid.innerHTML = gruppi.length
+    ? gruppi.map((g,i) => `<div class="cc full"><div class="ctitle">Diari e interventi per postazione — ${g.pr.nome}</div><div class="cwrap tall"><canvas id="cvPost-${i}"></canvas></div></div>`).join('')
+    : '<div class="cc full" style="text-align:center;padding:2rem;color:var(--gray)">Nessun diario nel periodo selezionato</div>';
+  gruppi.forEach((g,i) => chartPostazioni('pp-'+i, 'cvPost-'+i, g.docs));
 
   const stb = document.getElementById('stn-tbody');
   stb.innerHTML = '';
-  [[preDocs, false], [postDocs, true]].forEach(([docs, isPost]) => {
-    aggregaPostazioni(docs).forEach(r => {
+  gruppi.forEach(g => {
+    aggregaPostazioni(g.docs).forEach(r => {
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--border)';
       tr.innerHTML = `
         <td style="padding:5px 10px"><strong>${r.p}</strong>
-          <span style="font-size:10px;background:${isPost?'#FEF3C7':'#EEF3FB'};color:var(--navy2);padding:1px 6px;border-radius:10px;font-weight:700">${isPost?'POST':'STAG'}</span>
-          <span style="color:var(--gray);font-size:11px">${stationName(r.p, isPost)}</span></td>
+          <span style="font-size:10px;background:#EEF3FB;color:var(--navy2);padding:1px 6px;border-radius:10px;font-weight:700">${g.pr.nome}</span>
+          <span style="color:var(--gray);font-size:11px">${nomeDaDocs(r.p, g.docs)}</span></td>
         <td style="padding:5px 10px;text-align:center">${r.diari}</td>
         <td style="padding:5px 10px;text-align:center">${r.interventi}</td>
         <td style="padding:5px 10px;text-align:center">${r.foto}</td>
@@ -1093,11 +1092,8 @@ function aggregaPostazioni(docs) {
   }));
 }
 
-function chartPostazioni(key, canvasId, cardId, docs) {
-  destroyChart(key);
+function chartPostazioni(key, canvasId, docs) {
   const rows = aggregaPostazioni(docs);
-  const card = document.getElementById(cardId);
-  card.style.display = rows.length ? '' : 'none';
   if (!rows.length) return;
   CHARTS[key] = new Chart(document.getElementById(canvasId), {
     type:'bar',
@@ -1229,7 +1225,7 @@ function refreshReport() {
     <div class="rstat"><div class="rstat-v">${docs.length}</div><div class="rstat-l">Diari</div></div>
     <div class="rstat"><div class="rstat-v">${docs.reduce((s,d)=>s+(d.interventi||[]).length,0)}</div><div class="rstat-l">Interventi</div></div>
     <div class="rstat"><div class="rstat-v" style="color:${totMiss>0?'var(--red)':'var(--green)'}">${totMiss}</div><div class="rstat-l">Mancanze</div></div>
-    <div class="rstat"><div class="rstat-v">${new Set(docs.map(d=>d.postazione)).size}/${ALL_P.length}</div><div class="rstat-l">Postazioni</div></div>`;
+    <div class="rstat"><div class="rstat-v">${new Set(docs.map(d=>d.postazione)).size}/${stazioniOggi().length}</div><div class="rstat-l">Postazioni</div></div>`;
 }
 
 function downloadXLS() {
@@ -1247,7 +1243,7 @@ function downloadXLS() {
     ['Interventi',docs.reduce((s,d)=>s+(d.interventi||[]).length,0)],
     ['Foto',docs.reduce((s,d)=>s+(d.foto||[]).length,0)],
     ['Mancanze segnalate',totMiss],
-    ['Postazioni attive',new Set(docs.map(d=>d.postazione)).size+'/'+ALL_P.length],
+    ['Postazioni attive',new Set(docs.map(d=>d.postazione)).size+'/'+stazioniOggi().length],
   ]), 'Riepilogo');
 
   // Sheet 2: Diari
@@ -1287,8 +1283,7 @@ function downloadXLS() {
     const ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
     stationsForDate(d).forEach(p=>{
       const m2=comp[`${dk}|${p}|m`],pp=comp[`${dk}|${p}|p`];
-      const isPost=d>=POST_SEASON_START;
-      if(!m2||!pp) tRows.push([ds,p,isPost?(LIDI_MAP[p]||[]).join(', '):'',m2?'✓':'MANCANTE',pp?'✓':'MANCANTE']);
+      if(!m2||!pp) tRows.push([ds,p,lidiDi(p,d).join(', '),m2?'✓':'MANCANTE',pp?'✓':'MANCANTE']);
     });
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tRows), 'Turni non compilati');
@@ -1304,7 +1299,7 @@ function downloadXLS() {
   const pk=Object.keys(pc2).sort((a2,b)=>parseInt(a2.replace('P.',''))-parseInt(b.replace('P.','')));
   const sRows=[['Postazione','Nome','Diari','Interventi','Mancanze','Checklist media %']];
   pk.forEach(p=>{
-    const sn=stationNameForDocs(p,docs);
+    const sn=nomeDaDocs(p,docs);
     const avg=Math.round(docs.filter(d=>d.postazione===p).reduce((s,d)=>s+chkPct(d),0)/(pc2[p]||1));
     sRows.push([p,sn,pc2[p]||0,pi2[p]||0,pm2[p]||0,avg]);
   });
@@ -1362,7 +1357,7 @@ function downloadPDF() {
     {v:docs.length,l:'Diari',c:NAVY},
     {v:docs.reduce((s,d)=>s+(d.interventi||[]).length,0),l:'Interventi',c:NAVY},
     {v:totMiss,l:'Mancanze',c:totMiss>0?RED:GREEN},
-    {v:new Set(docs.map(d=>d.postazione)).size+'/'+ALL_P.length,l:'Postazioni',c:NAVY}
+    {v:new Set(docs.map(d=>d.postazione)).size+'/'+stazioniOggi().length,l:'Postazioni',c:NAVY}
   ];
   stats.forEach((s,i)=>{
     const x=14+i*46;
@@ -1392,8 +1387,8 @@ function downloadPDF() {
   const tBody=[];
   dates2.forEach(d=>{
     const dk=d.toISOString().slice(0,10),ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const attive=stationsForDate(d), isPost=d>=POST_SEASON_START;
-    const nomeP=q=>isPost?`${q} (${(LIDI_MAP[q]||[]).join(', ')})`:q;
+    const attive=stationsForDate(d);
+    const nomeP=q=>`${q} (${lidiDi(q,d).join(', ')})`;
     const mm=attive.filter(p=>!comp2[`${dk}|${p}|m`]),pp=attive.filter(p=>!comp2[`${dk}|${p}|p`]);
     if(mm.length||pp.length){
       const mmStr=mm.length?mm.map(nomeP).join('\n'):'✓ Tutte';
@@ -1488,24 +1483,37 @@ function exportCSV() {
 // ═══════════════════════════════════════
 function toDate(v){ return v?.toDate?v.toDate():(v?new Date(v):new Date(0)); }
 function fmt(d){ return d.toISOString().slice(0,10); }
-function isPostStagione(d){ return toDate(d.dataOra) >= POST_SEASON_START; }
+function ymd(d){
+  const dt = d instanceof Date ? d : new Date(d);
+  const z = n => String(n).padStart(2,'0');
+  return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}`;
+}
+function periodoPer(d){
+  const k = ymd(d);
+  let out = PERIODI[0];
+  PERIODI.forEach(p => { if (k >= p.dal) out = p; });
+  return out;
+}
+function periodoDoc(doc){ return periodoPer(toDate(doc.dataOra)); }
 function cmpP(a,b){ return parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')); }
-function stationName(p,isPost){
-  const list = isPost ? STATIONS : STATIONS_PRE;
-  return list.find(s=>`P.${s.n}`===p)?.name || '';
+function stazioneDi(sigla,d){ return periodoPer(d).postazioni.find(s=>`P.${s.n}`===sigla)||null; }
+function stationsForDate(d){ return periodoPer(d).postazioni.map(s=>`P.${s.n}`); }
+function stazioniOggi(){ return stationsForDate(new Date()); }
+function stationName(p,d){ return stazioneDi(p,d)?.nome || ''; }
+function lidiDi(p,d){ return stazioneDi(p,d)?.lidi || []; }
+function pattiniDi(p,d){ return stazioneDi(p,d)?.pattini || []; }
+function nomeDaDocs(p,docs){
+  const d = docs.find(x=>x.postazione===p);
+  return d ? stationName(p, toDate(d.dataOra)) : '';
 }
-function stationNameForDocs(p,docs){
-  return stationName(p, docs.some(d=>d.postazione===p && isPostStagione(d)));
-}
-function stationsForDate(d){ return d >= POST_SEASON_START ? ALL_P : ALL_P_PRE; }
-// lidi/pattini di un diario: prima dai dati salvati, poi dalla mappa attuale
+// lidi/pattini di un diario: prima dai dati salvati, poi dall'elenco del suo periodo
 function docLidi(doc){
   const lc=doc.lidiChecklist||{};
-  return Object.keys(lc).length?Object.keys(lc):(LIDI_MAP[doc.postazione]||[]);
+  return Object.keys(lc).length?Object.keys(lc):lidiDi(doc.postazione, toDate(doc.dataOra));
 }
 function docPattini(doc){
   const pc=doc.pattiniChecklist||{};
-  return Object.keys(pc).length?Object.keys(pc):(isPostStagione(doc)?(PATTINI_MAP[doc.postazione]||[]):[]);
+  return Object.keys(pc).length?Object.keys(pc):pattiniDi(doc.postazione, toDate(doc.dataOra));
 }
 function chkPct(doc){
   if(!doc) return 0;
