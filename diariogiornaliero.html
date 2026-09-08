@@ -849,7 +849,11 @@ function periodoPer(d) {
   PERIODI.forEach(p => { if (k >= p.dal) out = p; });
   return out;
 }
-function periodoScaduto(p, d) { return !!p.al && ymd(d) > p.al; }
+// Fine stagione = ultimo giorno dell'ultimo periodo: dopo non si registrano
+// piu' diari e i messaggi Telegram sono sospesi. Per riaprire basta
+// aggiungere un periodo nuovo (o spostare la sua data 'al'): tutto riparte.
+const FINE_STAGIONE = PERIODI[PERIODI.length - 1].al;
+function stagioneAttiva(d) { return !FINE_STAGIONE || ymd(d) <= FINE_STAGIONE; }
 function stazioneDi(sigla, d) {
   return periodoPer(d).postazioni.find(s => `P.${s.n}` === sigla) || null;
 }
@@ -1075,6 +1079,11 @@ async function submitForm() {
     return;
   }
 
+  if (!stagioneAttiva(new Date(dataOra))) {
+    showBanner('err', `🏁 Stagione conclusa il ${fmtGiorno(FINE_STAGIONE)}: non si registrano più diari con questa data.`);
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'Invio in corso…';
 
@@ -1147,6 +1156,7 @@ async function submitForm() {
   } finally {
     btn.disabled = false;
     btn.textContent = 'Invia Diario';
+    aggiornaPeriodo();
   }
 }
 
@@ -1401,17 +1411,23 @@ function aggiornaPeriodo() {
     else if (prec) { resetLidiSection(); resetPattiniSection(); updateChkCounter(); }
   }
 
+  const chiusa = !stagioneAttiva(d);
   const info = document.getElementById('periodoInfo');
   if (info) {
-    if (periodoScaduto(pr, d)) {
-      info.className = 'periodo-info warn';
-      info.textContent = `⚠️ Elenco postazioni aggiornato solo fino al ${fmtGiorno(pr.al)} — verifica con l'ufficio`;
-    } else {
-      info.className = 'periodo-info';
-      info.textContent = pr.al ?
-        `Elenco valido dal ${fmtGiorno(pr.dal)} al ${fmtGiorno(pr.al)}` :
-        `Elenco valido dal ${fmtGiorno(pr.dal)}`;
-    }
+    info.className = 'periodo-info' + (chiusa ? ' warn' : '');
+    info.textContent = chiusa
+      ? `🏁 Stagione conclusa il ${fmtGiorno(FINE_STAGIONE)} — non si registrano più diari`
+      : (pr.al ? `Elenco valido dal ${fmtGiorno(pr.dal)} al ${fmtGiorno(pr.al)}`
+               : `Elenco valido dal ${fmtGiorno(pr.dal)}`);
+  }
+
+  // a stagione chiusa il diario resta consultabile ma non si invia;
+  // per recuperare un turno arretrato basta rimettere la data giusta
+  const btn = document.getElementById('submitBtn');
+  if (btn) {
+    btn.disabled = chiusa;
+    btn.style.opacity = chiusa ? '.45' : '';
+    btn.textContent = chiusa ? 'Stagione conclusa' : 'Invia Diario';
   }
 }
 

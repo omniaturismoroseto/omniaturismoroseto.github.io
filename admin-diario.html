@@ -926,6 +926,12 @@ function buildTurni() {
 }
 
 function turnoCard(label, ora, okSet) {
+  if (!stagioneAttiva()) {
+    return `<div class="tcard">
+      <div class="tcard-hd"><div><div class="tcard-label">${label}</div><div class="tcard-ora">${ora}</div></div></div>
+      <div class="tcard-body"><span style="font-size:13px;color:var(--gray);font-weight:600">🏁 Stagione conclusa — nessun turno da controllare</span></div>
+    </div>`;
+  }
   const miss = stazioniOggi().filter(p => !okSet.has(p));
   const pct  = Math.round(okSet.size/stazioniOggi().length*100);
   const cls  = pct===100?'ok':pct>=60?'warn':'bad';
@@ -1498,6 +1504,11 @@ function periodoDoc(doc){ return periodoPer(toDate(doc.dataOra)); }
 function cmpP(a,b){ return parseInt(a.replace('P.',''))-parseInt(b.replace('P.','')); }
 function stazioneDi(sigla,d){ return periodoPer(d).postazioni.find(s=>`P.${s.n}`===sigla)||null; }
 function stationsForDate(d){ return periodoPer(d).postazioni.map(s=>`P.${s.n}`); }
+// Fine stagione = ultimo giorno dell'ultimo periodo: dopo non si registrano
+// piu' diari e i messaggi Telegram sono sospesi. Per riaprire basta
+// aggiungere un periodo nuovo (o spostare la sua data 'al'): tutto riparte.
+const FINE_STAGIONE = PERIODI[PERIODI.length - 1].al;
+function stagioneAttiva(d){ return !FINE_STAGIONE || ymd(d || new Date()) <= FINE_STAGIONE; }
 function stazioniOggi(){ return stationsForDate(new Date()); }
 function stationName(p,d){ return stazioneDi(p,d)?.nome || ''; }
 function lidiDi(p,d){ return stazioneDi(p,d)?.lidi || []; }
