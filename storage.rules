@@ -1,8 +1,26 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Foto e video del diario. diariogiornaliero.html carica da browser
+    // anonimo e subito dopo rilegge il link del file appena caricato,
+    // quindi la lettura del singolo file resta aperta: quella la chiude
+    // App Check, non queste regole.
+    //
+    // Tutto il resto e' chiuso, perche' il diario non lo usa:
+    //  - list   : nessuno puo' farsi dare l'elenco dell'archivio
+    //  - create : solo immagini (max 20 MB) e video (max 200 MB)
+    //  - update : le foto gia' caricate non sono sostituibili
+    //  - delete : e nemmeno cancellabili
     match /diario/{allPaths=**} {
-      allow read, write: if true;
+      allow get:  if true;
+      allow list: if false;
+
+      allow create: if (request.resource.contentType.matches('image/.*')
+                        && request.resource.size < 20 * 1024 * 1024)
+                    || (request.resource.contentType.matches('video/.*')
+                        && request.resource.size < 200 * 1024 * 1024);
+
+      allow update, delete: if false;
     }
   }
 }
