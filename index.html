@@ -17,7 +17,13 @@
   body { background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden; }
   body::before { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0; }
 
-  .hero { position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:clamp(32px,6vh,64px) clamp(24px,6vw,80px) clamp(48px,8vh,96px);overflow:hidden; }
+  .promo { position:relative;z-index:30;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--orange);color:#fff;text-decoration:none;font-size:13px;font-weight:400;letter-spacing:.04em;padding:13px 20px;text-align:center;line-height:1.4;transition:background .2s; }
+  .promo:hover { background:var(--orange2); }
+  .promo b { font-weight:700;letter-spacing:.08em;text-transform:uppercase; }
+  .promo svg { flex-shrink:0;transition:transform .2s; }
+  .promo:hover svg { transform:translateX(3px); }
+  .promo-short, .promo-mini { display:none; }
+  .hero { position:relative;min-height:calc(100svh - 46px);display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:clamp(32px,6vh,64px) clamp(24px,6vw,80px) clamp(48px,8vh,96px);overflow:hidden; }
   .hero::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 120% 60% at 50% 110%,rgba(26,58,92,0.9) 0%,transparent 70%),radial-gradient(ellipse 80% 40% at 80% 20%,rgba(255,92,26,0.07) 0%,transparent 60%),linear-gradient(175deg,var(--navy) 0%,var(--deep) 40%,var(--ocean) 100%);z-index:1; }
   .waves { position:absolute;bottom:0;left:0;right:0;height:18%;z-index:2;overflow:hidden; }
   .waves svg { width:200%;animation:waveMove 12s linear infinite; }
@@ -87,15 +93,32 @@
   .reveal.visible { opacity:1;transform:none; }
 
   @media(max-width:600px){
+    .promo{font-size:12px;padding:12px 14px;gap:8px}
+    .promo-long{display:none}
+    .promo-short{display:inline}
     .statbar{grid-template-columns:1fr}
     .stat{border-right:none;border-bottom:1px solid var(--line)}
     .stat:last-child{border-bottom:none}
     .hero-cta{flex-direction:column}
     .btn-primary,.btn-ghost{justify-content:center}
   }
+  @media(max-width:360px){
+    .promo{font-size:11px;padding:11px 12px;gap:6px;letter-spacing:.02em}
+    .promo b{letter-spacing:.04em}
+    .promo-short{display:none}
+    .promo-mini{display:inline}
+  }
 </style>
 </head>
 <body>
+
+<a class="promo" href="/candidature/">
+  <b>Iscrizioni aperte</b>
+  <span class="promo-long">Diventa Assistente Bagnanti — mare e piscina, dai 16 anni</span>
+  <span class="promo-short">Diventa Assistente Bagnanti</span>
+  <span class="promo-mini">Assistente Bagnanti</span>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
 
 <section class="hero">
   <div class="waves">

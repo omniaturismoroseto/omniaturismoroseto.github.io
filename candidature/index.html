@@ -307,12 +307,11 @@
       </div>
 
       <div class="field" style="margin-top:26px">
-        <label>Zone preferite</label>
+        <label>Dove preferisci lavorare</label>
         <div class="opts" id="optZone">
-          <label class="opt check"><input type="checkbox" name="zone" value="Roseto degli Abruzzi"><span>Roseto degli Abruzzi</span></label>
-          <label class="opt check"><input type="checkbox" name="zone" value="Pineto"><span>Pineto</span></label>
-          <label class="opt check"><input type="checkbox" name="zone" value="Piscina comunale"><span>Piscina comunale</span></label>
-          <label class="opt check"><input type="checkbox" name="zone" value="Indifferente"><span>Indifferente</span></label>
+          <label class="opt"><input type="radio" name="zone" value="Mare"><span>Mare</span></label>
+          <label class="opt"><input type="radio" name="zone" value="Piscina"><span>Piscina</span></label>
+          <label class="opt"><input type="radio" name="zone" value="Entrambe"><span>Entrambe</span></label>
         </div>
       </div>
 
@@ -512,17 +511,6 @@ mesiBox.forEach(c => c.addEventListener('change', () => {
   } else if (c.checked) {
     const tutta = mesiBox.find(o => o.value === 'Tutta la stagione');
     if (tutta) tutta.checked = false;
-  }
-}));
-
-// "Indifferente" esclude le singole zone
-const zoneBox = [...document.querySelectorAll('input[name="zone"]')];
-zoneBox.forEach(c => c.addEventListener('change', () => {
-  if (c.value === 'Indifferente' && c.checked) {
-    zoneBox.forEach(o => { if (o !== c) o.checked = false; });
-  } else if (c.checked) {
-    const ind = zoneBox.find(o => o.value === 'Indifferente');
-    if (ind) ind.checked = false;
   }
 }));
 
