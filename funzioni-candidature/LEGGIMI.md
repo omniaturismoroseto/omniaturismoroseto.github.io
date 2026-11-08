@@ -21,9 +21,17 @@ Senza questa regola il browser non può scrivere e il form dà errore.
 Console Firebase → **Firestore** (non Realtime Database: sono due database
 diversi, con due file di regole separati) → scheda **Regole**.
 
-Il file completo e aggiornato sta in `funzioni-candidature/firestore.rules`:
-si puo' incollare tutto, oppure aggiungere solo questo blocco dentro
-`match /databases/{database}/documents { … }`, **senza toccare le regole che hai già**:
+Le regole stanno in **`firestore.rules`**, nella radice del repository: quello
+e' l'unico file valido, ed e' la sorgente che usa `firebase deploy`. Non
+modificarle dalla console, altrimenti il prossimo deploy le sovrascrive.
+
+Per pubblicarle, dalla radice del repository:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Il blocco che riguarda le candidature e' questo:
 
 ```
 match /candidature/{id} {
