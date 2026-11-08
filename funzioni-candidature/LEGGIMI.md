@@ -18,8 +18,12 @@ Il file `candidature.js` è la Cloud Function che, appena arriva una candidatura
 ## 1. Regole Firestore (obbligatorio)
 
 Senza questa regola il browser non può scrivere e il form dà errore.
-Console Firebase → **Firestore Database → Regole**, aggiungi questo blocco
-dentro `match /databases/{database}/documents { … }`, **senza toccare le regole che hai già**:
+Console Firebase → **Firestore** (non Realtime Database: sono due database
+diversi, con due file di regole separati) → scheda **Regole**.
+
+Il file completo e aggiornato sta in `funzioni-candidature/firestore.rules`:
+si puo' incollare tutto, oppure aggiungere solo questo blocco dentro
+`match /databases/{database}/documents { … }`, **senza toccare le regole che hai già**:
 
 ```
 match /candidature/{id} {

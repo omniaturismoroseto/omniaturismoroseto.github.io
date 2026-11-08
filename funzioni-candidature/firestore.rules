@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Il diario scrive da browser anonimo: diariogiornaliero.html e
+    // admin-diario.html non autenticano. Resta cosi' finche' il diario non
+    // confluisce nell'app postazioni.
+    // Niente update ne' delete: lo storico non e' alterabile dall'esterno.
+    match /diariogiornaliero/{doc} {
+      allow read, create: if true;
+    }
+    match /config/{doc} {
+      allow read, write: if true;
+    }
+    // Il modulo /candidature del sito scrive da browser anonimo.
+    // Solo create, e solo con consenso privacy e campi di lunghezza
+    // sensata: serve a non farsi riempire la collection di spazzatura.
+    // Niente read dal web: le candidature si leggono dalla console e
+    // dalla Cloud Function, che usa l'Admin SDK e ignora le regole.
+    match /candidature/{doc} {
+      allow create: if request.resource.data.privacy == true
+                    && request.resource.data.stato == 'nuova'
+                    && request.resource.data.nome is string
+                    && request.resource.data.nome.size() > 1
+                    && request.resource.data.nome.size() < 100
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() < 120
+                    && request.resource.data.telefono is string
+                    && request.resource.data.telefono.size() < 30
+                    && request.resource.data.get('note', '').size() < 1500;
+      allow read, update, delete: if false;
+    }
+    match /meteoGiornaliero/{data} {
+      allow read: if request.auth != null;
+      match /rilevazioni/{rilevazioneId} {
+        allow read: if request.auth != null;
+      }
+      match /riepilogoOre/{rilevazioneId} {
+        allow read: if request.auth != null;
+      }
+    }
+    match /osservazioniManuali/{doc} {
+      allow read, write: if request.auth != null;
+    }
+    match /stazioneLocale/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /stazioniPubblicheNetatmo/{data} {
+      allow read: if request.auth != null;
+      match /rilevazioni/{rilevazioneId} {
+        allow read: if request.auth != null;
+      }
+    }
+    match /calibrazioneMeteo/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /statisticheStoriche/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /statoRadar/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /statoSistema/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /richiesteLidi/{doc} {
+      allow read, write: if request.auth != null;
+    }
+    match /destinatariLidi/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /grigliaAdriatico/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /meteoCroazia/{doc} {
+      allow read: if request.auth != null;
+    }
+    match /previsioneEnsemble/{doc} {
+      allow read: if request.auth != null;
+    }
+  }
+}
