@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diventa Bagnino di Salvataggio — Omnia Adriatic Lifeguard Service</title>
+<meta name="description" content="Candidati come bagnino di salvataggio (mare e piscina) o iscriviti al corso di formazione FIN con istruttori qualificati. Dai 16 anni. Rosetana Nuoto presso Piscina Comunale, Roseto degli Abruzzi.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://adriaticlifeguardservice.it/candidature/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="Omnia Adriatic Lifeguard Service">
+<meta property="og:url" content="https://adriaticlifeguardservice.it/candidature/">
+<meta property="og:title" content="Diventa Bagnino di Salvataggio — Il tuo lavoro per l'estate">
+<meta property="og:description" content="Corso di formazione professionale con istruttori qualificati e ottime opportunità di lavoro sulla costa adriatica abruzzese. Iscrizioni aperte, dai 16 anni.">
+<meta name="theme-color" content="#07111f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:#07111f;--deep:#0b1a2e;--mid:#112240;--ocean:#1a3a5c;
+    --orange:#ff5c1a;--orange2:#ff8c42;--white:#f0ede8;--muted:#8fa5be;--line:rgba(255,255,255,0.08);
+    --ok:#36c28b;--err:#ff5f56;
+  }
+  html { scroll-behavior: smooth; }
+  body { background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden; }
+  body::before { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0; }
+
+  /* ── NAV ───────────────────────────── */
+  .topbar { position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(20px,6vw,80px);border-bottom:1px solid var(--line);background:rgba(7,17,31,.75);backdrop-filter:blur(10px); }
+  .topbar a.brand { font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.06em;color:var(--white);text-decoration:none;white-space:nowrap; }
+  .topbar a.brand span { color:var(--orange); }
+  .topbar .back { font-size:12px;letter-spacing:.06em;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:color .2s; }
+  .topbar .back:hover { color:var(--white); }
+
+  /* ── HERO ──────────────────────────── */
+  .hero { position:relative;padding:clamp(48px,9vh,96px) clamp(24px,8vw,120px) clamp(56px,9vh,104px);overflow:hidden; }
+  .hero::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 120% 70% at 50% 120%,rgba(26,58,92,.9) 0%,transparent 70%),radial-gradient(ellipse 80% 50% at 85% 10%,rgba(255,92,26,.1) 0%,transparent 60%),linear-gradient(175deg,var(--navy) 0%,var(--deep) 45%,var(--ocean) 100%);z-index:1; }
+  .hero-inner { position:relative;z-index:10;max-width:860px; }
+  .badge { display:inline-flex;align-items:center;gap:8px;border:1px solid var(--orange);color:var(--orange);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;padding:10px 16px;border-radius:2px;margin-bottom:28px; }
+  .badge span { width:6px;height:6px;background:var(--orange);border-radius:50%;animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  h1 { font-family:'Bebas Neue',sans-serif;font-size:clamp(46px,9vw,104px);line-height:.92;letter-spacing:.02em;margin-bottom:18px; }
+  h1 em { font-style:normal;color:var(--orange); }
+  .hero p.lead { font-size:clamp(15px,1.9vw,19px);color:var(--muted);line-height:1.7;max-width:620px; }
+  .hero-meta { display:flex;flex-wrap:wrap;gap:10px;margin-top:32px; }
+  .pill { border:1px solid var(--line);background:rgba(17,34,64,.5);padding:9px 15px;font-size:12px;letter-spacing:.05em;color:var(--muted);border-radius:2px; }
+  .pill b { color:var(--white);font-weight:500; }
+
+  /* ── INFO ──────────────────────────── */
+  section { position:relative;z-index:5;padding:clamp(56px,9vh,104px) clamp(24px,8vw,120px); }
+  .section-tag { font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:18px; }
+  h2 { font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4.6vw,64px);line-height:1;letter-spacing:.02em;margin-bottom:20px; }
+  .lead { font-size:clamp(14px,1.7vw,17px);color:var(--muted);line-height:1.7;max-width:620px; }
+  .info { background:var(--deep);border-top:1px solid var(--line); }
+  .grid-3 { display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:48px; }
+  .card { background:var(--mid);padding:32px 28px; }
+  .card-icon { width:44px;height:44px;border:1px solid var(--orange);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--orange); }
+  .card h3 { font-size:15px;font-weight:500;letter-spacing:.03em;margin-bottom:10px; }
+  .card p { font-size:13px;color:var(--muted);line-height:1.7; }
+
+  /* ── FORM ──────────────────────────── */
+  .form-section { background:var(--navy);border-top:1px solid var(--line); }
+  form { max-width:760px;margin-top:44px; }
+  fieldset { border:none;border-top:1px solid var(--line);padding-top:28px;margin-top:36px; }
+  fieldset:first-of-type { border-top:none;padding-top:0;margin-top:0; }
+  legend { font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.06em;color:var(--white);margin-bottom:20px;padding:0; }
+  legend small { display:block;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.02em;color:var(--muted);font-weight:300;margin-top:4px; }
+  .row { display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px; }
+  .field { display:flex;flex-direction:column;gap:8px;margin-bottom:18px; }
+  .field label { font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+  .field label .req { color:var(--orange); }
+  .hint { font-size:12px;color:rgba(143,165,190,.65);line-height:1.5; }
+  input[type=text],input[type=tel],input[type=email],input[type=date],select,textarea {
+    width:100%;background:var(--mid);border:1px solid var(--line);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:300;padding:13px 14px;border-radius:2px;transition:border-color .2s,background .2s;
+  }
+  input:focus,select:focus,textarea:focus { outline:none;border-color:var(--orange);background:var(--ocean); }
+  input::placeholder,textarea::placeholder { color:rgba(143,165,190,.45); }
+  input[type=date] { color-scheme:dark; }
+  select { appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238fa5be' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px; }
+  textarea { resize:vertical;min-height:104px;line-height:1.6; }
+  .invalid { border-color:var(--err) !important; }
+
+  /* opzioni a chip */
+  .opts { display:flex;flex-wrap:wrap;gap:10px; }
+  .opt { position:relative; }
+  .opt input { position:absolute;opacity:0;width:0;height:0; }
+  .opt span { display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--mid);padding:12px 16px;font-size:13.5px;color:var(--muted);border-radius:2px;cursor:pointer;transition:border-color .2s,color .2s,background .2s;user-select:none; }
+  .opt span::before { content:'';width:14px;height:14px;border:1px solid var(--muted);border-radius:50%;flex-shrink:0;transition:border-color .2s,box-shadow .2s; }
+  .opt.check span::before { border-radius:2px; }
+  .opt input:checked + span { border-color:var(--orange);color:var(--white);background:var(--ocean); }
+  .opt input:checked + span::before { border-color:var(--orange);box-shadow:inset 0 0 0 4px var(--orange); }
+  .opt.check input:checked + span::before { box-shadow:inset 0 0 0 7px var(--orange); }
+  .opt input:focus-visible + span { outline:2px solid var(--orange);outline-offset:2px; }
+  .opt span:hover { border-color:var(--muted); }
+
+  /* privacy */
+  .consent { display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);background:var(--mid);padding:18px;border-radius:2px;cursor:pointer; }
+  .consent input { margin-top:3px;width:17px;height:17px;accent-color:var(--orange);flex-shrink:0;cursor:pointer; }
+  .consent p { font-size:12.5px;color:var(--muted);line-height:1.65; }
+  .consent a { color:var(--orange);text-decoration:none;border-bottom:1px solid rgba(255,92,26,.4); }
+
+  .hp { position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden; }
+
+  .actions { margin-top:36px;display:flex;flex-wrap:wrap;align-items:center;gap:16px; }
+  .btn-primary { display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--orange);color:#fff;border:none;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.05em;padding:17px 34px;border-radius:2px;cursor:pointer;transition:background .2s,transform .2s;min-width:230px; }
+  .btn-primary:hover:not(:disabled) { background:var(--orange2);transform:translateY(-2px); }
+  .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none; }
+  .btn-ghost { display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--line);color:var(--muted);text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.04em;padding:16px 28px;border-radius:2px;transition:border-color .2s,color .2s; }
+  .btn-ghost:hover { border-color:var(--muted);color:var(--white); }
+  .spinner { width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .form-msg { margin-top:18px;font-size:13.5px;line-height:1.6;display:none; }
+  .form-msg.show { display:block; }
+  .form-msg.err { color:var(--err); }
+
+  /* schermata di conferma */
+  .done { display:none;max-width:680px;border:1px solid var(--line);background:var(--mid);padding:clamp(28px,5vw,48px);border-radius:3px;margin-top:44px; }
+  .done.show { display:block;animation:fadeUp .6s; }
+  .done-icon { width:62px;height:62px;border-radius:50%;background:rgba(54,194,139,.12);border:1px solid var(--ok);color:var(--ok);display:flex;align-items:center;justify-content:center;margin-bottom:24px; }
+  .done h3 { font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,42px);letter-spacing:.03em;margin-bottom:14px;line-height:1.05; }
+  .done p { font-size:14.5px;color:var(--muted);line-height:1.75;margin-bottom:12px; }
+  .done .actions { margin-top:28px; }
+
+  /* ── CONTATTI / FOOTER ─────────────── */
+  .contact { background:var(--deep);border-top:1px solid var(--line); }
+  .contact-grid { display:flex;flex-wrap:wrap;gap:14px;margin-top:36px; }
+  .contact-grid a { display:inline-flex;align-items:center;gap:11px;border:1px solid var(--line);background:var(--mid);padding:16px 22px;border-radius:2px;color:var(--white);text-decoration:none;font-size:14px;transition:border-color .2s,background .2s; }
+  .contact-grid a:hover { border-color:var(--orange);background:var(--ocean); }
+  .contact-grid svg { color:var(--orange);flex-shrink:0; }
+  footer { position:relative;z-index:5;background:var(--mid);border-top:1px solid var(--line);padding:clamp(36px,6vh,56px) clamp(24px,6vw,80px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px; }
+  .footer-brand { font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:.05em; }
+  .footer-brand span { color:var(--orange); }
+  .footer-links { display:flex;flex-wrap:wrap;gap:22px; }
+  .footer-links a { font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.06em;transition:color .2s; }
+  .footer-links a:hover { color:var(--white); }
+  .footer-copy { width:100%;font-size:11px;color:rgba(143,165,190,.4);letter-spacing:.06em;margin-top:6px;line-height:1.7; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s; }
+  .reveal.visible { opacity:1;transform:none; }
+  .cond { display:none; }
+  .cond.show { display:block;animation:fadeUp .4s; }
+  @media(max-width:600px){
+    .actions .btn-primary,.actions .btn-ghost { width:100%; }
+    .contact-grid a { width:100%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }
+    .reveal { opacity:1;transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">Omnia <span>Adriatic</span> Lifeguard Service</a>
+  <a class="back" href="/">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Torna al sito
+  </a>
+</div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge"><span></span> Iscrizioni aperte</div>
+    <h1>Diventa <em>Bagnino</em><br>di Salvataggio</h1>
+    <p class="lead">Mare e piscina. Formazione professionale con istruttori qualificati e ottime opportunità di lavoro per l'estate sulla costa adriatica abruzzese. Compila il modulo: ti ricontattiamo noi.</p>
+    <div class="hero-meta">
+      <div class="pill">Dai <b>16 anni</b></div>
+      <div class="pill">Corso <b>FIN</b> — mare e piscina</div>
+      <div class="pill">Sede: <b>Rosetana Nuoto</b> — Piscina Comunale</div>
+    </div>
+  </div>
+</section>
+
+<section class="info">
+  <div class="section-tag reveal">Perché candidarsi</div>
+  <h2 class="reveal">Un brevetto,<br>un lavoro per l'estate</h2>
+  <p class="lead reveal">Omnia opera dal 1998 sulla costa adriatica abruzzese. Formiamo e assumiamo ogni anno bagnini di salvataggio per spiagge, stabilimenti e piscine tra Roseto degli Abruzzi e Pineto.</p>
+  <div class="grid-3">
+    <div class="card reveal">
+      <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <h3>Formazione qualificata</h3>
+      <p>Corso con istruttori abilitati: tecniche di salvataggio in acqua, primo soccorso e BLS-D, normativa e prove pratiche in piscina e al mare.</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+      <h3>Lavora subito</h3>
+      <p>Chi ottiene il brevetto entra nelle nostre selezioni per la stagione balneare. Se sei già brevettato, puoi candidarti direttamente per lavorare.</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4.5 8-11a8 8 0 10-16 0c0 6.5 8 11 8 11z"/><circle cx="12" cy="11" r="3"/></svg></div>
+      <h3>Vicino a casa</h3>
+      <p>Postazioni tra Roseto degli Abruzzi e Pineto e turni in piscina comunale: indica le tue zone e i mesi di disponibilità nel modulo.</p>
+    </div>
+  </div>
+</section>
+
+<section class="form-section">
+  <div class="section-tag reveal">Modulo di candidatura</div>
+  <h2 class="reveal">Candidati ora</h2>
+  <p class="lead reveal" id="introForm">Bastano due minuti. I campi con <span style="color:var(--orange)">*</span> sono obbligatori.</p>
+
+  <form id="formCandidatura" novalidate autocomplete="on">
+
+    <fieldset>
+      <legend>I tuoi dati</legend>
+      <div class="row">
+        <div class="field">
+          <label for="nome">Nome e cognome <span class="req">*</span></label>
+          <input type="text" id="nome" name="nome" maxlength="80" autocomplete="name" placeholder="Mario Rossi" required>
+        </div>
+        <div class="field">
+          <label for="dataNascita">Data di nascita <span class="req">*</span></label>
+          <input type="date" id="dataNascita" name="dataNascita" autocomplete="bday" required>
+          <span class="hint" id="etaHint"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="telefono">Telefono / WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="telefono" name="telefono" maxlength="25" autocomplete="tel" inputmode="tel" placeholder="328 000 0000" required>
+        </div>
+        <div class="field">
+          <label for="email">Email <span class="req">*</span></label>
+          <input type="email" id="email" name="email" maxlength="100" autocomplete="email" inputmode="email" placeholder="nome@email.it" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="comune">Comune di residenza <span class="req">*</span></label>
+          <input type="text" id="comune" name="comune" maxlength="60" autocomplete="address-level2" placeholder="Roseto degli Abruzzi" required>
+        </div>
+        <div class="field">
+          <label for="codiceFiscale">Codice fiscale</label>
+          <input type="text" id="codiceFiscale" name="codiceFiscale" maxlength="16" placeholder="Facoltativo, serve per l'iscrizione" style="text-transform:uppercase">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="cond" id="boxMinore">
+      <legend>Genitore o tutore <small>Sei minorenne: servono i dati di chi può firmare l'autorizzazione.</small></legend>
+      <div class="row">
+        <div class="field">
+          <label for="genitoreNome">Nome e cognome del genitore <span class="req">*</span></label>
+          <input type="text" id="genitoreNome" name="genitoreNome" maxlength="80" placeholder="Nome del genitore o tutore">
+        </div>
+        <div class="field">
+          <label for="genitoreTelefono">Telefono del genitore <span class="req">*</span></label>
+          <input type="tel" id="genitoreTelefono" name="genitoreTelefono" maxlength="25" inputmode="tel" placeholder="328 000 0000">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>La tua candidatura</legend>
+      <div class="field">
+        <label>Mi candido per <span class="req">*</span></label>
+        <div class="opts" id="optObiettivo">
+          <label class="opt"><input type="radio" name="obiettivo" value="Corso di formazione" required><span>Corso di formazione</span></label>
+          <label class="opt"><input type="radio" name="obiettivo" value="Lavoro (sono già brevettato/a)"><span>Lavoro — sono già brevettato/a</span></label>
+          <label class="opt"><input type="radio" name="obiettivo" value="Corso + lavoro"><span>Corso + lavoro</span></label>
+        </div>
+      </div>
+
+      <div class="cond" id="boxBrevetto" style="margin-top:26px">
+        <div class="row">
+          <div class="field">
+            <label for="brevettoTipo">Brevetto posseduto</label>
+            <select id="brevettoTipo" name="brevettoTipo">
+              <option value="">Seleziona…</option>
+              <option>FIN — Piscina (P)</option>
+              <option>FIN — Acque interne (IP)</option>
+              <option>FIN — Mare (MIP)</option>
+              <option>Altro ente (SNS, SALVAMENTO, ecc.)</option>
+              <option>Brevetto in scadenza / da rinnovare</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="brevettoScadenza">Scadenza del brevetto</label>
+            <input type="date" id="brevettoScadenza" name="brevettoScadenza">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:26px">
+        <label>Disponibilità <span class="req">*</span></label>
+        <div class="opts" id="optMesi">
+          <label class="opt check"><input type="checkbox" name="mesi" value="Tutta la stagione"><span>Tutta la stagione</span></label>
+          <label class="opt check"><input type="checkbox" name="mesi" value="Maggio"><span>Maggio</span></label>
+          <label class="opt check"><input type="checkbox" name="mesi" value="Giugno"><span>Giugno</span></label>
+          <label class="opt check"><input type="checkbox" name="mesi" value="Luglio"><span>Luglio</span></label>
+          <label class="opt check"><input type="checkbox" name="mesi" value="Agosto"><span>Agosto</span></label>
+          <label class="opt check"><input type="checkbox" name="mesi" value="Settembre"><span>Settembre</span></label>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:26px">
+        <label>Zone preferite</label>
+        <div class="opts" id="optZone">
+          <label class="opt check"><input type="checkbox" name="zone" value="Roseto degli Abruzzi"><span>Roseto degli Abruzzi</span></label>
+          <label class="opt check"><input type="checkbox" name="zone" value="Pineto"><span>Pineto</span></label>
+          <label class="opt check"><input type="checkbox" name="zone" value="Piscina comunale"><span>Piscina comunale</span></label>
+          <label class="opt check"><input type="checkbox" name="zone" value="Indifferente"><span>Indifferente</span></label>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:26px">
+        <label>Altro</label>
+        <div class="opts">
+          <label class="opt check"><input type="checkbox" name="automunito" value="si"><span>Sono automunito/a</span></label>
+          <label class="opt check"><input type="checkbox" name="esperienzaPrec" value="si"><span>Ho già lavorato come bagnino</span></label>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:26px">
+        <label for="note">Note, esperienze, corsi già fatti</label>
+        <textarea id="note" name="note" maxlength="1200" placeholder="Raccontaci brevemente di te: esperienze in acqua, nuoto agonistico, BLS-D, stagioni già svolte…"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="canale">Come ci hai conosciuti?</label>
+        <select id="canale" name="canale">
+          <option value="">Seleziona…</option>
+          <option>Instagram</option>
+          <option>Facebook</option>
+          <option>Locandina / volantino</option>
+          <option>Passaparola</option>
+          <option>Sito web</option>
+          <option>Rosetana Nuoto / Piscina comunale</option>
+          <option>Altro</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Privacy</legend>
+      <label class="consent" for="privacy">
+        <input type="checkbox" id="privacy" name="privacy" required>
+        <p>Acconsento al trattamento dei miei dati personali da parte di <b>Omnia Servizi al Turismo S.r.l.s.</b> (P.I. 01900050673) per la gestione della candidatura e dell'eventuale iscrizione al corso, ai sensi del Reg. UE 2016/679. I dati non vengono ceduti a terzi e posso chiederne la cancellazione scrivendo a <a href="mailto:omniaturismoroseto@gmail.com">omniaturismoroseto@gmail.com</a>. <span class="req" style="color:var(--orange)">*</span></p>
+      </label>
+    </fieldset>
+
+    <div class="hp" aria-hidden="true">
+      <label for="sitoWeb">Non compilare questo campo</label>
+      <input type="text" id="sitoWeb" name="sitoWeb" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn-primary" id="btnInvia">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span id="btnLabel">Invia la candidatura</span>
+      </button>
+      <a class="btn-ghost" href="https://wa.me/393284769641?text=Ciao%2C%20vorrei%20informazioni%20sul%20corso%20per%20diventare%20bagnino%20di%20salvataggio" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12 2a10 10 0 00-8.6 15.1L2 22l5.05-1.32A10 10 0 1012 2z"/></svg>
+        Oppure scrivici su WhatsApp
+      </a>
+    </div>
+    <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="done" id="done">
+    <div class="done-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3>Candidatura inviata!</h3>
+    <p>Grazie <b id="doneNome">!</b> Abbiamo ricevuto la tua candidatura e ti abbiamo mandato una mail di conferma.</p>
+    <p>Ti ricontattiamo al numero che ci hai lasciato con tutti i dettagli su date, orari e costi del corso. Se nel frattempo hai domande, scrivici pure su WhatsApp.</p>
+    <div class="actions">
+      <a class="btn-primary" href="https://wa.me/393284769641?text=Ciao%2C%20ho%20appena%20inviato%20la%20candidatura%20dal%20sito" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12 2a10 10 0 00-8.6 15.1L2 22l5.05-1.32A10 10 0 1012 2z"/></svg>
+        Scrivici su WhatsApp
+      </a>
+      <a class="btn-ghost" href="/">Torna al sito</a>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="section-tag reveal">Info &amp; iscrizioni</div>
+  <h2 class="reveal">Parliamone</h2>
+  <p class="lead reveal">Corso presso <b style="color:var(--white);font-weight:500">Rosetana Nuoto — Piscina Comunale</b>, Roseto degli Abruzzi. Per informazioni su date, costi e documenti contattaci pure direttamente.</p>
+  <div class="contact-grid reveal">
+    <a href="https://wa.me/393284769641" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12 2a10 10 0 00-8.6 15.1L2 22l5.05-1.32A10 10 0 1012 2z"/></svg>
+      WhatsApp 328 476 9641
+    </a>
+    <a href="tel:+393284769641">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 011 1.22 2 2 0 012.96 1h3a2 2 0 012 1.72 12.1 12.1 0 00.66 2.66 2 2 0 01-.45 2.11L7.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.1 12.1 0 002.66.66A2 2 0 0122 15.92z"/></svg>
+      +39 328 476 9641
+    </a>
+    <a href="mailto:omniaturismoroseto@gmail.com">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+      omniaturismoroseto@gmail.com
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Omnia <span>Adriatic</span> Lifeguard Service</div>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/appsegnalazioni">App Segnalazioni</a>
+    <a href="tel:+393284769641">+39 328 476 9641</a>
+    <a href="https://wa.me/393284769641">WhatsApp</a>
+  </div>
+  <p class="footer-copy">© Omnia Servizi al Turismo S.r.l.s. · Costa Adriatica Abruzzese · P.I. 01900050673</p>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ══════════════════════════════════════
+//  FIREBASE — stesso progetto del diario
+// ══════════════════════════════════════
+// Se l'SDK non si carica (rete lenta o assente) la pagina continua a
+// funzionare: validazione attiva e messaggio con i contatti diretti.
+let db = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp({
+      apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
+      authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
+      projectId:         "app-segnalazioni-omnia-roseto",
+      storageBucket:     "app-segnalazioni-omnia-roseto.firebasestorage.app",
+      messagingSenderId: "699028105579",
+      appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
+    });
+    db = firebase.firestore();
+  } else {
+    console.error('SDK Firebase non caricato.');
+  }
+} catch (e) {
+  console.error('Inizializzazione Firebase fallita:', e);
+}
+
+const $ = (id) => document.getElementById(id);
+const form   = $('formCandidatura');
+const btn    = $('btnInvia');
+const msg    = $('formMsg');
+
+// ══════════════════════════════════════
+//  ETÀ E CAMPI CONDIZIONATI
+// ══════════════════════════════════════
+function calcolaEta(iso) {
+  if (!iso) return null;
+  const n = new Date(iso + 'T00:00:00');
+  if (isNaN(n)) return null;
+  const oggi = new Date();
+  let eta = oggi.getFullYear() - n.getFullYear();
+  const m = oggi.getMonth() - n.getMonth();
+  if (m < 0 || (m === 0 && oggi.getDate() < n.getDate())) eta--;
+  return eta;
+}
+
+function aggiornaEta() {
+  const eta  = calcolaEta($('dataNascita').value);
+  const hint = $('etaHint');
+  const box  = $('boxMinore');
+  if (eta === null) { hint.textContent = ''; box.classList.remove('show'); setObbligoGenitore(false); return; }
+  if (eta < 0 || eta > 100) { hint.textContent = 'Controlla la data inserita.'; box.classList.remove('show'); setObbligoGenitore(false); return; }
+  if (eta < 16) {
+    hint.innerHTML = '<span style="color:var(--err)">Il corso è riservato ai maggiori di 16 anni. Scrivici su WhatsApp per valutare il tuo caso.</span>';
+    box.classList.remove('show'); setObbligoGenitore(false);
+  } else if (eta < 18) {
+    hint.textContent = eta + ' anni — serve l’autorizzazione di un genitore.';
+    box.classList.add('show'); setObbligoGenitore(true);
+  } else {
+    hint.textContent = eta + ' anni';
+    box.classList.remove('show'); setObbligoGenitore(false);
+  }
+}
+
+function setObbligoGenitore(on) {
+  ['genitoreNome','genitoreTelefono'].forEach(id => {
+    const el = $(id);
+    el.required = on;
+    if (!on) { el.value = ''; el.classList.remove('invalid'); }
+  });
+}
+
+$('dataNascita').addEventListener('change', aggiornaEta);
+$('dataNascita').addEventListener('input',  aggiornaEta);
+// niente date future
+$('dataNascita').max = new Date().toISOString().slice(0, 10);
+
+// brevetto visibile solo a chi si candida per lavorare
+document.querySelectorAll('input[name="obiettivo"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const serve = r.value !== 'Corso di formazione';
+    $('boxBrevetto').classList.toggle('show', serve);
+    document.querySelector('#optObiettivo').classList.remove('invalid');
+  });
+});
+
+// "Tutta la stagione" esclude i singoli mesi e viceversa
+const mesiBox = [...document.querySelectorAll('input[name="mesi"]')];
+mesiBox.forEach(c => c.addEventListener('change', () => {
+  if (c.value === 'Tutta la stagione' && c.checked) {
+    mesiBox.forEach(o => { if (o !== c) o.checked = false; });
+  } else if (c.checked) {
+    const tutta = mesiBox.find(o => o.value === 'Tutta la stagione');
+    if (tutta) tutta.checked = false;
+  }
+}));
+
+// "Indifferente" esclude le singole zone
+const zoneBox = [...document.querySelectorAll('input[name="zone"]')];
+zoneBox.forEach(c => c.addEventListener('change', () => {
+  if (c.value === 'Indifferente' && c.checked) {
+    zoneBox.forEach(o => { if (o !== c) o.checked = false; });
+  } else if (c.checked) {
+    const ind = zoneBox.find(o => o.value === 'Indifferente');
+    if (ind) ind.checked = false;
+  }
+}));
+
+// ══════════════════════════════════════
+//  VALIDAZIONE
+// ══════════════════════════════════════
+function errore(testo, elemento) {
+  msg.textContent = testo;
+  msg.className = 'form-msg err show';
+  if (elemento) {
+    elemento.classList.add('invalid');
+    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (elemento.focus) elemento.focus({ preventScroll: true });
+  }
+}
+
+function pulisciErrori() {
+  msg.className = 'form-msg';
+  msg.textContent = '';
+  form.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+}
+
+function valida() {
+  const obbligatori = [
+    ['nome',     'Scrivi il tuo nome e cognome.'],
+    ['dataNascita', 'Inserisci la tua data di nascita.'],
+    ['telefono', 'Serve un numero di telefono per ricontattarti.'],
+    ['email',    'Serve un indirizzo email valido.'],
+    ['comune',   'Indica il tuo comune di residenza.']
+  ];
+  for (const [id, testo] of obbligatori) {
+    const el = $(id);
+    if (!el.value.trim()) { errore(testo, el); return false; }
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test($('email').value.trim())) {
+    errore('Controlla l’indirizzo email: sembra incompleto.', $('email')); return false;
+  }
+  const cifre = $('telefono').value.replace(/\D/g, '');
+  if (cifre.length < 8 || cifre.length > 15) {
+    errore('Controlla il numero di telefono.', $('telefono')); return false;
+  }
+  const eta = calcolaEta($('dataNascita').value);
+  if (eta === null || eta < 0 || eta > 100) {
+    errore('Controlla la data di nascita.', $('dataNascita')); return false;
+  }
+  if (eta < 16) {
+    errore('Per il corso bisogna avere almeno 16 anni. Scrivici su WhatsApp: valutiamo insieme.', $('dataNascita')); return false;
+  }
+  if (eta < 18) {
+    if (!$('genitoreNome').value.trim())     { errore('Per i minorenni servono i dati del genitore.', $('genitoreNome')); return false; }
+    if (!$('genitoreTelefono').value.trim()) { errore('Serve il telefono del genitore o tutore.', $('genitoreTelefono')); return false; }
+  }
+  if (!form.querySelector('input[name="obiettivo"]:checked')) {
+    errore('Scegli se ti candidi per il corso, per lavorare o per entrambi.', $('optObiettivo')); return false;
+  }
+  if (!form.querySelector('input[name="mesi"]:checked')) {
+    errore('Indica almeno un periodo di disponibilità.', $('optMesi')); return false;
+  }
+  if (!$('privacy').checked) {
+    errore('Serve il consenso al trattamento dei dati per inviare la candidatura.', $('privacy')); return false;
+  }
+  return true;
+}
+
+// ══════════════════════════════════════
+//  INVIO
+// ══════════════════════════════════════
+const selezionati = (nome) => [...form.querySelectorAll('input[name="' + nome + '"]:checked')].map(e => e.value);
+const txt = (id, max) => $(id).value.trim().slice(0, max);
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  pulisciErrori();
+  if ($('sitoWeb').value) return;          // honeypot: bot
+  if (!valida()) return;
+
+  if (!db) {
+    errore('Al momento non riusciamo a collegarci al server. Controlla la connessione e riprova, oppure scrivici su WhatsApp al 328 476 9641.');
+    return;
+  }
+
+  btn.disabled = true;
+  $('btnLabel').textContent = 'Invio in corso…';
+  btn.querySelector('svg').outerHTML = '<span class="spinner"></span>';
+
+  const eta = calcolaEta($('dataNascita').value);
+  const dati = {
+    nome:             txt('nome', 80),
+    dataNascita:      $('dataNascita').value,
+    eta:              eta,
+    comune:           txt('comune', 60),
+    telefono:         txt('telefono', 25),
+    email:            txt('email', 100).toLowerCase(),
+    codiceFiscale:    txt('codiceFiscale', 16).toUpperCase(),
+    genitoreNome:     eta < 18 ? txt('genitoreNome', 80) : '',
+    genitoreTelefono: eta < 18 ? txt('genitoreTelefono', 25) : '',
+    obiettivo:        form.querySelector('input[name="obiettivo"]:checked').value,
+    brevettoTipo:     $('brevettoTipo').value,
+    brevettoScadenza: $('brevettoScadenza').value,
+    mesi:             selezionati('mesi'),
+    zone:             selezionati('zone'),
+    automunito:       form.querySelector('input[name="automunito"]').checked,
+    esperienzaPrec:   form.querySelector('input[name="esperienzaPrec"]').checked,
+    note:             txt('note', 1200),
+    canale:           $('canale').value,
+    privacy:          true,
+    stato:            'nuova',
+    origine:          'sito-candidature',
+    creatoIl:         firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    await db.collection('candidature').add(dati);
+    form.style.display = 'none';
+    $('introForm').style.display = 'none';
+    $('doneNome').textContent = dati.nome.split(' ')[0] + '!';
+    const done = $('done');
+    done.classList.add('show');
+    done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    const sp = btn.querySelector('.spinner');
+    if (sp) sp.outerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+    $('btnLabel').textContent = 'Invia la candidatura';
+    errore('Non siamo riusciti a inviare la candidatura (' + (err.code || 'errore di rete') + '). Riprova tra poco oppure scrivici su WhatsApp al 328 476 9641.');
+  }
+});
+
+// pulisce l'errore appena l'utente corregge
+form.addEventListener('input', (e) => {
+  if (e.target.classList.contains('invalid')) e.target.classList.remove('invalid');
+});
+
+// ══════════════════════════════════════
+//  ANIMAZIONI
+// ══════════════════════════════════════
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 70); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
