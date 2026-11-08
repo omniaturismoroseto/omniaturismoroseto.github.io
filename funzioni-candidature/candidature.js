@@ -101,7 +101,7 @@ function mailInterna(d) {
       ${riga('Disponibilità', elenco(d.mesi), true)}
       ${riga('Zone preferite', elenco(d.zone))}
       ${riga('Automunito/a', siNo(d.automunito))}
-      ${riga('Già bagnino', siNo(d.esperienzaPrec))}
+      ${riga('Già assistente bagnanti', siNo(d.esperienzaPrec))}
       ${riga('Come ci ha conosciuti', d.canale)}
     </table>
 
@@ -141,13 +141,13 @@ function mailInterna(d) {
     d.brevettoScadenza ? `Scadenza brevetto: ${dataIta(d.brevettoScadenza)}` : '',
     `Disponibilità: ${elenco(d.mesi)}`,
     `Zone: ${elenco(d.zone)}`,
-    `Automunito: ${siNo(d.automunito)} — Già bagnino: ${siNo(d.esperienzaPrec)}`,
+    `Automunito: ${siNo(d.automunito)} — Già assistente bagnanti: ${siNo(d.esperienzaPrec)}`,
     d.canale ? `Ci ha conosciuti da: ${d.canale}` : '',
     d.note ? `\nNote:\n${d.note}` : ''
   ].filter(Boolean).join('\n');
 
   return {
-    subject: `Candidatura bagnino — ${d.nome} (${d.obiettivo})`,
+    subject: `Candidatura assistente bagnanti — ${d.nome} (${d.obiettivo})`,
     html: corpo,
     text: testo
   };
@@ -165,7 +165,7 @@ function mailConferma(d) {
     </div>
     <div style="padding:28px 26px;color:#1a3a5c;font-size:15px;line-height:1.7">
       <p style="margin:0 0 16px">Ciao ${esc(nome)},</p>
-      <p style="margin:0 0 16px">grazie per esserti candidato come <b>bagnino di salvataggio</b>. La tua richiesta è arrivata al nostro ufficio: la valutiamo e ti ricontattiamo al numero <b>${esc(d.telefono)}</b> con tutti i dettagli su date, orari e costi del corso.</p>
+      <p style="margin:0 0 16px">grazie per esserti candidato come <b>assistente bagnanti</b> (mare e piscina). La tua richiesta è arrivata al nostro ufficio: la valutiamo e ti ricontattiamo al numero <b>${esc(d.telefono)}</b> con tutti i dettagli su date, orari e costi del corso.</p>
       <p style="margin:0 0 20px">Se nel frattempo hai domande, puoi scriverci direttamente su WhatsApp.</p>
       <p style="margin:0 0 26px;text-align:center">
         <a href="https://wa.me/393284769641" style="display:inline-block;background:#ff5c1a;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 30px;border-radius:3px">Scrivici su WhatsApp</a>
@@ -185,7 +185,7 @@ function mailConferma(d) {
   return {
     subject: 'Abbiamo ricevuto la tua candidatura — Omnia Lifeguard Service',
     html: corpo,
-    text: `Ciao ${nome},\n\ngrazie per esserti candidato come bagnino di salvataggio.\nLa tua richiesta è arrivata: ti ricontattiamo al ${d.telefono} con date, orari e costi del corso.\n\nInfo e domande: WhatsApp +39 328 476 9641 — omniaturismoroseto@gmail.com\nSede del corso: Rosetana Nuoto, Piscina Comunale, Roseto degli Abruzzi.\n\nOmnia Servizi al Turismo S.r.l.s.`
+    text: `Ciao ${nome},\n\ngrazie per esserti candidato come assistente bagnanti (mare e piscina).\nLa tua richiesta è arrivata: ti ricontattiamo al ${d.telefono} con date, orari e costi del corso.\n\nInfo e domande: WhatsApp +39 328 476 9641 — omniaturismoroseto@gmail.com\nSede del corso: Rosetana Nuoto, Piscina Comunale, Roseto degli Abruzzi.\n\nOmnia Servizi al Turismo S.r.l.s.`
   };
 }
 
@@ -202,7 +202,7 @@ async function avvisaTelegram(d, token) {
   if (!chatIds.length) { logger.info('Telegram saltato: nessun destinatario.'); return; }
 
   const testo =
-    `🏊 *Nuova candidatura bagnino*\n\n` +
+    `🏊 *Nuova candidatura assistente bagnanti*\n\n` +
     `*${d.nome}*${d.eta != null ? ` — ${d.eta} anni` : ''}\n` +
     `${d.obiettivo}\n\n` +
     `📞 ${d.telefono}\n` +
