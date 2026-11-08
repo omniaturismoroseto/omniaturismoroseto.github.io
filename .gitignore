@@ -2,3 +2,6 @@ Funzioni del diario/
 omnia-meteo-functions/
 node_modules/
 *.log
+
+# Copie di sicurezza delle regole: la cronologia git le sostituisce
+ORIG-*.rules
