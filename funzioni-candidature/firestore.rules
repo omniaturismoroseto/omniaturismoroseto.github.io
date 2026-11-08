@@ -8,8 +8,19 @@ service cloud.firestore {
     match /diariogiornaliero/{doc} {
       allow read, create: if true;
     }
-    match /config/{doc} {
-      allow read, write: if true;
+    // Contatti Telegram del diario. admin-diario.html non autentica, e
+    // legge questo documento per mostrare i numeri configurati: la
+    // lettura resta percio' aperta, e si chiude con App Check, non da qui.
+    // La scrittura invece e' ammessa solo nella forma esatta che usa
+    // quella pagina: nessun campo arbitrario, nessuna lista enorme.
+    // Il documento non e' cancellabile e nessun altro documento puo'
+    // essere creato dentro config.
+    match /config/telegram_diario {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['chat_ids', 'updated'])
+                   && request.resource.data.chat_ids is list
+                   && request.resource.data.chat_ids.size() > 0
+                   && request.resource.data.chat_ids.size() <= 20;
     }
     // Il modulo /candidature del sito scrive da browser anonimo.
     // Solo create, e solo con consenso privacy e campi di lunghezza
