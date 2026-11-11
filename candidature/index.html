@@ -418,6 +418,7 @@
 </footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
 // ══════════════════════════════════════
@@ -436,6 +437,13 @@ try {
       messagingSenderId: "699028105579",
       appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
     });
+    // App Check: attesta che la richiesta arriva davvero da queste
+    // pagine e non da uno script esterno. Se fallisce la pagina
+    // continua a funzionare: finche' il blocco non e' attivo in
+    // console, le richieste senza token passano lo stesso.
+    try {
+      if (firebase.appCheck) firebase.appCheck().activate('6LePypQtAAAAAE8ssXg685Ai7ThaUivjhxfAQLUZ', true);
+    } catch (e) { console.warn('App Check non attivato:', e); }
     db = firebase.firestore();
   } else {
     console.error('SDK Firebase non caricato.');

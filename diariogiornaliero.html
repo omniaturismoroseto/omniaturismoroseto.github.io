@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
@@ -763,6 +764,15 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// App Check: attesta che la richiesta arriva davvero da queste
+// pagine e non da uno script esterno. Se fallisce la pagina
+// continua a funzionare: finche' il blocco non e' attivo in
+// console, le richieste senza token passano lo stesso.
+try {
+  if (firebase.appCheck) firebase.appCheck().activate('6LePypQtAAAAAE8ssXg685Ai7ThaUivjhxfAQLUZ', true);
+} catch (e) { console.warn('App Check non attivato:', e); }
+
 const db      = firebase.firestore();
 const storage = firebase.storage();
 
