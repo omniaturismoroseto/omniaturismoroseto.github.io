@@ -216,7 +216,29 @@ teneva aperti i file di git e faceva fallire checkout e pull con
   `debug-operator-test`. Hanno ruolo operatore.
   *Deciso l'11/11/2026: verranno rimossi dall'app segnalazioni alla prossima
   modifica di quella app.*
-- **App Check non è attivo.** Verificherebbe che le richieste arrivino davvero
-  dalle vostre pagine, bloccando script e bot esterni. Non sostituisce il
-  login: chi apre una vostra pagina dal browser passa comunque il controllo.
+### App Check — attivato, in osservazione dall'11 novembre 2026
+
+App Check verifica che una richiesta arrivi davvero dalle vostre pagine e non
+da uno script esterno. Non sostituisce il login: chi apre una vostra pagina dal
+browser passa comunque il controllo.
+
+Stato: le pagine **attestano**, ma il blocco è **spento**, quindi le richieste
+senza token passano ancora. Chiave reCAPTCHA registrata per i domini
+`adriaticlifeguardservice.it`, `www.adriaticlifeguardservice.it` e
+`omniaturismoroseto.github.io`.
+
+| Prodotto | Verificate prima | Chi lo usa | Si può bloccare |
+|---|---|---|---|
+| Cloud Firestore | 0% | solo le tre nostre pagine | sì, quando il monitoraggio sale |
+| Storage | 0% | solo il diario | sì, quando il monitoraggio sale |
+| Realtime Database | 97% | app segnalazioni e Android | manca solo l'app Android, non registrata |
+| Maps JavaScript | 0% | app segnalazioni | non ci riguarda |
+
+**Prossimo passo:** riaprire la scheda *API* di App Check in console. Se
+Firestore e Storage sono vicini al 100% verificato, accendere il blocco su
+quei due. Se resta traffico non verificato, trovarne la causa **prima** di
+accendere: al momento dell'applicazione tutte le richieste senza token
+vengono rifiutate, e un blocco acceso alla cieca ferma i bagnini.
+
+Le Cloud Functions usano l'Admin SDK e non sono soggette ad App Check.
 
