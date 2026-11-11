@@ -223,7 +223,11 @@ da uno script esterno. Non sostituisce il login: chi apre una vostra pagina dal
 browser passa comunque il controllo.
 
 Stato: le pagine **attestano**, ma il blocco è **spento**, quindi le richieste
-senza token passano ancora. Chiave reCAPTCHA registrata per i domini
+senza token passano ancora. Verificato l'11/11/2026 nella console del browser
+su tutte e tre le pagine (`candidature/`, `diariogiornaliero.html`,
+`admin-diario.html`): ognuna scrive *"App Check: token ottenuto, richieste
+attestate"*. Attenzione: una console **senza messaggi** non dimostrerebbe
+nulla — il messaggio deve esserci. Chiave reCAPTCHA registrata per i domini
 `adriaticlifeguardservice.it`, `www.adriaticlifeguardservice.it` e
 `omniaturismoroseto.github.io`.
 
