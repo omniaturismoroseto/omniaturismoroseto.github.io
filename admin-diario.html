@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,6 +22,25 @@
   --r:12px;--r2:8px;--green:#1A8A4A;--red:#C0392B;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+
+/* ACCESSO — visibile da subito, nascosto dal codice solo a ruolo verificato.
+   Finche' body ha la classe "bloccato" il pannello non e' solo coperto:
+   non e' proprio nella pagina. */
+body.bloccato > *:not(#gate){display:none !important}
+#gate{position:fixed;inset:0;z-index:1000;background:var(--navy);display:flex;align-items:center;justify-content:center;padding:1.25rem}
+.gate-card{background:var(--white);border-radius:var(--r);padding:2rem 1.75rem;width:min(420px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.gate-badge{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:4px;display:inline-block;margin-bottom:.875rem}
+.gate-card h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;margin-bottom:.35rem}
+.gate-card p.sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;line-height:1.5}
+.gate-card label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:4px}
+.gate-card input{width:100%;padding:.6rem .875rem;border:1.5px solid var(--border);border-radius:var(--r2);font-family:'Barlow',sans-serif;font-size:15px;margin-bottom:1rem;color:var(--navy)}
+.gate-card input:focus{outline:none;border-color:var(--orange)}
+#gateBtn{width:100%;padding:.7rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+#gateBtn:hover:not(:disabled){background:var(--navy2)}
+#gateBtn:disabled{opacity:.6;cursor:not-allowed}
+.gate-msg{margin-top:1rem;font-size:13px;line-height:1.5;display:none}
+.gate-msg.err{display:block;color:var(--red)}
+.gate-who{font-size:11px;color:rgba(255,255,255,0.55);margin-left:.75rem}
 body{font-family:'Barlow',sans-serif;background:var(--sand);color:var(--navy);min-height:100vh}
 
 /* HEADER */
@@ -218,7 +238,21 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
 
 </style>
 </head>
-<body>
+<body class="bloccato">
+
+<div id="gate">
+  <form class="gate-card" onsubmit="entra(event)">
+    <span class="gate-badge">Admin</span>
+    <h2>Diario Giornaliero</h2>
+    <p class="sub">Pannello riservato. Accedi con le credenziali dell'app segnalazioni.</p>
+    <label for="gateEmail">Indirizzo email</label>
+    <input type="email" id="gateEmail" autocomplete="username" required>
+    <label for="gatePw">Password</label>
+    <input type="password" id="gatePw" autocomplete="current-password" required>
+    <button type="submit" id="gateBtn">Accedi</button>
+    <p class="gate-msg" id="gateMsg"></p>
+  </form>
+</div>
 
 <header>
   <span class="hbadge">Admin</span>
@@ -226,6 +260,10 @@ tr.on .arr{transform:rotate(90deg);color:var(--orange)}
   <span id="hcount"></span>
   <button onclick="load()" style="margin-left:.75rem;padding:4px 12px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:20px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px" title="Aggiorna dati">
     🔄 Aggiorna
+  </button>
+  <span id="gateUser" class="gate-who"></span>
+  <button onclick="esci()" style="margin-left:.5rem;padding:4px 12px;background:transparent;color:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.3);border-radius:20px;font-family:'Barlow',sans-serif;font-size:12px;cursor:pointer">
+    Esci
   </button>
 </header>
 
@@ -519,6 +557,88 @@ firebase.initializeApp({
 const db = firebase.firestore();
 
 // ═══════════════════════════════════════
+//  ACCESSO
+//  Il pannello e' riservato agli account dell'app segnalazioni con
+//  ruolo admin o coordinator (il ruolo si assegna da li'). Finche'
+//  l'accesso non e' superato non viene letto nulla da Firestore.
+// ═══════════════════════════════════════
+const auth = firebase.auth();
+const RUOLI_AMMESSI = ['admin', 'coordinator'];
+let appAvviata = false;
+
+function mostraAccesso(messaggio) {
+  document.getElementById('gate').style.display = 'flex';
+  document.body.classList.add('bloccato');
+  document.body.style.overflow = 'hidden';
+  const box = document.getElementById('gateMsg');
+  box.textContent = messaggio || '';
+  box.className = messaggio ? 'gate-msg err' : 'gate-msg';
+}
+
+function nascondiAccesso() {
+  document.getElementById('gate').style.display = 'none';
+  document.body.classList.remove('bloccato');
+  document.body.style.overflow = '';
+}
+
+async function entra(ev) {
+  ev.preventDefault();
+  const btn = document.getElementById('gateBtn');
+  const email = document.getElementById('gateEmail').value.trim();
+  const pw    = document.getElementById('gatePw').value;
+  if (!email || !pw) { mostraAccesso('Inserisci indirizzo e password.'); return; }
+  btn.disabled = true; btn.textContent = 'Accesso in corso...';
+  try {
+    await auth.signInWithEmailAndPassword(email, pw);
+    // il controllo del ruolo avviene in onAuthStateChanged
+  } catch (e) {
+    const spiegazioni = {
+      'auth/invalid-email':          'Indirizzo email non valido.',
+      'auth/user-disabled':          'Questo account e\' disattivato.',
+      'auth/user-not-found':         'Credenziali non valide.',
+      'auth/wrong-password':         'Credenziali non valide.',
+      'auth/invalid-credential':     'Credenziali non valide.',
+      'auth/too-many-requests':      'Troppi tentativi falliti. Riprova tra qualche minuto.',
+      'auth/network-request-failed': 'Connessione assente o bloccata.'
+    };
+    mostraAccesso(spiegazioni[e.code] || ('Errore di accesso: ' + (e.code || e.message)));
+  }
+  btn.disabled = false; btn.textContent = 'Accedi';
+}
+
+async function esci() {
+  try { await auth.signOut(); } catch (e) {}
+  location.reload();
+}
+
+auth.onAuthStateChanged(async (utente) => {
+  if (!utente) { mostraAccesso(); return; }
+
+  let ruolo = null;
+  try {
+    // true forza il rinnovo del token: un ruolo appena assegnato
+    // dall'app segnalazioni vale subito, senza aspettare un'ora
+    const token = await utente.getIdTokenResult(true);
+    ruolo = token.claims.role || null;
+  } catch (e) {
+    mostraAccesso('Impossibile verificare il ruolo: ' + e.message);
+    return;
+  }
+
+  if (!RUOLI_AMMESSI.includes(ruolo)) {
+    await auth.signOut();
+    mostraAccesso(ruolo
+      ? 'Accesso negato: il tuo account ha ruolo "' + ruolo + '". Il pannello e\' riservato ad admin e coordinatore.'
+      : 'Accesso negato: al tuo account non risulta assegnato alcun ruolo. Assegnalo dall\'app segnalazioni.');
+    return;
+  }
+
+  document.getElementById('gateUser').textContent = utente.email + ' \u00b7 ' + ruolo;
+  nascondiAccesso();
+  if (!appAvviata) { appAvviata = true; load(); }
+});
+
+// ═══════════════════════════════════════
 //  DATI STATICI
 // ═══════════════════════════════════════
 // ══════════════════════════════════════
@@ -634,7 +754,7 @@ let rPeriod = 'oggi';
 //  INIT
 // ═══════════════════════════════════════
 // Auto-refresh ogni 2 minuti
-setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
+setInterval(() => { if(appAvviata && document.visibilityState === 'visible') load(); }, 120000);
 
 (function init() {
   // il filtro elenca tutte le sigle mai usate, col nome dell'ultimo periodo
@@ -648,7 +768,7 @@ setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000
     o.textContent = `${sigla} — ${nomi.get(sigla)}`;
     sel.appendChild(o);
   });
-  load();
+  // load() non si chiama qui: lo fa onAuthStateChanged a ruolo verificato
 })();
 
 // ═══════════════════════════════════════
