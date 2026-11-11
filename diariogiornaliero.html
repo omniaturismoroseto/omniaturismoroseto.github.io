@@ -770,7 +770,14 @@ firebase.initializeApp(firebaseConfig);
 // continua a funzionare: finche' il blocco non e' attivo in
 // console, le richieste senza token passano lo stesso.
 try {
-  if (firebase.appCheck) firebase.appCheck().activate('6LePypQtAAAAAE8ssXg685Ai7ThaUivjhxfAQLUZ', true);
+  if (typeof firebase.appCheck !== 'function') {
+    console.warn('App Check: SDK non caricato, le richieste non vengono attestate.');
+  } else {
+    firebase.appCheck().activate('6LePypQtAAAAAE8ssXg685Ai7ThaUivjhxfAQLUZ', true);
+    firebase.appCheck().getToken()
+      .then(() => console.info('App Check: token ottenuto, richieste attestate.'))
+      .catch(err => console.warn('App Check: token non ottenuto —', err && err.message));
+  }
 } catch (e) { console.warn('App Check non attivato:', e); }
 
 const db      = firebase.firestore();
