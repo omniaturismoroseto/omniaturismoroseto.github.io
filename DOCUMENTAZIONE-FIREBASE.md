@@ -45,6 +45,7 @@ Le regole del Realtime Database usano i ruoli degli utenti
 | `diariogiornaliero` | `diariogiornaliero.html` | `admin-diario.html` |
 | `config/telegram_diario` | `admin-diario.html` | pannello admin e Cloud Function |
 | `candidature` | `candidature/index.html` | solo console e Cloud Function |
+| `segnalazioniInterne` | `segnalazioni-interne/index.html` | solo console e Cloud Function |
 | `meteoGiornaliero`, `osservazioniManuali`, `stazioneLocale`, `stazioniPubblicheNetatmo`, `calibrazioneMeteo`, `statisticheStoriche`, `statoRadar`, `statoSistema`, `grigliaAdriatico`, `meteoCroazia`, `previsioneEnsemble` | sistema meteo | utenti autenticati |
 | `richiesteLidi`, `destinatariLidi` | gestione lidi | utenti autenticati |
 
@@ -164,7 +165,8 @@ proprio, con `"codebase": "diario"`.
 
 | Function | Cosa fa |
 |---|---|
-| `notificaCandidatura` | manda le mail a ogni nuova candidatura (vedi `funzioni-candidature/LEGGIMI.md`) |
+| `notificaCandidatura` | manda le mail a ogni nuova candidatura (vedi `funzioni-cloud/LEGGIMI.md`) |
+| `notificaSegnalazioneInterna` | manda alla direzione le segnalazioni anonime del personale |
 | `inviaTestTelegram` | messaggio di prova dal pannello admin |
 | altre del diario | promemoria e notifiche Telegram |
 
@@ -204,6 +206,27 @@ Si impostano con `firebase functions:secrets:set NOME`.
 Dall'11 novembre 2026 il codice sta **fuori da OneDrive**: la sincronizzazione
 teneva aperti i file di git e faceva fallire checkout e pull con
 `index.lock: File exists`. Il backup sono i due repository GitHub, non OneDrive.
+
+## Il canale anonimo del personale
+
+La pagina `/segnalazioni-interne` (attiva dall'11 novembre 2026) raccoglie
+segnalazioni e consigli dal personale **senza identificare chi scrive**. Non e'
+collegata dal sito ed e' `noindex`: si diffonde solo col link.
+
+Tre scelte deliberate, da non smontare per sbaglio:
+
+1. **Si salva solo il giorno, mai l'ora.** In una squadra piccola l'orario
+   esatto basterebbe a risalire a chi era in turno.
+2. **La regola usa `hasOnly`**: il server accetta esattamente otto campi e
+   rifiuta ogni altro. Se qualcuno modificasse la pagina per allegare di
+   nascosto un identificativo, Firestore respingerebbe la scrittura.
+   L'anonimato non dipende dal codice della pagina, che si puo' cambiare.
+3. **Niente Telegram, niente `replyTo`, niente mail di conferma.** La
+   segnalazione arriva a una sola casella, quella della direzione, perche'
+   puo' riguardare un collega o un responsabile.
+
+Il campo recapito e' facoltativo: compilarlo e' una scelta di chi scrive, ed e'
+l'unico modo in cui puo' ricevere risposta.
 
 ## Cose note e non ancora risolte
 
