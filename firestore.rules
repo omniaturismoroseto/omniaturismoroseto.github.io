@@ -8,16 +8,21 @@ service cloud.firestore {
     match /diariogiornaliero/{doc} {
       allow read, create: if true;
     }
-    // Contatti Telegram del diario. admin-diario.html non autentica, e
-    // legge questo documento per mostrare i numeri configurati: la
-    // lettura resta percio' aperta, e si chiude con App Check, non da qui.
-    // La scrittura invece e' ammessa solo nella forma esatta che usa
-    // quella pagina: nessun campo arbitrario, nessuna lista enorme.
-    // Il documento non e' cancellabile e nessun altro documento puo'
-    // essere creato dentro config.
+    // Contatti Telegram del diario. Da quando admin-diario.html chiede le
+    // credenziali, qui entrano solo gli account dell'app segnalazioni con
+    // ruolo admin o coordinator: niente piu' lettura anonima dei contatti.
+    // La scrittura deve inoltre avere la forma esatta che usa la pagina:
+    // nessun campo arbitrario, nessuna lista enorme. Il documento non e'
+    // cancellabile e nessun altro documento puo' nascere dentro config.
+    // Le Cloud Functions usano l'Admin SDK e ignorano queste regole.
+    function autorizzato() {
+      return request.auth != null
+             && request.auth.token.role in ['admin', 'coordinator'];
+    }
     match /config/telegram_diario {
-      allow read: if true;
-      allow write: if request.resource.data.keys().hasOnly(['chat_ids', 'updated'])
+      allow read: if autorizzato();
+      allow write: if autorizzato()
+                   && request.resource.data.keys().hasOnly(['chat_ids', 'updated'])
                    && request.resource.data.chat_ids is list
                    && request.resource.data.chat_ids.size() > 0
                    && request.resource.data.chat_ids.size() <= 20;

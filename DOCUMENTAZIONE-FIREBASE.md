@@ -187,12 +187,15 @@ Si impostano con `firebase functions:secrets:set NOME`.
 
 ---
 
+## Risolto
+
+- **`admin-diario.html` chiede le credenziali** (dal 11 novembre 2026). Entrano
+  solo gli account con ruolo `admin` o `coordinator`; prima dell'accesso la
+  pagina non legge nulla da Firestore. Di conseguenza `config/telegram_diario`
+  non e' piu' leggibile ne' scrivibile senza autenticazione.
+
 ## Cose note e non ancora risolte
 
-- **`admin-diario.html` non ha alcun controllo di accesso.** Chiunque conosca
-  l'indirizzo vede l'archivio completo dei diari, le statistiche, le
-  esportazioni e i destinatari Telegram, e può modificarli. È il problema
-  aperto più grosso.
 - **`diariogiornaliero.html` è pubblico**: chiunque può leggere lo storico e
   inserire voci. Le regole lo consentono perché la pagina non autentica.
 - **App Check non è attivo.** Verificherebbe che le richieste arrivino davvero
