@@ -198,6 +198,13 @@ Si impostano con `firebase functions:secrets:set NOME`.
 
 - **`diariogiornaliero.html` è pubblico**: chiunque può leggere lo storico e
   inserire voci. Le regole lo consentono perché la pagina non autentica.
+  *Deciso l'11/11/2026: sospeso. L'accesso verrà gestito quando il diario
+  confluirà nell'app del dispositivo, non con un login sulla pagina web.*
+- **Account di prova da cancellare**: `__claudeProdVerify__`,
+  `__claudeRebuildTest__`, `__claudeVerifyFix__`, `__claudeStationTest__`,
+  `debug-operator-test`. Hanno ruolo operatore.
+  *Deciso l'11/11/2026: verranno rimossi dall'app segnalazioni alla prossima
+  modifica di quella app.*
 - **App Check non è attivo.** Verificherebbe che le richieste arrivino davvero
   dalle vostre pagine, bloccando script e bot esterni. Non sostituisce il
   login: chi apre una vostra pagina dal browser passa comunque il controllo.
