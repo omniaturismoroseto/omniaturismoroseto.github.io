@@ -1,4 +1,18 @@
-# Notifiche candidature — istruzioni
+# Cloud Functions del sito — istruzioni
+
+Questa cartella contiene due functions:
+
+- **`candidature.js`** → `notificaCandidatura`, le mail delle candidature
+- **`segnalazioni-interne.js`** → `notificaSegnalazioneInterna`, le segnalazioni anonime
+
+Si installano allo stesso modo. Sotto, i passaggi descritti per le
+candidature valgono per entrambe: dove si legge `candidature.js` vale anche
+`segnalazioni-interne.js`, e dove si legge `notificaCandidatura` vale anche
+`notificaSegnalazioneInterna`.
+
+---
+
+## Notifiche candidature
 
 La pagina **`/candidature`** del sito salva ogni candidatura nella collection Firestore
 `candidature` del progetto `app-segnalazioni-omnia-roseto`.
@@ -155,3 +169,42 @@ Dopo ogni modifica, ri-deploya con il comando del punto 4.
 
 > Se cambi `INDIRIZZO_MITTENTE` con un altro account Gmail, serve una nuova
 > password per le app di *quell'* account.
+
+
+---
+
+## Segnalazioni interne anonime
+
+La pagina `/segnalazioni-interne` salva in `segnalazioniInterne`. La function
+`notificaSegnalazioneInterna` manda **una sola mail**, alla direzione.
+
+Differenze volute rispetto alle candidature:
+
+- **Niente Telegram.** Una segnalazione puo' riguardare un collega o un
+  responsabile, e il gruppo del diario ha piu' destinatari.
+- **Niente `replyTo`.** Chi scrive e' anonimo. Se ha scelto di lasciare un
+  recapito, lo trovi nel corpo della mail.
+- **Niente mail di conferma**, per lo stesso motivo.
+
+In `index.js` serve una riga in piu':
+
+```js
+exports.notificaSegnalazioneInterna = require('./segnalazioni-interne').notificaSegnalazioneInterna;
+```
+
+Poi:
+
+```bash
+firebase deploy --only functions:diario:notificaSegnalazioneInterna
+```
+
+Usa lo stesso secret `GMAIL_APP_PASSWORD` gia' configurato: non serve crearne
+un altro.
+
+### Sull'anonimato
+
+Il documento salvato non contiene nome, recapito obbligatorio ne' orario: solo
+il giorno, perche' in una squadra piccola l'ora esatta basterebbe a capire chi
+era in turno. La regola Firestore usa `hasOnly`, quindi nessuno puo' aggiungere
+campi al documento: l'anonimato non dipende dalla buona fede della pagina, ma
+dal server che rifiuta qualsiasi campo in piu'.

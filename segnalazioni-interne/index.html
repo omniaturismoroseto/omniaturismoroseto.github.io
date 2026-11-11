@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Segnalazioni e consigli — Omnia Adriatic Lifeguard Service</title>
+<meta name="description" content="Canale riservato al personale Omnia per segnalare problemi e proporre miglioramenti in forma anonima.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#07111f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:#07111f;--deep:#0b1a2e;--mid:#112240;--ocean:#1a3a5c;
+    --orange:#ff5c1a;--orange2:#ff8c42;--white:#f0ede8;--muted:#8fa5be;--line:rgba(255,255,255,0.08);
+    --ok:#36c28b;--err:#ff5f56;
+  }
+  html { scroll-behavior: smooth; }
+  body { background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden; }
+  body::before { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0; }
+
+  .topbar { position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(20px,6vw,80px);border-bottom:1px solid var(--line);background:rgba(7,17,31,.75); }
+  .topbar .brand { font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.06em;color:var(--white);white-space:nowrap; }
+  .topbar .brand .accent, .brand-short { color:var(--orange); }
+  .brand-short { display:none; }
+  .topbar .tag { font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap; }
+
+  .hero { position:relative;padding:clamp(40px,7vh,80px) clamp(24px,8vw,120px) clamp(32px,5vh,56px);overflow:hidden; }
+  .hero::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 120% 70% at 50% 120%,rgba(26,58,92,.9) 0%,transparent 70%),radial-gradient(ellipse 80% 50% at 85% 10%,rgba(255,92,26,.1) 0%,transparent 60%),linear-gradient(175deg,var(--navy) 0%,var(--deep) 45%,var(--ocean) 100%);z-index:1; }
+  .hero-inner { position:relative;z-index:10;max-width:760px; }
+  .badge { display:inline-flex;align-items:center;gap:8px;border:1px solid var(--orange);color:var(--orange);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;padding:10px 16px;border-radius:2px;margin-bottom:26px; }
+  .badge svg { flex-shrink:0; }
+  h1 { font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,7.5vw,84px);line-height:.95;letter-spacing:.02em;margin-bottom:8px; }
+  h1 em { font-style:normal;color:var(--orange); }
+  .hero-sub { font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,2.8vw,28px);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 20px; }
+  .hero p { font-size:clamp(15px,1.8vw,18px);color:var(--muted);line-height:1.75;max-width:620px; }
+
+  section { position:relative;z-index:5;padding:clamp(40px,6vh,72px) clamp(24px,8vw,120px); }
+  .patto { background:var(--deep);border-top:1px solid var(--line); }
+  .patto-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);max-width:900px; }
+  .patto-card { background:var(--mid);padding:26px 24px; }
+  .patto-card h3 { font-size:14px;font-weight:500;letter-spacing:.03em;margin-bottom:10px;display:flex;align-items:center;gap:9px; }
+  .patto-card h3 svg { color:var(--orange);flex-shrink:0; }
+  .patto-card p { font-size:13px;color:var(--muted);line-height:1.7; }
+  .patto-card b { color:var(--white);font-weight:500; }
+
+  .form-section { background:var(--navy);border-top:1px solid var(--line); }
+  .section-tag { font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:18px; }
+  h2 { font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,4.4vw,56px);line-height:1;letter-spacing:.02em;margin-bottom:18px; }
+  .lead { font-size:clamp(14px,1.7vw,17px);color:var(--muted);line-height:1.7;max-width:620px; }
+  form { max-width:720px;margin-top:38px; }
+  .field { display:flex;flex-direction:column;gap:8px;margin-bottom:26px; }
+  .field > label { font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+  .field .req { color:var(--orange); }
+  .hint { font-size:12.5px;color:rgba(143,165,190,.65);line-height:1.55; }
+  input[type=text],textarea { width:100%;background:var(--mid);border:1px solid var(--line);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:300;padding:13px 14px;border-radius:2px;transition:border-color .2s,background .2s; }
+  input:focus,textarea:focus { outline:none;border-color:var(--orange);background:var(--ocean); }
+  input::placeholder,textarea::placeholder { color:rgba(143,165,190,.45); }
+  textarea { resize:vertical;min-height:170px;line-height:1.65; }
+  .invalid { border-color:var(--err) !important; }
+  .conta { font-size:12px;color:rgba(143,165,190,.55);text-align:right; }
+
+  .opts { display:flex;flex-wrap:wrap;gap:10px; }
+  .opt { position:relative; }
+  .opt input { position:absolute;opacity:0;width:0;height:0; }
+  .opt span { display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--mid);padding:12px 16px;font-size:13.5px;color:var(--muted);border-radius:2px;cursor:pointer;transition:border-color .2s,color .2s,background .2s;user-select:none; }
+  .opt span::before { content:'';width:14px;height:14px;border:1px solid var(--muted);border-radius:50%;flex-shrink:0;transition:border-color .2s,box-shadow .2s; }
+  .opt input:checked + span { border-color:var(--orange);color:var(--white);background:var(--ocean); }
+  .opt input:checked + span::before { border-color:var(--orange);box-shadow:inset 0 0 0 4px var(--orange); }
+  .opt input:focus-visible + span { outline:2px solid var(--orange);outline-offset:2px; }
+  .opt span:hover { border-color:var(--muted); }
+
+  .hp { position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden; }
+  .actions { margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:16px; }
+  .btn-primary { display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--orange);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.05em;padding:17px 34px;border-radius:2px;cursor:pointer;transition:background .2s,transform .2s;min-width:240px; }
+  .btn-primary:hover:not(:disabled) { background:var(--orange2);transform:translateY(-2px); }
+  .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none; }
+  .spinner { width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .form-msg { margin-top:18px;font-size:13.5px;line-height:1.6;display:none; }
+  .form-msg.show { display:block;color:var(--err); }
+
+  .done { display:none;max-width:640px;border:1px solid var(--line);background:var(--mid);padding:clamp(28px,5vw,44px);border-radius:3px;margin-top:38px; }
+  .done.show { display:block;animation:fadeUp .6s; }
+  .done-icon { width:58px;height:58px;border-radius:50%;background:rgba(54,194,139,.12);border:1px solid var(--ok);color:var(--ok);display:flex;align-items:center;justify-content:center;margin-bottom:22px; }
+  .done h3 { font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3.6vw,38px);letter-spacing:.03em;margin-bottom:14px;line-height:1.05; }
+  .done p { font-size:14.5px;color:var(--muted);line-height:1.75;margin-bottom:12px; }
+
+  footer { position:relative;z-index:5;background:var(--mid);border-top:1px solid var(--line);padding:clamp(28px,4vh,44px) clamp(24px,6vw,80px); }
+  .footer-copy { font-size:11px;color:rgba(143,165,190,.45);letter-spacing:.05em;line-height:1.8; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)} }
+  @media(max-width:600px){ .actions .btn-primary{width:100%} }
+  @media(max-width:430px){ .topbar{padding:16px 18px} .brand-full{display:none} .brand-short{display:inline} .topbar .tag{display:none} }
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand" aria-label="Omnia Adriatic Lifeguard Service">Omnia <span class="brand-full"><span class="accent">Adriatic</span> Lifeguard Service</span><span class="brand-short">ALS</span></span>
+  <span class="tag">Canale riservato al personale</span>
+</div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Anonimo
+    </div>
+    <h1>Segnalazioni<br>e <em>consigli</em></h1>
+    <div class="hero-sub">Senza dire chi sei</div>
+    <p>Se c'è qualcosa che non va, o hai un'idea per far funzionare meglio il lavoro, scrivila qui. Non ti chiediamo il nome e non lo vogliamo sapere: a noi arriva solo quello che scrivi.</p>
+  </div>
+</section>
+
+<section class="patto">
+  <div class="section-tag">Come funziona</div>
+  <h2>Cosa arriva<br>e cosa no</h2>
+  <div class="patto-grid" style="margin-top:34px">
+    <div class="patto-card">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Cosa ci arriva</h3>
+      <p>La <b>categoria</b>, il <b>testo</b> che scrivi, la <b>data</b> — e solo se lo scrivi tu, un recapito per risponderti.</p>
+    </div>
+    <div class="patto-card">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cosa non ci arriva</h3>
+      <p>Nessun nome, nessuna email, nessun telefono. <b>Nemmeno l'orario</b>: salviamo solo il giorno, così non si risale a chi era in turno.</p>
+    </div>
+    <div class="patto-card">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg> Chi la legge</h3>
+      <p>Solo la direzione, per email. <b>Non passa dal gruppo Telegram</b> dei responsabili e non compare in nessun pannello.</p>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:28px">Una cosa detta con onestà: se nel testo racconti un fatto che conosce una persona sola, quel racconto può farti riconoscere. L'anonimato lo garantisce il modulo, il resto dipende da come scrivi.</p>
+</section>
+
+<section class="form-section">
+  <div class="section-tag">Il modulo</div>
+  <h2>Scrivi qui</h2>
+  <p class="lead" id="introForm">I campi con <span style="color:var(--orange)">*</span> sono obbligatori. Gli altri servono solo se vuoi.</p>
+
+  <form id="formSegnalazione" novalidate autocomplete="off">
+
+    <div class="field">
+      <label>Di cosa si tratta <span class="req">*</span></label>
+      <div class="opts" id="optCategoria">
+        <label class="opt"><input type="radio" name="categoria" value="Sicurezza"><span>Sicurezza</span></label>
+        <label class="opt"><input type="radio" name="categoria" value="Attrezzatura e mezzi"><span>Attrezzatura e mezzi</span></label>
+        <label class="opt"><input type="radio" name="categoria" value="Turni e organizzazione"><span>Turni e organizzazione</span></label>
+        <label class="opt"><input type="radio" name="categoria" value="Rapporti di lavoro"><span>Rapporti di lavoro</span></label>
+        <label class="opt"><input type="radio" name="categoria" value="Idea o miglioria"><span>Idea o miglioria</span></label>
+        <label class="opt"><input type="radio" name="categoria" value="Altro"><span>Altro</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Quanto è urgente</label>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="urgenza" value="Normale" checked><span>Può aspettare</span></label>
+        <label class="opt"><input type="radio" name="urgenza" value="Urgente"><span>Urgente</span></label>
+      </div>
+      <span class="hint">Se è un pericolo immediato non usare questo modulo: chiama il 328 476 9641.</span>
+    </div>
+
+    <div class="field">
+      <label for="messaggio">Cosa vuoi dirci <span class="req">*</span></label>
+      <textarea id="messaggio" name="messaggio" maxlength="3500" placeholder="Racconta con parole tue. Più sei preciso su cosa succede e cosa servirebbe, più è facile intervenire."></textarea>
+      <span class="conta" id="conta">0 / 3500</span>
+    </div>
+
+    <div class="field">
+      <label for="dove">Dove succede</label>
+      <input type="text" id="dove" name="dove" maxlength="100" placeholder="Facoltativo — per esempio una postazione o un mezzo">
+      <span class="hint">Indicalo solo se serve a capire il problema. In una squadra piccola, dire il luogo può restringere di molto chi può averlo scritto.</span>
+    </div>
+
+    <div class="field">
+      <label for="contatto">Se vuoi una risposta</label>
+      <input type="text" id="contatto" name="contatto" maxlength="150" placeholder="Facoltativo — email, numero o anche solo un soprannome">
+      <span class="hint">Lascialo vuoto per restare del tutto anonimo. Se lo compili, lo usiamo soltanto per risponderti su questa segnalazione.</span>
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label for="sitoWeb">Non compilare questo campo</label>
+      <input type="text" id="sitoWeb" name="sitoWeb" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn-primary" id="btnInvia">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span id="btnLabel">Invia in forma anonima</span>
+      </button>
+    </div>
+    <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="done" id="done">
+    <div class="done-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3>Ricevuto, grazie</h3>
+    <p>La tua segnalazione è arrivata alla direzione. Non sappiamo chi l'ha scritta, e va bene così.</p>
+    <p id="doneContatto" style="display:none">Hai lasciato un recapito: ti risponderemo lì appena possibile.</p>
+    <p style="color:rgba(143,165,190,.6);font-size:13px;margin-bottom:0">Puoi chiudere questa pagina. Se più avanti vorrai aggiungere qualcosa, riapri il modulo e scrivi di nuovo.</p>
+  </div>
+</section>
+
+<footer>
+  <p class="footer-copy">
+    Omnia Servizi al Turismo S.r.l.s. · P.I. 01900050673<br>
+    Pagina riservata al personale. Per emergenze: <b style="color:var(--muted)">328 476 9641</b>
+  </p>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// Se l'SDK non si carica la pagina resta usabile e lo dice, invece di
+// fingere che l'invio sia riuscito.
+let db = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp({
+      apiKey:            "AIzaSyDcLeex_9o0BqgAs2lEEXTiVYG_zRSiXQA",
+      authDomain:        "app-segnalazioni-omnia-roseto.firebaseapp.com",
+      projectId:         "app-segnalazioni-omnia-roseto",
+      storageBucket:     "app-segnalazioni-omnia-roseto.firebasestorage.app",
+      messagingSenderId: "699028105579",
+      appId:             "1:699028105579:web:cdc0a432083b7fe18d442e"
+    });
+    try {
+      if (typeof firebase.appCheck !== 'function') {
+        console.warn('App Check: SDK non caricato, le richieste non vengono attestate.');
+      } else {
+        firebase.appCheck().activate('6LePypQtAAAAAE8ssXg685Ai7ThaUivjhxfAQLUZ', true);
+        firebase.appCheck().getToken()
+          .then(() => console.info('App Check: token ottenuto, richieste attestate.'))
+          .catch(err => console.warn('App Check: token non ottenuto —', err && err.message));
+      }
+    } catch (e) { console.warn('App Check non attivato:', e); }
+    db = firebase.firestore();
+  } else {
+    console.error('SDK Firebase non caricato.');
+  }
+} catch (e) {
+  console.error('Inizializzazione Firebase fallita:', e);
+}
+
+const $ = (id) => document.getElementById(id);
+const form = $('formSegnalazione');
+const btn  = $('btnInvia');
+const msg  = $('formMsg');
+
+// contatore caratteri
+$('messaggio').addEventListener('input', () => {
+  $('conta').textContent = $('messaggio').value.length + ' / 3500';
+  $('messaggio').classList.remove('invalid');
+});
+
+function errore(testo, elemento) {
+  msg.textContent = testo;
+  msg.className = 'form-msg show';
+  if (elemento) {
+    elemento.classList.add('invalid');
+    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (elemento.focus) elemento.focus({ preventScroll: true });
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.className = 'form-msg';
+  form.querySelectorAll('.invalid').forEach(x => x.classList.remove('invalid'));
+  if ($('sitoWeb').value) return;                       // honeypot: bot
+
+  const categoria = form.querySelector('input[name="categoria"]:checked');
+  if (!categoria) { errore('Scegli di cosa si tratta.', $('optCategoria')); return; }
+
+  const testo = $('messaggio').value.trim();
+  if (testo.length < 10) { errore('Scrivi qualche parola in più: così com’è non riusciamo a capire.', $('messaggio')); return; }
+
+  if (!db) {
+    errore('Al momento non riusciamo a collegarci al server. Controlla la connessione e riprova.');
+    return;
+  }
+
+  btn.disabled = true;
+  $('btnLabel').textContent = 'Invio in corso…';
+  btn.querySelector('svg').outerHTML = '<span class="spinner"></span>';
+
+  // Solo la data, senza orario: in una squadra piccola l'ora esatta
+  // basterebbe a capire chi era in turno.
+  const oggi = new Date();
+  const data = oggi.getFullYear() + '-' +
+               String(oggi.getMonth() + 1).padStart(2, '0') + '-' +
+               String(oggi.getDate()).padStart(2, '0');
+
+  const contatto = $('contatto').value.trim().slice(0, 150);
+
+  try {
+    await db.collection('segnalazioniInterne').add({
+      categoria: categoria.value,
+      urgenza:   (form.querySelector('input[name="urgenza"]:checked') || {}).value || 'Normale',
+      messaggio: testo.slice(0, 3500),
+      dove:      $('dove').value.trim().slice(0, 100),
+      contatto:  contatto,
+      data:      data,
+      stato:     'nuova',
+      origine:   'segnalazioni-interne'
+    });
+    form.style.display = 'none';
+    $('introForm').style.display = 'none';
+    if (contatto) $('doneContatto').style.display = 'block';
+    const done = $('done');
+    done.classList.add('show');
+    done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    const sp = btn.querySelector('.spinner');
+    if (sp) sp.outerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+    $('btnLabel').textContent = 'Invia in forma anonima';
+    errore('Non siamo riusciti a inviare la segnalazione (' + (err.code || 'errore di rete') + '). Riprova tra poco.');
+  }
+});
+</script>
+</body>
+</html>

@@ -45,6 +45,27 @@ service cloud.firestore {
                     && request.resource.data.get('note', '').size() < 1500;
       allow read, update, delete: if false;
     }
+    // Segnalazioni anonime del personale, dalla pagina
+    // /segnalazioni-interne. hasOnly e' la parte importante: impedisce di
+    // aggiungere al documento qualunque campo diverso da questi, quindi
+    // nessuno puo' infilarci un identificativo e rompere l'anonimato
+    // promesso dalla pagina. Niente lettura dal web: le segnalazioni si
+    // leggono dalla console e dalla Cloud Function, che usa l'Admin SDK.
+    match /segnalazioniInterne/{doc} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['categoria','urgenza','messaggio','dove','contatto','data','stato','origine'])
+                    && request.resource.data.stato == 'nuova'
+                    && request.resource.data.categoria is string
+                    && request.resource.data.categoria.size() < 60
+                    && request.resource.data.messaggio is string
+                    && request.resource.data.messaggio.size() > 9
+                    && request.resource.data.messaggio.size() <= 3500
+                    && request.resource.data.data is string
+                    && request.resource.data.data.size() == 10
+                    && request.resource.data.get('dove', '').size() <= 100
+                    && request.resource.data.get('contatto', '').size() <= 150;
+      allow read, update, delete: if false;
+    }
     match /meteoGiornaliero/{data} {
       allow read: if request.auth != null;
       match /rilevazioni/{rilevazioneId} {
