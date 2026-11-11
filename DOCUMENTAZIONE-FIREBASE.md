@@ -194,6 +194,17 @@ Si impostano con `firebase functions:secrets:set NOME`.
   pagina non legge nulla da Firestore. Di conseguenza `config/telegram_diario`
   non e' piu' leggibile ne' scrivibile senza autenticazione.
 
+## Dove sta il codice
+
+| Cosa | Dove | Repository GitHub |
+|---|---|---|
+| Sito, regole, documentazione | `C:\Users\roset\Progetti\SitoWebALS` | `omniaturismoroseto.github.io` |
+| Cloud Functions del diario | la sottocartella `Funzioni del diario\omnia-diario-functions` | `omnia-diario-functions` |
+
+Dall'11 novembre 2026 il codice sta **fuori da OneDrive**: la sincronizzazione
+teneva aperti i file di git e faceva fallire checkout e pull con
+`index.lock: File exists`. Il backup sono i due repository GitHub, non OneDrive.
+
 ## Cose note e non ancora risolte
 
 - **`diariogiornaliero.html` è pubblico**: chiunque può leggere lo storico e
@@ -208,5 +219,4 @@ Si impostano con `firebase functions:secrets:set NOME`.
 - **App Check non è attivo.** Verificherebbe che le richieste arrivino davvero
   dalle vostre pagine, bloccando script e bot esterni. Non sostituisce il
   login: chi apre una vostra pagina dal browser passa comunque il controllo.
-- Il repository del sito sta dentro **OneDrive**, che interferisce con git e
-  provoca errori di lock (`index.lock: File exists`).
+
